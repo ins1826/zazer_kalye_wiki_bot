@@ -432,14 +432,13 @@ nav.tabs button.active {
     </div></div>
 </div>
   <div class="toolbar">
-  <button class="primary" onclick="saveData()">💾 Сохранить HTML</button>
-  <button onclick="exportData()">📤 Экспорт данных</button>
-  <button onclick="document.getElementById('import-file').click()">📥 Импорт данных</button>
-  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
-  <button class="primary" onclick="importFromLocalStorage()">📂 Импорт из localStorage</button>
-  <button onclick="fullBackup()">📦 Полный бэкап</button>
-  <button class="danger" onclick="resetData()">🔄 Сброс</button>
-</div>
+    <button class="primary" onclick="saveData()">💾 Сохранить HTML</button>
+    <button onclick="exportData()">📤 Экспорт данных</button>
+    <button onclick="document.getElementById('import-file').click()">📥 Импорт данных</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+    <button onclick="fullBackup()">📦 Полный бэкап</button>
+    <button class="danger" onclick="resetData()">🔄 Сброс</button>
+  </div>
 </header>
 
 <nav class="tabs">
@@ -480,7 +479,7 @@ nav.tabs button.active {
 </div>
   <div class="grid" id="grid-characters"><div class="card race-Существо" data-idx="49" data-name="Акакий Куролесов" data-full="Акакий Куролесов любит нюхать пыльцу и ходить по росе, но пугается жабьего кваканья. Этот славный малый в курсе всего, что происходит в сумеречной роще, ничто не проходит мимо его глаз и ушей. Но он никогда не лезет в дела посторонних, предпочитая дрязгам спокойствие и наслаждение природой.
 Хорошо провёл сегодняшний день. Прогулка у болот ознаменовалась встречей с Бабой Жулей, показал ей самые грибные места неподалёку, после чего собирал зеленику, а когда стало смеркаться он направился к своему дому, заварил зеленичный компот и уснул. Это был хороший день.
-Он действительно славный малый." data-img="images/Akakiy_Kurolesov.png">
+Он действительно славный малый." data-img="images/Акакий Куролесов.png">
       <div class="actions">
         <button onclick="deleteItem('characters',49)">🗑️</button>
         <button onclick="openEdit('characters',49)">✏️</button>
@@ -489,7 +488,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Маленький гриб, славный малый</div>
       <div class="episodes"><span>ep.20</span><span>ep.39</span><span>ep.47</span><span>ep.56</span><span>ep.69</span></div>
-    </div><div class="card race-Человек-Существо" data-idx="16" data-name="Алевтина" data-full="Выглядит как человек, но может принять истинную форму в виде павлина, если рассыпать её бисер." data-img="images/Alevtina.png">
+    </div><div class="card race-Человек-Существо" data-idx="16" data-name="Алевтина" data-full="Выглядит как человек, но может принять истинную форму в виде павлина, если рассыпать её бисер." data-img="images/Алевтина.png">
       <div class="actions">
         <button onclick="deleteItem('characters',16)">🗑️</button>
         <button onclick="openEdit('characters',16)">✏️</button>
@@ -507,7 +506,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Рассекают над литолием</div>
       
-    </div><div class="card race-Существо" data-idx="1" data-name="Баба Жуля" data-full="Бабушка-фиолетовый Мопс. Выращивает на огороде хрычей и морковные пятки. Прогнала Евдокию со своего огорода." data-img="images/Baba_ZHulya.png">
+    </div><div class="card race-Существо" data-idx="1" data-name="Баба Жуля" data-full="Бабушка-фиолетовый Мопс. Выращивает на огороде хрычей и морковные пятки. Прогнала Евдокию со своего огорода." data-img="images/Баба Жуля.png">
       <div class="actions">
         <button onclick="deleteItem('characters',1)">🗑️</button>
         <button onclick="openEdit('characters',1)">✏️</button>
@@ -516,7 +515,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Бабушка-Мопс</div>
       <div class="episodes"><span>ep.2</span><span>ep.14</span><span>ep.69</span></div>
-    </div><div class="card race-Существо" data-idx="56" data-name="Баранча" data-full="Баранча никогда не откажется от мясного хлеба, голоден ли он, сыт или летуч. Но если воротит нос - бей тревогу, собирай народ, ищи укрытие." data-img="images/Barancha.png">
+    </div><div class="card race-Существо" data-idx="56" data-name="Баранча" data-full="Баранча никогда не откажется от мясного хлеба, голоден ли он, сыт или летуч. Но если воротит нос - бей тревогу, собирай народ, ищи укрытие." data-img="images/Баранча.png">
       <div class="actions">
         <button onclick="deleteItem('characters',56)">🗑️</button>
         <button onclick="openEdit('characters',56)">✏️</button>
@@ -525,7 +524,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Один из трёх крепышей</div>
       <div class="episodes"><span>ep.28</span><span>ep.49</span><span>ep.51</span><span>ep.57</span></div>
-    </div><div class="card race-Существо" data-idx="48" data-name="Болотный скрипач" data-full="В сумеречной роще иди на звук канифоли, пока не встретишь болотного скрипача. Он расскажет тебе под каким именно деревом находится спектральный колодец. Может обмануть." data-img="images/Bolotnyy_skripach.png">
+    </div><div class="card race-Существо" data-idx="48" data-name="Болотный скрипач" data-full="В сумеречной роще иди на звук канифоли, пока не встретишь болотного скрипача. Он расскажет тебе под каким именно деревом находится спектральный колодец. Может обмануть." data-img="images/Болотный скрипач.png">
       <div class="actions">
         <button onclick="deleteItem('characters',48)">🗑️</button>
         <button onclick="openEdit('characters',48)">✏️</button>
@@ -534,7 +533,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Играет звуки канифоли в сумеречной роще</div>
       <div class="episodes"><span>ep.20</span><span>ep.47</span></div>
-    </div><div class="card race-Существо" data-idx="4" data-name="Большой Дима" data-full="Похож на Снежного человека. Лучший друг полипов, но не играет с ними, если их больше пяти." data-img="images/Bolshoy_Dima.png">
+    </div><div class="card race-Существо" data-idx="4" data-name="Большой Дима" data-full="Похож на Снежного человека. Лучший друг полипов, но не играет с ними, если их больше пяти." data-img="images/Большой Дима.png">
       <div class="actions">
         <button onclick="deleteItem('characters',4)">🗑️</button>
         <button onclick="openEdit('characters',4)">✏️</button>
@@ -552,7 +551,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Говорящий мясной хлеб</div>
       
-    </div><div class="card race-Человек" data-idx="98" data-name="Брат Евдокии" data-full="" data-img="images/Brat_Evdokii.png">
+    </div><div class="card race-Человек" data-idx="98" data-name="Брат Евдокии" data-full="" data-img="images/Брат Евдокии.png">
       <div class="actions">
         <button onclick="deleteItem('characters',98)">🗑️</button>
         <button onclick="openEdit('characters',98)">✏️</button>
@@ -561,7 +560,7 @@ nav.tabs button.active {
       <span class="type tag-Человек">Человек</span>
       <div class="short">Построил карьеру на Псарне</div>
       <div class="episodes"><span>ep.27</span></div>
-    </div><div class="card race-Существа" data-idx="47" data-name="Братья Мишеневы" data-full="Они сами не помнят своих имён, как и того, кто из них верховный, что часто приводит к забавным на вид потасовкам. Ведь они настолько стары, что застали зазеркалье ещё до собственно зеркал. Всё указывает на то, что они и создали Истукануса, чтобы внести хоть какой-то порядок в абсолютный хаос, но они сами этого не помнят. Если зажурчит Раковина на горе, братья Мишеневы размешают её своими палками, ведь на журчанье уже бежит Круглый Толик." data-img="images/Bratya_Mishenevy.png">
+    </div><div class="card race-Существа" data-idx="47" data-name="Братья Мишеневы" data-full="Они сами не помнят своих имён, как и того, кто из них верховный, что часто приводит к забавным на вид потасовкам. Ведь они настолько стары, что застали зазеркалье ещё до собственно зеркал. Всё указывает на то, что они и создали Истукануса, чтобы внести хоть какой-то порядок в абсолютный хаос, но они сами этого не помнят. Если зажурчит Раковина на горе, братья Мишеневы размешают её своими палками, ведь на журчанье уже бежит Круглый Толик." data-img="images/Братья Мишеневы.png">
       <div class="actions">
         <button onclick="deleteItem('characters',47)">🗑️</button>
         <button onclick="openEdit('characters',47)">✏️</button>
@@ -570,7 +569,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Древнейшие существа, прозваны так из-за узора на лбу</div>
       <div class="episodes"><span>ep.19</span><span>ep.68</span></div>
-    </div><div class="card race-Существо" data-idx="95" data-name="Брунявая Чуня" data-full="Главный объект вопроса выбора Истукануса." data-img="images/Brunyavaya_CHunya.png">
+    </div><div class="card race-Существо" data-idx="95" data-name="Брунявая Чуня" data-full="Главный объект вопроса выбора Истукануса." data-img="images/Брунявая Чуня.png">
       <div class="actions">
         <button onclick="deleteItem('characters',95)">🗑️</button>
         <button onclick="openEdit('characters',95)">✏️</button>
@@ -579,7 +578,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Лягушка-Муха</div>
       <div class="episodes"><span>ep.22</span><span>ep.61</span></div>
-    </div><div class="card race-Синий-ящер" data-idx="54" data-name="Бубоня" data-full="Возможно, причастен к тому, что дождь опаздывает на три дня." data-img="images/Bubonya.png">
+    </div><div class="card race-Синий-ящер" data-idx="54" data-name="Бубоня" data-full="Возможно, причастен к тому, что дождь опаздывает на три дня." data-img="images/Бубоня.png">
       <div class="actions">
         <button onclick="deleteItem('characters',54)">🗑️</button>
         <button onclick="openEdit('characters',54)">✏️</button>
@@ -588,7 +587,7 @@ nav.tabs button.active {
       <span class="type tag-Синий-ящер">Синий ящер</span>
       <div class="short">Один из синих ящеров</div>
       <div class="episodes"><span>ep.25</span></div>
-    </div><div class="card race-Существо" data-idx="99" data-name="Бульдогзер" data-full="Участник гонок Вальтасара, заглох." data-img="images/Buldogzer.png">
+    </div><div class="card race-Существо" data-idx="99" data-name="Бульдогзер" data-full="Участник гонок Вальтасара, заглох." data-img="images/Бульдогзер.png">
       <div class="actions">
         <button onclick="deleteItem('characters',99)">🗑️</button>
         <button onclick="openEdit('characters',99)">✏️</button>
@@ -597,7 +596,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Механизм, созданный Мопсосвинами</div>
       <div class="episodes"><span>ep.30</span><span>ep.51</span><span>ep.57</span></div>
-    </div><div class="card race-Существо" data-idx="62" data-name="Бутыльон" data-full="Твои горящие глаза пугают Бутыльона. Бутыльон - последний хранитель знания о том, где рассыпаны потерянные жемчужины. Не осушай его, хотя-бы не целиком. Обитает в Запретной пустыне." data-img="images/Butylon.png">
+    </div><div class="card race-Существо" data-idx="62" data-name="Бутыльон" data-full="Твои горящие глаза пугают Бутыльона. Бутыльон - последний хранитель знания о том, где рассыпаны потерянные жемчужины. Не осушай его, хотя-бы не целиком. Обитает в Запретной пустыне." data-img="images/Бутыльон.png">
       <div class="actions">
         <button onclick="deleteItem('characters',62)">🗑️</button>
         <button onclick="openEdit('characters',62)">✏️</button>
@@ -606,7 +605,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Последний хранитель знания о потерянных жемчужинах</div>
       <div class="episodes"><span>ep.33</span><span>ep.60</span></div>
-    </div><div class="card race-Существа" data-idx="97" data-name="Валькирия" data-full="" data-img="images/Valkiriya.png">
+    </div><div class="card race-Существа" data-idx="97" data-name="Валькирия" data-full="" data-img="images/Валькирия.png">
       <div class="actions">
         <button onclick="deleteItem('characters',97)">🗑️</button>
         <button onclick="openEdit('characters',97)">✏️</button>
@@ -615,7 +614,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Их принимают в Орден босых ведьм</div>
       <div class="episodes"><span>ep.27</span></div>
-    </div><div class="card race-Человек-Существо" data-idx="0" data-name="Вальтасар" data-full="Организатор викторин и гонок. Предлагает зелья с различными эффектами. Не верит Истуканусу." data-img="images/Valtasar.png">
+    </div><div class="card race-Человек-Существо" data-idx="0" data-name="Вальтасар" data-full="Организатор викторин и гонок. Предлагает зелья с различными эффектами. Не верит Истуканусу." data-img="images/Вальтасар.png">
       <div class="actions">
         <button onclick="deleteItem('characters',0)">🗑️</button>
         <button onclick="openEdit('characters',0)">✏️</button>
@@ -651,7 +650,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Гоблин с пружиной ниже пояса</div>
       
-    </div><div class="card race-Существо" data-idx="69" data-name="Видус" data-full="Лучший игрок, судья/распорядитель." data-img="images/Vidus.png">
+    </div><div class="card race-Существо" data-idx="69" data-name="Видус" data-full="Лучший игрок, судья/распорядитель." data-img="images/Видус.png">
       <div class="actions">
         <button onclick="deleteItem('characters',69)">🗑️</button>
         <button onclick="openEdit('characters',69)">✏️</button>
@@ -669,7 +668,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Объявления на бесхозных камнях</div>
       
-    </div><div class="card race-Существо" data-idx="100" data-name="Глазастая Пицца" data-full="" data-img="images/Glazastaya_Pitstsa.png">
+    </div><div class="card race-Существо" data-idx="100" data-name="Глазастая Пицца" data-full="" data-img="images/Глазастая Пицца.png">
       <div class="actions">
         <button onclick="deleteItem('characters',100)">🗑️</button>
         <button onclick="openEdit('characters',100)">✏️</button>
@@ -678,7 +677,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short"></div>
       <div class="episodes"><span>ep.35</span><span>ep.43</span></div>
-    </div><div class="card race-Существа" data-idx="91" data-name="Головастики" data-full="" data-img="images/Golovastiki.png">
+    </div><div class="card race-Существа" data-idx="91" data-name="Головастики" data-full="" data-img="images/Головастики.png">
       <div class="actions">
         <button onclick="deleteItem('characters',91)">🗑️</button>
         <button onclick="openEdit('characters',91)">✏️</button>
@@ -687,7 +686,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">С ними можно веселиться.</div>
       <div class="episodes"><span>ep.8</span></div>
-    </div><div class="card race-Существа" data-idx="105" data-name="Голуби" data-full="" data-img="images/Golub.png">
+    </div><div class="card race-Существа" data-idx="105" data-name="Голуби" data-full="" data-img="images/Голубь.png">
       <div class="actions">
         <button onclick="deleteItem('characters',105)">🗑️</button>
         <button onclick="openEdit('characters',105)">✏️</button>
@@ -696,7 +695,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Похожи на пескарей</div>
       <div class="episodes"><span>ep.35</span><span>ep.43</span></div>
-    </div><div class="card race-Существо" data-idx="53" data-name="Горбатый крупоед" data-full="Перебирает вшиные ядрышки в поисках того самого, в котором спрятался вчерашний сон. Если найдёт - проглотит. Если нет - будет ждать до следующего дождя." data-img="images/Gorbatyy_Krupoed.png">
+    </div><div class="card race-Существо" data-idx="53" data-name="Горбатый крупоед" data-full="Перебирает вшиные ядрышки в поисках того самого, в котором спрятался вчерашний сон. Если найдёт - проглотит. Если нет - будет ждать до следующего дождя." data-img="images/Горбатый Крупоед.png">
       <div class="actions">
         <button onclick="deleteItem('characters',53)">🗑️</button>
         <button onclick="openEdit('characters',53)">✏️</button>
@@ -705,7 +704,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Его удел перебирать вшиные ядрышки</div>
       <div class="episodes"><span>ep.25</span></div>
-    </div><div class="card race-Человек" data-idx="61" data-name="Господин Кривин" data-full="Господин Кривин, тот ещё арестипнутый Гедонюга, в своём имении посреди сумеречной рощи он любит предаваться изысканным удовольствиям. Крайне чувствителен к сатире." data-img="images/Gospodin_Krivin.png">
+    </div><div class="card race-Человек" data-idx="61" data-name="Господин Кривин" data-full="Господин Кривин, тот ещё арестипнутый Гедонюга, в своём имении посреди сумеречной рощи он любит предаваться изысканным удовольствиям. Крайне чувствителен к сатире." data-img="images/Господин Кривин.png">
       <div class="actions">
         <button onclick="deleteItem('characters',61)">🗑️</button>
         <button onclick="openEdit('characters',61)">✏️</button>
@@ -714,7 +713,7 @@ nav.tabs button.active {
       <span class="type tag-Человек">Человек</span>
       <div class="short">Арестипнутый гедонюга</div>
       <div class="episodes"><span>ep.32</span><span>ep.66</span></div>
-    </div><div class="card race-Существо" data-idx="85" data-name="Грибной архивариус" data-full="Грибной архивариус снова перепутал полки. Теперь все справочники по мхам пахнут звонкими спорами, а ведь он клялся, что в этот раз точно не перепутает лево и право. Остаётся надеяться, что это не сильно задержит создание карты изведанного Зазеркалья." data-img="images/Gribnoy_Arhivarius.png">
+    </div><div class="card race-Существо" data-idx="85" data-name="Грибной архивариус" data-full="Грибной архивариус снова перепутал полки. Теперь все справочники по мхам пахнут звонкими спорами, а ведь он клялся, что в этот раз точно не перепутает лево и право. Остаётся надеяться, что это не сильно задержит создание карты изведанного Зазеркалья." data-img="images/Грибной Архивариус.png">
       <div class="actions">
         <button onclick="deleteItem('characters',85)">🗑️</button>
         <button onclick="openEdit('characters',85)">✏️</button>
@@ -723,7 +722,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Создаёт карту Зазеркалья</div>
       <div class="episodes"><span>ep.70</span></div>
-    </div><div class="card race-Существо" data-idx="2" data-name="Григорий" data-full="Испытывает жуткое возмущение от красного цвета. Не пропускает, если перед ним не извиниться." data-img="images/Grigoriy.png">
+    </div><div class="card race-Существо" data-idx="2" data-name="Григорий" data-full="Испытывает жуткое возмущение от красного цвета. Не пропускает, если перед ним не извиниться." data-img="images/Григорий.png">
       <div class="actions">
         <button onclick="deleteItem('characters',2)">🗑️</button>
         <button onclick="openEdit('characters',2)">✏️</button>
@@ -741,7 +740,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Привлекаются ноготками</div>
       
-    </div><div class="card race-Существа" data-idx="104" data-name="Грузчики" data-full="Глядят и беесятся, что из каждого утюга вещает Дон Окунь." data-img="images/Gruzchiki.png">
+    </div><div class="card race-Существа" data-idx="104" data-name="Грузчики" data-full="Глядят и беесятся, что из каждого утюга вещает Дон Окунь." data-img="images/Грузчики.png">
       <div class="actions">
         <button onclick="deleteItem('characters',104)">🗑️</button>
         <button onclick="openEdit('characters',104)">✏️</button>
@@ -769,7 +768,7 @@ nav.tabs button.active {
       <div class="short">Знает, как помочь, если неважно себя чувствуешь</div>
       
     </div><div class="card race-Человек" data-idx="40" data-name="Доктор Эпикантус" data-full="Раньше он охотился за картинами Алевтины. Но, передав коллекцию в логово Вальтасара, пристрастился к скорлупе. Пытался спрятать её от Михаила, большого любителя скорлупы, в 5-и метровой яме за хрящёвкой. Одержим идеей заполучить скорлупу Реутени в свою коллекцию, так же, чтобы с её помощью защитить свою коллекцию скорлупы. Чтобы осуществить свой план написал Мультипрограмму, но Мультипрограмм не ответил.
-Для Дядюшки Фантасмагора на основе генома Полипов вывел способ для сверхбыстрого синтеза хрящевой ткани, чтобы возводить Хрящёвки в кратчайшие сроки." data-img="images/Doktor_Epikantus.png">
+Для Дядюшки Фантасмагора на основе генома Полипов вывел способ для сверхбыстрого синтеза хрящевой ткани, чтобы возводить Хрящёвки в кратчайшие сроки." data-img="images/Доктор Эпикантус.png">
       <div class="actions">
         <button onclick="deleteItem('characters',40)">🗑️</button>
         <button onclick="openEdit('characters',40)">✏️</button>
@@ -778,7 +777,7 @@ nav.tabs button.active {
       <span class="type tag-Человек">Человек</span>
       <div class="short">Искушённый коллекционер и сумашедший учёный</div>
       <div class="episodes"><span>ep.15</span><span>ep.46</span><span>ep.48</span><span>ep.56</span></div>
-    </div><div class="card race-Существо" data-idx="58" data-name="Дон Окунь" data-full="Дон Окунь - невероятно солидный эстет. Его респектабельность оставляет равнодушным только Фукса. И не просто так. Дон Окунь вещает из каждого утюга" data-img="images/Don_Okun.png">
+    </div><div class="card race-Существо" data-idx="58" data-name="Дон Окунь" data-full="Дон Окунь - невероятно солидный эстет. Его респектабельность оставляет равнодушным только Фукса. И не просто так. Дон Окунь вещает из каждого утюга" data-img="images/Дон Окунь.png">
       <div class="actions">
         <button onclick="deleteItem('characters',58)">🗑️</button>
         <button onclick="openEdit('characters',58)">✏️</button>
@@ -787,7 +786,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Пескарь под прикрытием</div>
       <div class="episodes"><span>ep.31</span><span>ep.42</span><span>ep.50</span><span>ep.66</span></div>
-    </div><div class="card race-Существа" data-idx="88" data-name="Духа" data-full="До сих пор не научились переходить дорогу без помощи, возможно в этом замешан Петька." data-img="images/Duha.png">
+    </div><div class="card race-Существа" data-idx="88" data-name="Духа" data-full="До сих пор не научились переходить дорогу без помощи, возможно в этом замешан Петька." data-img="images/Духа.png">
       <div class="actions">
         <button onclick="deleteItem('characters',88)">🗑️</button>
         <button onclick="openEdit('characters',88)">✏️</button>
@@ -814,7 +813,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Абсолютно беспринципен</div>
       
-    </div><div class="card race-Человек" data-idx="107" data-name="Евген" data-full="Всегда был заинтригован тем, что происходит в стенах подпольного щекоточного клуба, но его уши при одной мысли об этих стенах загоряются ярко-красным. Даже многочисленные извинения перед Григорием не спасают его заявки от отказов." data-img="images/Evgen.png">
+    </div><div class="card race-Человек" data-idx="107" data-name="Евген" data-full="Всегда был заинтригован тем, что происходит в стенах подпольного щекоточного клуба, но его уши при одной мысли об этих стенах загоряются ярко-красным. Даже многочисленные извинения перед Григорием не спасают его заявки от отказов." data-img="images/Евген.png">
       <div class="actions">
         <button onclick="deleteItem('characters',107)">🗑️</button>
         <button onclick="openEdit('characters',107)">✏️</button>
@@ -823,7 +822,7 @@ nav.tabs button.active {
       <span class="type tag-Человек">Человек</span>
       <div class="short">Желающий попасть в щекоточный клуб</div>
       <div class="episodes"><span>ep.53</span></div>
-    </div><div class="card race-Существо" data-idx="31" data-name="Евдокия" data-full="Ей надоело щекотать морковные пятки, тем более, что баба Жуля прогнала с огорода, морковный хохот ей спать мешает. Всегда хотела стать Босой Ведьмой, но ей было не разрешено. Причины не разглашаются, но они не связаны с карьерой её брата на Псарне." data-img="images/Evdokiya.png">
+    </div><div class="card race-Существо" data-idx="31" data-name="Евдокия" data-full="Ей надоело щекотать морковные пятки, тем более, что баба Жуля прогнала с огорода, морковный хохот ей спать мешает. Всегда хотела стать Босой Ведьмой, но ей было не разрешено. Причины не разглашаются, но они не связаны с карьерой её брата на Псарне." data-img="images/Евдокия.png">
       <div class="actions">
         <button onclick="deleteItem('characters',31)">🗑️</button>
         <button onclick="openEdit('characters',31)">✏️</button>
@@ -850,7 +849,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Ненавидит бесхозные камни</div>
       
-    </div><div class="card race-Существа" data-idx="102" data-name="Жаба" data-full="" data-img="images/ZHaba.png">
+    </div><div class="card race-Существа" data-idx="102" data-name="Жаба" data-full="" data-img="images/Жаба.png">
       <div class="actions">
         <button onclick="deleteItem('characters',102)">🗑️</button>
         <button onclick="openEdit('characters',102)">✏️</button>
@@ -860,7 +859,7 @@ nav.tabs button.active {
       <div class="short">Населяют Сумеречную рощу</div>
       <div class="episodes"><span>ep.39</span></div>
     </div><div class="card race-Существо" data-idx="83" data-name="Жадность на лайке" data-full="Жадность на лайке появляется только в тёмное время. По мере того, как ОНА приближается к катушкам, они замедляются всё сильнее, вплоть до остановки.
-Для противостояния с ней, необходимо кинуть Подводного Гошу или задобрить кукичами и она убежит до следующего раза. Лайка опасности не представляет, её можно поставить охранять катушки." data-img="images/ZHadnost_na_layke.png">
+Для противостояния с ней, необходимо кинуть Подводного Гошу или задобрить кукичами и она убежит до следующего раза. Лайка опасности не представляет, её можно поставить охранять катушки." data-img="images/Жадность на лайке.png">
       <div class="actions">
         <button onclick="deleteItem('characters',83)">🗑️</button>
         <button onclick="openEdit('characters',83)">✏️</button>
@@ -869,7 +868,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Зловредная сущность, появляется только в тёмное время</div>
       <div class="episodes"><span>ep.58</span><span>ep.64</span></div>
-    </div><div class="card race-Существа" data-idx="94" data-name="Жвачники" data-full="Не нравятся Болотному скрипачу, просит от них избавиться." data-img="images/ZHvachniki.png">
+    </div><div class="card race-Существа" data-idx="94" data-name="Жвачники" data-full="Не нравятся Болотному скрипачу, просит от них избавиться." data-img="images/Жвачники.png">
       <div class="actions">
         <button onclick="deleteItem('characters',94)">🗑️</button>
         <button onclick="openEdit('characters',94)">✏️</button>
@@ -878,7 +877,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Обитатели болот</div>
       <div class="episodes"><span>ep.20</span></div>
-    </div><div class="card race-Существо" data-idx="37" data-name="Желейный князь" data-full="Желейный князь, фигура загадочная хотя бы тем, что постоянной фигуры не имеет. Немногие удосужились чести вкусить его мудрость." data-img="images/ZHeleynyy_Knyaz.png">
+    </div><div class="card race-Существо" data-idx="37" data-name="Желейный князь" data-full="Желейный князь, фигура загадочная хотя бы тем, что постоянной фигуры не имеет. Немногие удосужились чести вкусить его мудрость." data-img="images/Желейный Князь.png">
       <div class="actions">
         <button onclick="deleteItem('characters',37)">🗑️</button>
         <button onclick="openEdit('characters',37)">✏️</button>
@@ -887,7 +886,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Фигура загадочная, постоянной фигуры не имеет</div>
       <div class="episodes"><span>ep.11</span><span>ep.40</span><span>ep.59</span></div>
-    </div><div class="card race-Существо" data-idx="103" data-name="Загадочный господин" data-full="Это отличное предложение, а-то остальные хорошо если 5 половин предлагают." data-img="images/Zagadochnyy_gospodin.png">
+    </div><div class="card race-Существо" data-idx="103" data-name="Загадочный господин" data-full="Это отличное предложение, а-то остальные хорошо если 5 половин предлагают." data-img="images/Загадочный господин.png">
       <div class="actions">
         <button onclick="deleteItem('characters',103)">🗑️</button>
         <button onclick="openEdit('characters',103)">✏️</button>
@@ -896,7 +895,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Даёт 2 кукича за 1 пакич</div>
       <div class="episodes"><span>ep.42</span></div>
-    </div><div class="card race-Существо" data-idx="36" data-name="Зуб Зубыч" data-full="От зубцов, населяющих средний сегмент подземных труб. Внешне Зуб Зубыча отличает разве что размер. В отличие от своих уменьшенных копий, он куда медленнее передвигается." data-img="images/Zub_Zubych.png">
+    </div><div class="card race-Существо" data-idx="36" data-name="Зуб Зубыч" data-full="От зубцов, населяющих средний сегмент подземных труб. Внешне Зуб Зубыча отличает разве что размер. В отличие от своих уменьшенных копий, он куда медленнее передвигается." data-img="images/Зуб Зубыч.png">
       <div class="actions">
         <button onclick="deleteItem('characters',36)">🗑️</button>
         <button onclick="openEdit('characters',36)">✏️</button>
@@ -932,7 +931,7 @@ nav.tabs button.active {
       <span class="type tag-Человек-Существо">Существо/Человек</span>
       <div class="short">Гуттаперчивый человек с длинной шеей</div>
       
-    </div><div class="card race-Божество" data-idx="50" data-name="Истуканус" data-full="Однажды ты окажешься перед Истуканусом, он задаст тебе лишь один вопрос. Брунявая чуня или Чунявая бруня. Времени на размышления не будет." data-img="images/Istukanus.png">
+    </div><div class="card race-Божество" data-idx="50" data-name="Истуканус" data-full="Однажды ты окажешься перед Истуканусом, он задаст тебе лишь один вопрос. Брунявая чуня или Чунявая бруня. Времени на размышления не будет." data-img="images/Истуканус.png">
       <div class="actions">
         <button onclick="deleteItem('characters',50)">🗑️</button>
         <button onclick="openEdit('characters',50)">✏️</button>
@@ -941,7 +940,7 @@ nav.tabs button.active {
       <span class="type tag-Божество">Божество</span>
       <div class="short">Загадочная сущность, создан братьями Мишеневыми</div>
       <div class="episodes"><span>ep.22</span><span>ep.43</span><span>ep.55</span><span>ep.58</span><span>ep.68</span></div>
-    </div><div class="card race-Существо" data-idx="6" data-name="Казимир" data-full="Человекоподобный кот. Ворует ложки у Пацаноидов (более 41 раза) для Сеньора Понполомео." data-img="images/Kazimir.png">
+    </div><div class="card race-Существо" data-idx="6" data-name="Казимир" data-full="Человекоподобный кот. Ворует ложки у Пацаноидов (более 41 раза) для Сеньора Понполомео." data-img="images/Казимир.png">
       <div class="actions">
         <button onclick="deleteItem('characters',6)">🗑️</button>
         <button onclick="openEdit('characters',6)">✏️</button>
@@ -950,7 +949,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Ворует ложки для Сеньора Понполомео</div>
       <div class="episodes"><span>ep.9</span><span>ep.57</span></div>
-    </div><div class="card race-Существа" data-idx="89" data-name="Калач" data-full="Гречневые Калачи отпугиваются глазным молоком. Если в глазах 12 крапинок вместо 10 - это осы под прикрытием. Гречневый калач участвовал в гонках Вальтасара." data-img="images/Kalach.png">
+    </div><div class="card race-Существа" data-idx="89" data-name="Калач" data-full="Гречневые Калачи отпугиваются глазным молоком. Если в глазах 12 крапинок вместо 10 - это осы под прикрытием. Гречневый калач участвовал в гонках Вальтасара." data-img="images/Калач.png">
       <div class="actions">
         <button onclick="deleteItem('characters',89)">🗑️</button>
         <button onclick="openEdit('characters',89)">✏️</button>
@@ -968,7 +967,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Каменные големы в лавовом озере</div>
       
-    </div><div class="card race-Существо" data-idx="51" data-name="Колбасный страж" data-full="Не пускает никого дальше третьего поворота. Говорит, там уже всё съели. Но если пообещаешь принести ему свежий укроп, может и пропустит." data-img="images/Kolbasnyy_strazh.png">
+    </div><div class="card race-Существо" data-idx="51" data-name="Колбасный страж" data-full="Не пускает никого дальше третьего поворота. Говорит, там уже всё съели. Но если пообещаешь принести ему свежий укроп, может и пропустит." data-img="images/Колбасный страж.png">
       <div class="actions">
         <button onclick="deleteItem('characters',51)">🗑️</button>
         <button onclick="openEdit('characters',51)">✏️</button>
@@ -977,7 +976,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Охраняет лабиринты Г-на Кривина.</div>
       <div class="episodes"><span>ep.23</span></div>
-    </div><div class="card race-Существо" data-idx="45" data-name="Коленыч" data-full="Если коленыч преклонит перед тобой полено. Лучше даже не думать про это. Если это произошло - есть три простых шага. 1. Задобри его, кинув горстку войлочных катышков, может кинуться тереться о них, если нет, шаг два. 2. Прислушайся, слышишь ли постукивание суствава? Если да, то у тебя считанные секунды, чтобы перейти к шагу три. 3. Отпрыгивай в сторону и убегай от свирепеющего Коленыча зигзагами. Участвовал в гонках Вальтасара." data-img="images/Kolenych.png">
+    </div><div class="card race-Существо" data-idx="45" data-name="Коленыч" data-full="Если коленыч преклонит перед тобой полено. Лучше даже не думать про это. Если это произошло - есть три простых шага. 1. Задобри его, кинув горстку войлочных катышков, может кинуться тереться о них, если нет, шаг два. 2. Прислушайся, слышишь ли постукивание суствава? Если да, то у тебя считанные секунды, чтобы перейти к шагу три. 3. Отпрыгивай в сторону и убегай от свирепеющего Коленыча зигзагами. Участвовал в гонках Вальтасара." data-img="images/Коленыч.png">
       <div class="actions">
         <button onclick="deleteItem('characters',45)">🗑️</button>
         <button onclick="openEdit('characters',45)">✏️</button>
@@ -986,7 +985,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Опасно если преклонил полено</div>
       <div class="episodes"><span>ep.18</span><span>ep.29</span><span>ep.51</span></div>
-    </div><div class="card race-Существо" data-idx="46" data-name="Круглый Толик" data-full="Бежит на журчанье раковины прямиком из забытого высокогорья." data-img="images/Kruglyy_Tolik.png">
+    </div><div class="card race-Существо" data-idx="46" data-name="Круглый Толик" data-full="Бежит на журчанье раковины прямиком из забытого высокогорья." data-img="images/Круглый Толик.png">
       <div class="actions">
         <button onclick="deleteItem('characters',46)">🗑️</button>
         <button onclick="openEdit('characters',46)">✏️</button>
@@ -1004,7 +1003,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Страж острова в лавовом озере</div>
       
-    </div><div class="card race-Существа" data-idx="101" data-name="Ламантины" data-full="" data-img="images/Lamantiny.png">
+    </div><div class="card race-Существа" data-idx="101" data-name="Ламантины" data-full="" data-img="images/Ламантины.png">
       <div class="actions">
         <button onclick="deleteItem('characters',101)">🗑️</button>
         <button onclick="openEdit('characters',101)">✏️</button>
@@ -1013,7 +1012,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Склонны к ангине</div>
       <div class="episodes"><span>ep.35</span></div>
-    </div><div class="card race-Бобыль" data-idx="90" data-name="Лесной бобыль" data-full="Узнаётся по характерному клокочающему запаху." data-img="images/Lesnoy_bobyl.png">
+    </div><div class="card race-Бобыль" data-idx="90" data-name="Лесной бобыль" data-full="Узнаётся по характерному клокочающему запаху." data-img="images/Лесной бобыль.png">
       <div class="actions">
         <button onclick="deleteItem('characters',90)">🗑️</button>
         <button onclick="openEdit('characters',90)">✏️</button>
@@ -1022,7 +1021,7 @@ nav.tabs button.active {
       <span class="type tag-Бобыль">Бобыль</span>
       <div class="short">Распространённый тип бобылей.</div>
       <div class="episodes"><span>ep.5</span><span>ep.55</span></div>
-    </div><div class="card race-Существо" data-idx="30" data-name="Лесной Курбак" data-full="Из-за простуды ты говоришь слишком волнисто, чтобы он мог тебя услышать, нужно было надевать бурлешку." data-img="images/Lesnoy_Kurbak.png">
+    </div><div class="card race-Существо" data-idx="30" data-name="Лесной Курбак" data-full="Из-за простуды ты говоришь слишком волнисто, чтобы он мог тебя услышать, нужно было надевать бурлешку." data-img="images/Лесной Курбак.png">
       <div class="actions">
         <button onclick="deleteItem('characters',30)">🗑️</button>
         <button onclick="openEdit('characters',30)">✏️</button>
@@ -1076,7 +1075,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Человеческий живот с большим ртом</div>
       
-    </div><div class="card race-Существо" data-idx="109" data-name="Мальчик-Педаль" data-full="Не скупись, отблагодари его нажатием." data-img="images/Malchik-Pedal.png">
+    </div><div class="card race-Существо" data-idx="109" data-name="Мальчик-Педаль" data-full="Не скупись, отблагодари его нажатием." data-img="images/Мальчик-Педаль.png">
       <div class="actions">
         <button onclick="deleteItem('characters',109)">🗑️</button>
         <button onclick="openEdit('characters',109)">✏️</button>
@@ -1094,7 +1093,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Подозрительный мангальщик</div>
       
-    </div><div class="card race-Человек-Существо" data-idx="64" data-name="Микаэлла" data-full="" data-img="images/SCHekotochnyy_klub.png">
+    </div><div class="card race-Человек-Существо" data-idx="64" data-name="Микаэлла" data-full="" data-img="images/Щекоточный клуб.png">
       <div class="actions">
         <button onclick="deleteItem('characters',64)">🗑️</button>
         <button onclick="openEdit('characters',64)">✏️</button>
@@ -1103,7 +1102,7 @@ nav.tabs button.active {
       <span class="type tag-Человек-Существо">Человек/Существо</span>
       <div class="short">Управляет подпольным щекоточным клубом</div>
       <div class="episodes"><span>ep.37</span></div>
-    </div><div class="card race-Существо" data-idx="41" data-name="Михаил" data-full="Баранча и Михаил любят порезвиться и поиграть в чак-чак попавшимися прохожими. Любит скорлупу бобылей, прятать её от него бесполезно." data-img="images/Mihail.png">
+    </div><div class="card race-Существо" data-idx="41" data-name="Михаил" data-full="Баранча и Михаил любят порезвиться и поиграть в чак-чак попавшимися прохожими. Любит скорлупу бобылей, прятать её от него бесполезно." data-img="images/Михаил.png">
       <div class="actions">
         <button onclick="deleteItem('characters',41)">🗑️</button>
         <button onclick="openEdit('characters',41)">✏️</button>
@@ -1112,7 +1111,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Один из трёх крепышей</div>
       <div class="episodes"><span>ep.15</span><span>ep.48</span><span>ep.49</span><span>ep.51</span><span>ep.57</span></div>
-    </div><div class="card race-Существо" data-idx="38" data-name="Многоликий Филипп" data-full="Он причина ночной икоты бабы Жули. Если ему понравится твоё, то сразу кидай в него подводного Гошу и беги." data-img="images/Mnogolikiy_Filipp.png">
+    </div><div class="card race-Существо" data-idx="38" data-name="Многоликий Филипп" data-full="Он причина ночной икоты бабы Жули. Если ему понравится твоё, то сразу кидай в него подводного Гошу и беги." data-img="images/Многоликий Филипп.png">
       <div class="actions">
         <button onclick="deleteItem('characters',38)">🗑️</button>
         <button onclick="openEdit('characters',38)">✏️</button>
@@ -1121,7 +1120,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Сегодня он сменил 103 лица</div>
       <div class="episodes"><span>ep.14</span></div>
-    </div><div class="card race-Существа" data-idx="57" data-name="Мопсосвины" data-full="Даже к репке прикрутят шестерёнки и паровое двигало, а уж из сородича сделают целый Бульдогзер. Они сами не знают, откуда они произошли. Создатели Мигунов. Помогают Грязунам, в обмен на доступ к их грязевым угодьям, чего так желает свинная половина натуры этих необычных созданий." data-img="images/Mopsosviny.png">
+    </div><div class="card race-Существа" data-idx="57" data-name="Мопсосвины" data-full="Даже к репке прикрутят шестерёнки и паровое двигало, а уж из сородича сделают целый Бульдогзер. Они сами не знают, откуда они произошли. Создатели Мигунов. Помогают Грязунам, в обмен на доступ к их грязевым угодьям, чего так желает свинная половина натуры этих необычных созданий." data-img="images/Мопсосвины.png">
       <div class="actions">
         <button onclick="deleteItem('characters',57)">🗑️</button>
         <button onclick="openEdit('characters',57)">✏️</button>
@@ -1130,7 +1129,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Прирождённые механизаторы</div>
       <div class="episodes"><span>ep.30</span><span>ep.44</span></div>
-    </div><div class="card race-Существо" data-idx="17" data-name="Н'ясортеп" data-full="Абсолютно неописуемый ужас, образующийся, когда собирается больше пяти полипов. Умеет захватывать чужую речь. Любит печень, впивается в неё языком." data-img="images/Nyasortep.png">
+    </div><div class="card race-Существо" data-idx="17" data-name="Н'ясортеп" data-full="Абсолютно неописуемый ужас, образующийся, когда собирается больше пяти полипов. Умеет захватывать чужую речь. Любит печень, впивается в неё языком." data-img="images/Нясортеп.png">
       <div class="actions">
         <button onclick="deleteItem('characters',17)">🗑️</button>
         <button onclick="openEdit('characters',17)">✏️</button>
@@ -1139,7 +1138,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Ужас из пяти+ полипов</div>
       <div class="episodes"><span>ep.12</span><span>ep.45</span></div>
-    </div><div class="card race-Божество" data-idx="84" data-name="ОНА" data-full="А ОНА ещё более красива. Смотрящая за Зазеркальем в темноту. ОНА запретила щекотку, поскольку считает её слишком пустяковым испытанием и времяпровождением. Не считает Жадность на лайке угрозой." data-img="images/ONA.png">
+    </div><div class="card race-Божество" data-idx="84" data-name="ОНА" data-full="А ОНА ещё более красива. Смотрящая за Зазеркальем в темноту. ОНА запретила щекотку, поскольку считает её слишком пустяковым испытанием и времяпровождением. Не считает Жадность на лайке угрозой." data-img="images/ОНА.png">
       <div class="actions">
         <button onclick="deleteItem('characters',84)">🗑️</button>
         <button onclick="openEdit('characters',84)">✏️</button>
@@ -1148,7 +1147,7 @@ nav.tabs button.active {
       <span class="type tag-Божество">Божество</span>
       <div class="short">Ещё более красива, чем ОНО</div>
       <div class="episodes"><span>ep.64</span></div>
-    </div><div class="card race-Божество" data-idx="63" data-name="ОНО" data-full="ОНО присматривает за всем Зазеркальем свысока, следит, чтобы не совершались проступки вроде уклонения от появления перед Истуканусом или не появлялись зловредные сущности вроде Жадности на лайке. В светлое время ничто не проходит мимо его взора. Его пока устраивает твоё поведение. Только не ешь уравнение времени. Это карается ссылкой в сладкий хлев." data-img="images/ONO.png">
+    </div><div class="card race-Божество" data-idx="63" data-name="ОНО" data-full="ОНО присматривает за всем Зазеркальем свысока, следит, чтобы не совершались проступки вроде уклонения от появления перед Истуканусом или не появлялись зловредные сущности вроде Жадности на лайке. В светлое время ничто не проходит мимо его взора. Его пока устраивает твоё поведение. Только не ешь уравнение времени. Это карается ссылкой в сладкий хлев." data-img="images/ОНО.png">
       <div class="actions">
         <button onclick="deleteItem('characters',63)">🗑️</button>
         <button onclick="openEdit('characters',63)">✏️</button>
@@ -1157,7 +1156,7 @@ nav.tabs button.active {
       <span class="type tag-Божество">Божество</span>
       <div class="short">Орбитальный Непревзойдённый Объект</div>
       <div class="episodes"><span>ep.16</span><span>ep.36</span><span>ep.58</span></div>
-    </div><div class="card race-Существо" data-idx="55" data-name="Орлундий" data-full="Всем известно, что Орлундий вонючий. Прогоняет Полипов вон лучше всех. Прослыл странным среди майонезных тётенек, изгой среди них, они требуют, чтобы он дружил с полипами, как Большой Дима. Среди волн может быть собой." data-img="images/Orlundiy.png">
+    </div><div class="card race-Существо" data-idx="55" data-name="Орлундий" data-full="Всем известно, что Орлундий вонючий. Прогоняет Полипов вон лучше всех. Прослыл странным среди майонезных тётенек, изгой среди них, они требуют, чтобы он дружил с полипами, как Большой Дима. Среди волн может быть собой." data-img="images/Орлундий.png">
       <div class="actions">
         <button onclick="deleteItem('characters',55)">🗑️</button>
         <button onclick="openEdit('characters',55)">✏️</button>
@@ -1166,7 +1165,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Вонючий, прослыл странным среди майонезных</div>
       <div class="episodes"><span>ep.26</span><span>ep.67</span></div>
-    </div><div class="card race-Существа" data-idx="67" data-name="Осы" data-full="Бойся осов, ты же не Реутень. Как только увидишь их, прыгай в ближайшее болото. Осы, пока не освоили перемещение в трясине, их в ней трясет." data-img="images/Osy.png">
+    </div><div class="card race-Существа" data-idx="67" data-name="Осы" data-full="Бойся осов, ты же не Реутень. Как только увидишь их, прыгай в ближайшее болото. Осы, пока не освоили перемещение в трясине, их в ней трясет." data-img="images/Осы.png">
       <div class="actions">
         <button onclick="deleteItem('characters',67)">🗑️</button>
         <button onclick="openEdit('characters',67)">✏️</button>
@@ -1175,7 +1174,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Вредители, не освоили перемещение в трясине, делают мёд</div>
       <div class="episodes"><span>ep.41</span></div>
-    </div><div class="card race-Существо" data-idx="110" data-name="Пальчик-Медаль" data-full="Не верь ему и гони подальше." data-img="images/Palchik-Medal.png">
+    </div><div class="card race-Существо" data-idx="110" data-name="Пальчик-Медаль" data-full="Не верь ему и гони подальше." data-img="images/Пальчик-Медаль.png">
       <div class="actions">
         <button onclick="deleteItem('characters',110)">🗑️</button>
         <button onclick="openEdit('characters',110)">✏️</button>
@@ -1184,7 +1183,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Будет пакостить</div>
       <div class="episodes"><span>ep.65</span></div>
-    </div><div class="card race-Существо" data-idx="42" data-name="Пахомий" data-full="Пахомий вылезает из своего дупла настолько редко, что члены Ордена босых ведьм верят в то, что его следующий выход ознаменует крайне значительные события. Любит пахомить. Живёт вместе с Фуксом. Спрятал Рудло у себя в дупле." data-img="images/Pahomiy.png">
+    </div><div class="card race-Существо" data-idx="42" data-name="Пахомий" data-full="Пахомий вылезает из своего дупла настолько редко, что члены Ордена босых ведьм верят в то, что его следующий выход ознаменует крайне значительные события. Любит пахомить. Живёт вместе с Фуксом. Спрятал Рудло у себя в дупле." data-img="images/Пахомий.png">
       <div class="actions">
         <button onclick="deleteItem('characters',42)">🗑️</button>
         <button onclick="openEdit('characters',42)">✏️</button>
@@ -1193,7 +1192,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Один из трёх крепышей, редко вылезает из дупла.</div>
       <div class="episodes"><span>ep.16</span><span>ep.49</span><span>ep.54</span><span>ep.51</span><span>ep.57</span><span>ep.59</span></div>
-    </div><div class="card race-Существо" data-idx="92" data-name="Пацаноиды" data-full="Не злы по натуре, но всегда злятся на Казимира из-за его проделок. Между ними обязательно должно быть равновесие. Нельзя пахомить. Участвовали в гонке Вальтасара, из-за проникшего на трассу Казимира, их распёрла ярость, один из них побежал за Казимиром, а второй развил невероятную скорость и финишировал первым." data-img="images/Patsanoidy.png">
+    </div><div class="card race-Существо" data-idx="92" data-name="Пацаноиды" data-full="Не злы по натуре, но всегда злятся на Казимира из-за его проделок. Между ними обязательно должно быть равновесие. Нельзя пахомить. Участвовали в гонке Вальтасара, из-за проникшего на трассу Казимира, их распёрла ярость, один из них побежал за Казимиром, а второй развил невероятную скорость и финишировал первым." data-img="images/Пацаноиды.png">
       <div class="actions">
         <button onclick="deleteItem('characters',92)">🗑️</button>
         <button onclick="openEdit('characters',92)">✏️</button>
@@ -1202,7 +1201,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Существа с магией Истукануса.</div>
       <div class="episodes"><span>ep.9</span><span>ep.51</span><span>ep.57</span></div>
-    </div><div class="card race-Существо" data-idx="35" data-name="Пескарь" data-full="Существа, похожие на голубей. Дон Окунь - пескарь под прикрытием. Пескарь участвовал в гонках Вальтасара." data-img="images/Peskar.png">
+    </div><div class="card race-Существо" data-idx="35" data-name="Пескарь" data-full="Существа, похожие на голубей. Дон Окунь - пескарь под прикрытием. Пескарь участвовал в гонках Вальтасара." data-img="images/Пескарь.png">
       <div class="actions">
         <button onclick="deleteItem('characters',35)">🗑️</button>
         <button onclick="openEdit('characters',35)">✏️</button>
@@ -1220,7 +1219,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Разбежались, будут урчать и плюхаться</div>
       
-    </div><div class="card race-Существо" data-idx="32" data-name="Петька" data-full="Вероятно, замешан в том, что духи в Багетном сквере до сих пор не научилась переходить дорогу без помощи." data-img="images/Petka.png">
+    </div><div class="card race-Существо" data-idx="32" data-name="Петька" data-full="Вероятно, замешан в том, что духи в Багетном сквере до сих пор не научилась переходить дорогу без помощи." data-img="images/Петька.png">
       <div class="actions">
         <button onclick="deleteItem('characters',32)">🗑️</button>
         <button onclick="openEdit('characters',32)">✏️</button>
@@ -1229,7 +1228,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Возможно, замешан в том, что духи не переходят дорогу</div>
       <div class="episodes"><span>ep.3</span></div>
-    </div><div class="card race-Существо" data-idx="39" data-name="Подводный Гоша" data-full="За всей красотой подводного мира наблюдает подводный Гоша. Увидишь, угости его мёдом — он оценит. Может помочь с Многоликим Филиппом." data-img="images/Podvodnyy_Gosha.png">
+    </div><div class="card race-Существо" data-idx="39" data-name="Подводный Гоша" data-full="За всей красотой подводного мира наблюдает подводный Гоша. Увидишь, угости его мёдом — он оценит. Может помочь с Многоликим Филиппом." data-img="images/Подводный Гоша.png">
       <div class="actions">
         <button onclick="deleteItem('characters',39)">🗑️</button>
         <button onclick="openEdit('characters',39)">✏️</button>
@@ -1247,7 +1246,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Не пустит через запретную пустыню без оплаты</div>
       
-    </div><div class="card race-Существо" data-idx="44" data-name="Поленыч" data-full="Поленыч сам выйдет за теми, кому путь открыт и преклонит колено, это дружеский жест и/или приглашение в Зазеркалье." data-img="images/Polenych.png">
+    </div><div class="card race-Существо" data-idx="44" data-name="Поленыч" data-full="Поленыч сам выйдет за теми, кому путь открыт и преклонит колено, это дружеский жест и/или приглашение в Зазеркалье." data-img="images/Поленыч.png">
       <div class="actions">
         <button onclick="deleteItem('characters',44)">🗑️</button>
         <button onclick="openEdit('characters',44)">✏️</button>
@@ -1256,7 +1255,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Проводник в Зазеркалье</div>
       <div class="episodes"><span>ep.18</span><span>ep.50</span><span>ep.55</span></div>
-    </div><div class="card race-Существа" data-idx="28" data-name="Полипы" data-full="По отдельности милые комочки с невинной наружностью, их глаза полны очарования, но при сборе более 5 штук превращаются в Н'ясортепа. Орлундий прогоняет их вон, поэтому они обращаются за помощью к Большому Диме." data-img="images/Polipy.png">
+    </div><div class="card race-Существа" data-idx="28" data-name="Полипы" data-full="По отдельности милые комочки с невинной наружностью, их глаза полны очарования, но при сборе более 5 штук превращаются в Н'ясортепа. Орлундий прогоняет их вон, поэтому они обращаются за помощью к Большому Диме." data-img="images/Полипы.png">
       <div class="actions">
         <button onclick="deleteItem('characters',28)">🗑️</button>
         <button onclick="openEdit('characters',28)">✏️</button>
@@ -1283,7 +1282,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Человек с головой-лампочкой и клювом</div>
       
-    </div><div class="card race-Существо" data-idx="3" data-name="Птозный Эдгар" data-full="Единственный, кому не только удалось сбежать из Сладкого хлева, но и приспособить его обитателей, чтобы доставлять в Запретную пустыню столь редкие там воду и пыльцу. Назад Корованы везут алмазы. Подкармливает кукушек. Участвовал в гонках Вальтасара." data-img="images/Ptoznyy_Edgar.png">
+    </div><div class="card race-Существо" data-idx="3" data-name="Птозный Эдгар" data-full="Единственный, кому не только удалось сбежать из Сладкого хлева, но и приспособить его обитателей, чтобы доставлять в Запретную пустыню столь редкие там воду и пыльцу. Назад Корованы везут алмазы. Подкармливает кукушек. Участвовал в гонках Вальтасара." data-img="images/Птозный Эдгар.png">
       <div class="actions">
         <button onclick="deleteItem('characters',3)">🗑️</button>
         <button onclick="openEdit('characters',3)">✏️</button>
@@ -1292,7 +1291,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Глаз в шапце</div>
       <div class="episodes"><span>ep.47</span><span>ep.51</span><span>ep.60</span></div>
-    </div><div class="card race-Бобыль" data-idx="20" data-name="Реутень" data-full="Уникальный бобыль, ему повезло родиться с толстой скорлупой, которая надёжно защищает от коканья. Делает упражнения для кабанения, которые дают +7 децибел уже через неделю, если делать каждый день: 1. поднимай обсидиановые блины крупом, 2. Разводи когти в стороны с утяжелялами, 3. Прыгай на месте пара часов. Не забывай про питание." data-img="images/Reuten.png">
+    </div><div class="card race-Бобыль" data-idx="20" data-name="Реутень" data-full="Уникальный бобыль, ему повезло родиться с толстой скорлупой, которая надёжно защищает от коканья. Делает упражнения для кабанения, которые дают +7 децибел уже через неделю, если делать каждый день: 1. поднимай обсидиановые блины крупом, 2. Разводи когти в стороны с утяжелялами, 3. Прыгай на месте пара часов. Не забывай про питание." data-img="images/Реутень.png">
       <div class="actions">
         <button onclick="deleteItem('characters',20)">🗑️</button>
         <button onclick="openEdit('characters',20)">✏️</button>
@@ -1301,7 +1300,7 @@ nav.tabs button.active {
       <span class="type tag-Бобыль">Бобыль</span>
       <div class="short">Бобыль с толстой скорлупой</div>
       <div class="episodes"><span>ep.46</span><span>ep.48</span><span>ep.52</span></div>
-    </div><div class="card race-Человек" data-idx="15" data-name="Ржаной Борис" data-full="Просит позвонить в колокол, но если его вынести, сошки разбегутся." data-img="images/Rzhanoy_Boris.png">
+    </div><div class="card race-Человек" data-idx="15" data-name="Ржаной Борис" data-full="Просит позвонить в колокол, но если его вынести, сошки разбегутся." data-img="images/Ржаной Борис.png">
       <div class="actions">
         <button onclick="deleteItem('characters',15)">🗑️</button>
         <button onclick="openEdit('characters',15)">✏️</button>
@@ -1310,7 +1309,7 @@ nav.tabs button.active {
       <span class="type tag-Человек">Человек</span>
       <div class="short">Гопник, главнюк сошек.</div>
       <div class="episodes"><span>ep.21</span></div>
-    </div><div class="card race-Существо" data-idx="66" data-name="Рудло" data-full="Рудло готов поделиться услышанным от Желейного князя, едва не был кокнут, когда собирался рассказать. Спрятался в ближайшем дупле, где обитал Пахомий, он его не обидел, но теперь Рудло боится незваных ушей, поэтому будет делиться услышанным в письменном виде." data-img="images/Rudlo.png">
+    </div><div class="card race-Существо" data-idx="66" data-name="Рудло" data-full="Рудло готов поделиться услышанным от Желейного князя, едва не был кокнут, когда собирался рассказать. Спрятался в ближайшем дупле, где обитал Пахомий, он его не обидел, но теперь Рудло боится незваных ушей, поэтому будет делиться услышанным в письменном виде." data-img="images/Рудло.png">
       <div class="actions">
         <button onclick="deleteItem('characters',66)">🗑️</button>
         <button onclick="openEdit('characters',66)">✏️</button>
@@ -1319,7 +1318,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Говорящий крот</div>
       <div class="episodes"><span>ep.40</span><span>ep.59</span></div>
-    </div><div class="card race-Человек" data-idx="34" data-name="Сатор Арепыч" data-full="Сатор Арепыч один из тех немногих, кто попал в Зазеркалье из нашего мира. В миру Георгий Николаевич Крукопацкий. Офицер русской императорской армии. Во время визита в Мариинский театр он проходил мимо гримёрки и согласился на приглашение появившегося в зеркале Поленыча. От шока или осознанно мы не знаем, ведь свою прежнюю личность в Зазеркалье он забыл, а новое имя получил от Истукануса. Беспощаден к бобылям, его первое сильное впечатление в Зазеркалье произвёл взбесивший его клокочащий запах бобыля, так и охотится за ними, пока в нашем мире прошло уже более ста лет. В бешенстве от Реутеня." data-img="images/Sator_Arepych.png">
+    </div><div class="card race-Человек" data-idx="34" data-name="Сатор Арепыч" data-full="Сатор Арепыч один из тех немногих, кто попал в Зазеркалье из нашего мира. В миру Георгий Николаевич Крукопацкий. Офицер русской императорской армии. Во время визита в Мариинский театр он проходил мимо гримёрки и согласился на приглашение появившегося в зеркале Поленыча. От шока или осознанно мы не знаем, ведь свою прежнюю личность в Зазеркалье он забыл, а новое имя получил от Истукануса. Беспощаден к бобылям, его первое сильное впечатление в Зазеркалье произвёл взбесивший его клокочащий запах бобыля, так и охотится за ними, пока в нашем мире прошло уже более ста лет. В бешенстве от Реутеня." data-img="images/Сатор Арепыч.png">
       <div class="actions">
         <button onclick="deleteItem('characters',34)">🗑️</button>
         <button onclick="openEdit('characters',34)">✏️</button>
@@ -1328,7 +1327,7 @@ nav.tabs button.active {
       <span class="type tag-Человек">Человек</span>
       <div class="short">Ранее Г. Н. Крукопацкий. Охотник на бобылей из нашего мира</div>
       <div class="episodes"><span>ep.5</span><span>ep.46</span><span>ep.55</span></div>
-    </div><div class="card race-Существо" data-idx="106" data-name="Сектор сыра на баране" data-full="Пришёл вторым, после пацаноида." data-img="images/Sektor_syra_na_barane.png">
+    </div><div class="card race-Существо" data-idx="106" data-name="Сектор сыра на баране" data-full="Пришёл вторым, после пацаноида." data-img="images/Сектор сыра на баране.png">
       <div class="actions">
         <button onclick="deleteItem('characters',106)">🗑️</button>
         <button onclick="openEdit('characters',106)">✏️</button>
@@ -1346,7 +1345,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Красный шар со шляпой и большим носом</div>
       
-    </div><div class="card race-Существо" data-idx="5" data-name="Смоломаз" data-full="Телохранитель господина Кривина. Проверяет все места и уборные, где может прятаться Сортирный Сатир." data-img="images/Smolomaz.png">
+    </div><div class="card race-Существо" data-idx="5" data-name="Смоломаз" data-full="Телохранитель господина Кривина. Проверяет все места и уборные, где может прятаться Сортирный Сатир." data-img="images/Смоломаз.png">
       <div class="actions">
         <button onclick="deleteItem('characters',5)">🗑️</button>
         <button onclick="openEdit('characters',5)">✏️</button>
@@ -1364,7 +1363,7 @@ nav.tabs button.active {
       <span class="type tag-Существа">Существа</span>
       <div class="short">Кислый Борька норовит залезть им под перья</div>
       
-    </div><div class="card race-Существо" data-idx="60" data-name="Сортирный Сатир" data-full="Сортирный Сатир славится, что иронично своей сатирой. Его хлёсткий язык задел и господина Кривина." data-img="images/Sortirnyy_Satir.png">
+    </div><div class="card race-Существо" data-idx="60" data-name="Сортирный Сатир" data-full="Сортирный Сатир славится, что иронично своей сатирой. Его хлёсткий язык задел и господина Кривина." data-img="images/Сортирный Сатир.png">
       <div class="actions">
         <button onclick="deleteItem('characters',60)">🗑️</button>
         <button onclick="openEdit('characters',60)">✏️</button>
@@ -1373,7 +1372,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Славится ироничной сатирой</div>
       <div class="episodes"><span>ep.32</span><span>ep.61</span></div>
-    </div><div class="card race-Существо" data-idx="65" data-name="Сырный Джо" data-full="Сырный Джо вырос из чана молока из сладкого хлева, купленного дядюшкой Фантасмагором для живительных ванн. По популярности сырный Джо обходил даже Гузлика." data-img="images/Syrnyy_Dzho.png">
+    </div><div class="card race-Существо" data-idx="65" data-name="Сырный Джо" data-full="Сырный Джо вырос из чана молока из сладкого хлева, купленного дядюшкой Фантасмагором для живительных ванн. По популярности сырный Джо обходил даже Гузлика." data-img="images/Сырный Джо.png">
       <div class="actions">
         <button onclick="deleteItem('characters',65)">🗑️</button>
         <button onclick="openEdit('characters',65)">✏️</button>
@@ -1391,7 +1390,7 @@ nav.tabs button.active {
       <span class="type tag-Человек">Человек</span>
       <div class="short">Тест</div>
       <div class="episodes"><span>ep.1</span></div>
-    </div><div class="card race-Существо" data-idx="43" data-name="Тётя Варя" data-full="Любит делать беспощадный массаж мягким и нежным пяткам. Выбора нет." data-img="images/Tyotya_Varya.png">
+    </div><div class="card race-Существо" data-idx="43" data-name="Тётя Варя" data-full="Любит делать беспощадный массаж мягким и нежным пяткам. Выбора нет." data-img="images/Тётя Варя.png">
       <div class="actions">
         <button onclick="deleteItem('characters',43)">🗑️</button>
         <button onclick="openEdit('characters',43)">✏️</button>
@@ -1409,7 +1408,7 @@ nav.tabs button.active {
       <span class="type tag-Существо">Существо</span>
       <div class="short">Появляется везде, но быстро рвётся</div>
       
-    </div><div class="card race-Существо" data-idx="59" data-name="Фукс" data-full="Фукс знает очень много. Он знает, что Дон никакой не окунь, а всего лишь шифрующийся пескарь. Знает содержание ритуалов Ордена босых ведьм. Знает, где рассыпаны потерянные жемчужины. Научить говорить Фукса не кому, его соседу по дуплу, Пахомию, не до этого." data-img="images/Fuks.png">
+    </div><div class="card race-Существо" data-idx="59" data-name="Фукс" data-full="Фукс знает очень много. Он знает, что Дон никакой не окунь, а всего лишь шифрующийся пескарь. Знает содержание ритуалов Ордена босых ведьм. Знает, где рассыпаны потерянные жемчужины. Научить говорить Фукса не кому, его соседу по дуплу, Пахомию, не до этого." data-img="images/Фукс.png">
       <div class="actions">
         <button onclick="deleteItem('characters',59)">🗑️</button>
         <button onclick="openEdit('characters',59)">✏️</button>
@@ -1427,7 +1426,7 @@ nav.tabs button.active {
       <span class="type tag-Человек-Существо">Человек/Существо</span>
       <div class="short">Председатель Конгресса путешественников</div>
       
-    </div><div class="card race-Растение-Существо" data-idx="29" data-name="Хрычи" data-full="Похожи на тыквы с лицом. Выращиваются Бабой Жулей. Гремучее древо любит хрычей и, скорее всего, питается ими. Используется для приготовления Разваристого Хрыча" data-img="images/Hrych.png">
+    </div><div class="card race-Растение-Существо" data-idx="29" data-name="Хрычи" data-full="Похожи на тыквы с лицом. Выращиваются Бабой Жулей. Гремучее древо любит хрычей и, скорее всего, питается ими. Используется для приготовления Разваристого Хрыча" data-img="images/Хрыч.png">
       <div class="actions">
         <button onclick="deleteItem('characters',29)">🗑️</button>
         <button onclick="openEdit('characters',29)">✏️</button>
@@ -1454,7 +1453,7 @@ nav.tabs button.active {
       <span class="type tag-Бобыль">Бобыль</span>
       <div class="short">Известный бобыль</div>
       
-    </div><div class="card race-Существо" data-idx="96" data-name="Чунявая Бруня" data-full="Главный объект вопроса выбора Истукануса. Обитает в Запретной пустыне." data-img="images/CHunyavaya_Brunya.png">
+    </div><div class="card race-Существо" data-idx="96" data-name="Чунявая Бруня" data-full="Главный объект вопроса выбора Истукануса. Обитает в Запретной пустыне." data-img="images/Чунявая Бруня.png">
       <div class="actions">
         <button onclick="deleteItem('characters',96)">🗑️</button>
         <button onclick="openEdit('characters',96)">✏️</button>
@@ -1472,7 +1471,7 @@ nav.tabs button.active {
       <span class="type tag-Бобыль">Бобыль</span>
       <div class="short">Известный бобыль</div>
       
-    </div><div class="card race-Существо" data-idx="93" data-name="Шустрый Пескарь" data-full="Более шустрые, чем обычные пескари." data-img="images/SHustryy_Peskar.png">
+    </div><div class="card race-Существо" data-idx="93" data-name="Шустрый Пескарь" data-full="Более шустрые, чем обычные пескари." data-img="images/Шустрый Пескарь.png">
       <div class="actions">
         <button onclick="deleteItem('characters',93)">🗑️</button>
         <button onclick="openEdit('characters',93)">✏️</button>
@@ -2205,6 +2204,7 @@ nav.tabs button.active {
 // ============ ДАННЫЕ ============
 // __DEFAULT_DATA_START__
 const DEFAULT_DATA = {
+  {
   "characters": [
     {
       "name": "Вальтасар",
@@ -3927,7 +3927,7 @@ const DEFAULT_DATA = {
     }
   ]
 };
-// __DEFAULT_DATA_END__;
+// __DEFAULT_DATA_END__
 
 // ============ СОСТОЯНИЕ ============
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -3935,15 +3935,12 @@ let currentTab = 'characters';
 let editingType = null;
 let editingIndex = -1;
 
-// Загрузка из localStorage
-const saved = localStorage.getItem('zazerkale_v10');
-if (saved) {
-  try { data = JSON.parse(saved); } catch(e) {}
-}
+// Данные теперь хранятся прямо в DEFAULT_DATA внутри HTML-файла
 
 // ============ УТИЛИТЫ ============
 function save() {
-  localStorage.setItem('zazerkale_v10', JSON.stringify(data));
+  // Данные хранятся в памяти сессии.
+  // Для сохранения в файл — используйте кнопку "💾 Сохранить HTML"
   updateStats();
 }
 
@@ -4296,13 +4293,41 @@ function importData(e) {
   reader.readAsText(file);
 }
 
-function fullBackup() {
-  const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+function saveData() {
+  // Получаем текущий HTML документа
+  let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  
+  // Находим блок DEFAULT_DATA по маркерам
+  const startMarker = '// __DEFAULT_DATA_START__\n';
+  const endMarker = '\n// __DEFAULT_DATA_END__';
+  const startIdx = html.indexOf(startMarker);
+  const endIdx = html.indexOf(endMarker);
+  
+  if (startIdx === -1 || endIdx === -1) {
+    alert('❌ Ошибка: не найдены маркеры DEFAULT_DATA');
+    return;
+  }
+  
+  // Формируем новый блок с текущими данными
+  const newDataBlock = startMarker + 
+    'const DEFAULT_DATA = ' + JSON.stringify(data, null, 2) + ';\n' + 
+    endMarker;
+  
+  // Заменяем старый блок на новый
+  html = html.substring(0, startIdx) + newDataBlock + html.substring(endIdx + endMarker.length);
+  
+  // Скачиваем файл
   const blob = new Blob([html], {type: 'text/html'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'zazerkale_backup.html';
+  a.download = 'zazerkale_wiki.html';
   a.click();
+  
+  showToast('✅ HTML сохранён с новыми данными!');
+}
+
+function fullBackup() {
+  saveData();
 }
 
 function resetData() {
@@ -4310,10 +4335,6 @@ function resetData() {
   data = JSON.parse(JSON.stringify(DEFAULT_DATA));
   save();
   renderCurrentTab();
-}
-
-function saveData() {
-  fullBackup();
 }
 
 // ============ ГРАФ СВЯЗЕЙ ============
@@ -4584,133 +4605,6 @@ globalSearchInput.addEventListener('keydown', e => {
     globalSearchInput.blur();
   }
 });
-function importFromLocalStorage() {
-  const saved = localStorage.getItem('zazerkale_v10');
-  if (!saved) {
-    alert('❌ В localStorage нет сохранённых данных');
-    return;
-  }
-  
-  try {
-    const importedData = JSON.parse(saved);
-    
-    // Проверяем структуру
-    if (!importedData.characters || !importedData.locations) {
-      alert('❌ Данные в localStorage имеют неправильную структуру');
-      return;
-    }
-    
-    const stats = `${importedData.characters.length} персонажей, ${importedData.locations.length} локаций, ${importedData.items.length} предметов, ${importedData.events.length} ивентов, ${importedData.organizations.length} организаций, ${importedData.races.length} рас`;
-    
-    if (!confirm(`Найдены данные в localStorage:\n${stats}\n\nСкачать HTML-файл с этими данными, вшитыми в DEFAULT_DATA?`)) {
-      return;
-    }
-    
-    // Получаем текущий HTML документа
-    let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-    
-    // === ПОИСК БЛОКА DEFAULT_DATA ===
-    // Сначала пробуем найти по маркерам
-    const startMarker = '// __DEFAULT_DATA_START__\n';
-    const endMarker = '\n// __DEFAULT_DATA_END__';
-    let startIdx = html.indexOf(startMarker);
-    let endIdx = html.indexOf(endMarker);
-    let useMarkers = (startIdx !== -1 && endIdx !== -1);
-    
-    // Если маркеров нет — ищем по тексту "const DEFAULT_DATA = {"
-    if (!useMarkers) {
-      const dataStart = html.indexOf('const DEFAULT_DATA = {');
-      if (dataStart === -1) {
-        alert('❌ Не удалось найти блок DEFAULT_DATA в HTML.\n\nВозможно, файл был повреждён или имеет нестандартную структуру.');
-        return;
-      }
-      
-      // Ищем закрывающую скобку объекта — считаем баланс скобок
-      let braceCount = 0;
-      let inString = false;
-      let stringChar = '';
-      let escape = false;
-      let dataEnd = -1;
-      let started = false;
-      
-      // Начинаем с открывающей скобки после "const DEFAULT_DATA = "
-      const searchFrom = html.indexOf('{', dataStart);
-      
-      for (let i = searchFrom; i < html.length; i++) {
-        const ch = html[i];
-        
-        if (escape) { escape = false; continue; }
-        if (ch === '\\') { escape = true; continue; }
-        
-        if (inString) {
-          if (ch === stringChar) inString = false;
-          continue;
-        }
-        
-        if (ch === '"' || ch === "'" || ch === '`') {
-          inString = true;
-          stringChar = ch;
-          continue;
-        }
-        
-        if (ch === '{') {
-          braceCount++;
-          started = true;
-        } else if (ch === '}') {
-          braceCount--;
-          if (started && braceCount === 0) {
-            dataEnd = i + 1; // позиция ПОСЛЕ закрывающей скобки
-            break;
-          }
-        }
-      }
-      
-      if (dataEnd === -1) {
-        alert('❌ Не удалось найти конец блока DEFAULT_DATA');
-        return;
-      }
-      
-      // Заменяем блок "const DEFAULT_DATA = {...};"
-      const before = html.substring(0, dataStart);
-      const after = html.substring(dataEnd);
-      
-      // Добавляем маркеры для будущих сохранений
-      const newDataBlock = '// __DEFAULT_DATA_START__\n' +
-        'const DEFAULT_DATA = ' + JSON.stringify(importedData, null, 2) + ';\n' +
-        '// __DEFAULT_DATA_END__';
-      
-      html = before + newDataBlock + after;
-      
-    } else {
-      // Маркеры найдены — используем старый алгоритм
-      const newDataBlock = startMarker + 
-        'const DEFAULT_DATA = ' + JSON.stringify(importedData, null, 2) + ';\n' + 
-        endMarker;
-      
-      html = html.substring(0, startIdx) + newDataBlock + html.substring(endIdx + endMarker.length);
-    }
-    
-    // Скачиваем файл
-    const blob = new Blob([html], {type: 'text/html'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'zazerkale_wiki_restored.html';
-    a.click();
-    
-    showToast('✅ HTML скачан с данными из localStorage!');
-    
-    // Предложение очистить localStorage
-    setTimeout(() => {
-      if (confirm('Данные успешно вшиты в новый HTML-файл.\n\nОчистить localStorage, чтобы больше не путаться?')) {
-        localStorage.removeItem('zazerkale_v10');
-        showToast('✅ localStorage очищен');
-      }
-    }, 1000);
-    
-  } catch(e) {
-    alert('❌ Ошибка: ' + e.message);
-  }
-}
 </script>
 <div class="toast" id="toast">✅ Сохранено!</div>
 
