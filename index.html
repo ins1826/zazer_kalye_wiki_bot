@@ -2085,12 +2085,6 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div id="tab-plots" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-plots" placeholder="🔍 Поиск сюжета...">
-    <select id="sort-plots" class="sort-select">
-    <option value="name-asc">🔤 По имени (А→Я)</option>
-    <option value="name-desc">🔤 По имени (Я→А)</option>
-    <option value="length-desc">📖 Длинные описания</option>
-    <option value="length-asc">📝 Короткие описания</option>
-    </select>
     <button class="admin-only" onclick="openEdit('plots')">➕ Добавить сюжет</button>
   </div>
   <div id="grid-plots"><div class="storyline-group">
@@ -4312,16 +4306,24 @@ const sortEl = document.getElementById('sort-plots');
 const sortMode = sortEl ? sortEl.value : 'name-asc';
 const grid = document.getElementById('grid-plots');
 let filtered = data.plots.filter(c => !q || normalizeText(c.name).includes(q) || normalizeText(c.full).includes(q) || normalizeText(c.storyline||'').includes(q));
-filtered = sortItems(filtered, sortMode);
+// Сортировка: по order (если есть), иначе по episode (численно), иначе по индексу
+filtered.sort((a, b) => {
+const oa = a.order ?? Infinity;
+const ob = b.order ?? Infinity;
+if (oa !== ob) return oa - ob;
+const ea = a.episode ? parseInt(a.episode, 10) || 9999 : 9999;
+const eb = b.episode ? parseInt(b.episode, 10) || 9999 : 9999;
+if (ea !== eb) return ea - eb;
+return data.plots.indexOf(a) - data.plots.indexOf(b);
+});
 if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
-  
-  // Группировка по сюжетным линиям
-  const grouped = {};
-  filtered.forEach(c => {
-    const line = c.storyline || 'Без линии';
-    if (!grouped[line]) grouped[line] = [];
-    grouped[line].push(c);
-  });
+// Группировка по сюжетным линиям
+const grouped = {};
+filtered.forEach(c => {
+const line = c.storyline || 'Без линии';
+if (!grouped[line]) grouped[line] = [];
+grouped[line].push(c);
+});
   
   let html = '';
   Object.keys(grouped).sort().forEach(lineName => {
@@ -4329,15 +4331,17 @@ if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не �
       <h2 class="storyline-title">📚 ${escapeHtml(lineName)}</h2>`;
     grouped[lineName].forEach(c => {
       const realIdx = data.plots.indexOf(c);
-      html += `<div class="plot-card">
-        ${IS_ADMIN ? `<div style="float:right">
-          <button onclick="deleteItem('plots',${realIdx})">🗑️</button>
-          <button onclick="openEdit('plots',${realIdx})">✏️</button>
-        </div>` : ''}
-        <h3>${escapeHtml(c.name)}</h3>
-        <div class="short" style="margin-bottom:8px">${escapeHtml(c.short)}</div>
-        <div>${escapeHtml(c.full)}</div>
-      </div>`;
+      const orderBadge = c.order != null ? `<span style="display:inline-block;background:#5a3a8a;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.85em;margin-right:6px;">#${c.order}</span>` : '';
+const epBadge = c.episode ? `<span style="display:inline-block;background:#2a2a3a;color:#c9a0ff;padding:2px 8px;border-radius:10px;font-size:0.85em;margin-right:6px;">ep.${escapeHtml(c.episode)}</span>` : '';
+html += `<div class="plot-card">
+${IS_ADMIN ? `<div style="float:right">
+<button onclick="deleteItem('plots',${realIdx})">🗑️</button>
+<button onclick="openEdit('plots',${realIdx})">✏️</button>
+</div>` : ''}
+<h3>${orderBadge}${epBadge}${escapeHtml(c.name)}</h3>
+<div class="short" style="margin-bottom:8px">${escapeHtml(c.short)}</div>
+<div>${escapeHtml(c.full)}</div>
+</div>`;
     });
     html += `</div>`;
   });
@@ -4392,8 +4396,6 @@ if (sortCharactersSelect) sortCharactersSelect.addEventListener('change', render
   const sel = document.getElementById('sort-' + t);
   if (sel) sel.addEventListener('change', () => renderGeneric(t));
 });
-const sortPlots = document.getElementById('sort-plots');
-if (sortPlots) sortPlots.addEventListener('change', renderPlots);
 
 // ============ CRUD ============
 function openEdit(type, idx = -1) {
@@ -4426,7 +4428,9 @@ if (type === 'characters' || type === 'locations' || type === 'items' || type ==
   html += `<label>🎬 Эпизоды (через запятую: 1, 5, 12)</label><input id="f-episodes" value="${(item.episodes||[]).join(', ')}" placeholder="1, 5, 12">`;
 }
 if (type === 'plots') {
-  html += `<label>📚 Сюжетная линия</label><input id="f-storyline" value="${escapeHtml(item.storyline||'')}" placeholder="Например: Поиск пацаноидов">`;
+html += `<label>📚 Сюжетная линия</label><input id="f-storyline" value="${escapeHtml(item.storyline||'')}" placeholder="Например: Поиск пацаноидов">`;
+html += `<label>🔢 Порядковый номер (чем меньше, тем раньше в списке)</label><input type="number" id="f-order" value="${item.order ?? ''}" placeholder="1, 2, 3...">`;
+html += `<label>🎬 Эпизод (в каком эпизоде происходит)</label><input id="f-episode" value="${item.episode || ''}" placeholder="Например: 22">`;
 }
   fields.innerHTML = html;
   modal.classList.add('active');
@@ -4450,8 +4454,11 @@ function saveEdit() {
   item.episodes = eps;
 }
   if (type === 'plots') {
-    item.storyline = document.getElementById('f-storyline').value.trim() || 'Без линии';
-  }
+item.storyline = document.getElementById('f-storyline').value.trim() || 'Без линии';
+const orderVal = document.getElementById('f-order').value.trim();
+item.order = orderVal !== '' ? parseInt(orderVal, 10) : undefined;
+item.episode = document.getElementById('f-episode').value.trim();
+}
   if (editingIndex < 0) data[type].push(item);
   save();
   closeModal();
