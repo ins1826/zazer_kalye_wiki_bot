@@ -1641,6 +1641,13 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div id="tab-locations" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-locations" placeholder="🔍 Поиск локации...">
+    <select id="sort-locations" class="sort-select">
+    <option value="name-asc">🔤 По имени (А→Я)</option>
+    <option value="name-desc">🔤 По имени (Я→А)</option>
+    <option value="episodes">🎬 По эпизодам</option>
+    <option value="length-desc">📖 Длинные описания</option>
+    <option value="length-asc">📝 Короткие описания</option>
+    </select>
     <button class="admin-only" onclick="openEdit('locations')">➕ Добавить локацию</button>
   </div>
   <div class="grid" id="grid-locations"><div class="card " data-idx="0" data-name="Лавовое озеро" data-full="Озеро с островом в центре, охраняемым Лаваном. Там хранится Маска." data-img="">
@@ -1802,6 +1809,13 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div id="tab-items" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-items" placeholder="🔍 Поиск предмета...">
+    <select id="sort-items" class="sort-select">
+    <option value="name-asc">🔤 По имени (А→Я)</option>
+    <option value="name-desc">🔤 По имени (Я→А)</option>
+    <option value="episodes">🎬 По эпизодам</option>
+    <option value="length-desc">📖 Длинные описания</option>
+    <option value="length-asc">📝 Короткие описания</option>
+    </select>
     <button class="admin-only" onclick="openEdit('items')">➕ Добавить предмет</button>
   </div>
   <div class="grid" id="grid-items"><div class="card " data-idx="0" data-name="Маска" data-full="Артефакт, хранящийся на острове в лавовом озере. Даёт фору в битве с многоликим Филиппом." data-img="">
@@ -1999,6 +2013,13 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div id="tab-events" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-events" placeholder="🔍 Поиск ивента...">
+    <select id="sort-events" class="sort-select">
+    <option value="name-asc">🔤 По имени (А→Я)</option>
+    <option value="name-desc">🔤 По имени (Я→А)</option>
+    <option value="episodes">🎬 По эпизодам</option>
+    <option value="length-desc">📖 Длинные описания</option>
+    <option value="length-asc">📝 Короткие описания</option>
+    </select>
     <button class="admin-only" onclick="openEdit('events')">➕ Добавить ивент</button>
   </div>
   <div class="grid" id="grid-events"><div class="card " data-idx="0" data-name="Викторины Вальтасара" data-full="Темы: «Кныши из предлесья», «Фантазмагорические отжиги Арепыча», «Размеры ног босых ведьм» и др. Итоги: трое бобылей получили техническое поражение и были кокнуты за неадекватное поведение. Реутень выжил благодаря скорлупе." data-img="">
@@ -2064,6 +2085,12 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div id="tab-plots" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-plots" placeholder="🔍 Поиск сюжета...">
+    <select id="sort-plots" class="sort-select">
+    <option value="name-asc">🔤 По имени (А→Я)</option>
+    <option value="name-desc">🔤 По имени (Я→А)</option>
+    <option value="length-desc">📖 Длинные описания</option>
+    <option value="length-asc">📝 Короткие описания</option>
+    </select>
     <button class="admin-only" onclick="openEdit('plots')">➕ Добавить сюжет</button>
   </div>
   <div id="grid-plots"><div class="storyline-group">
@@ -2105,6 +2132,13 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div id="tab-organizations" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-organizations" placeholder="🔍 Поиск организации...">
+    <select id="sort-organizations" class="sort-select">
+    <option value="name-asc">🔤 По имени (А→Я)</option>
+    <option value="name-desc">🔤 По имени (Я→А)</option>
+    <option value="episodes">🎬 По эпизодам</option>
+    <option value="length-desc">📖 Длинные описания</option>
+    <option value="length-asc">📝 Короткие описания</option>
+    </select>
     <button class="admin-only" onclick="openEdit('organizations')">➕ Добавить организацию</button>
   </div>
   <div class="grid" id="grid-organizations"><div class="card " data-idx="0" data-name="Орден босых ведьм" data-full="Когда небо темнеет, собираются в своём логове под кривой горой для того, чтобы осветить мир своим смехом. Членов Ордена набирают из Валькирий. Без их ритуалов с пером Золотого Какаду ночи были бы слишком тёмными. Они верят, что следующий выход Пахомия из своего дупла ознаменует крайне значительные события." data-img="images/Орден босых ведьм.png">
@@ -2140,6 +2174,13 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div id="tab-races" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-races" placeholder="🔍 Поиск расы...">
+    <select id="sort-races" class="sort-select">
+    <option value="name-asc">🔤 По имени (А→Я)</option>
+    <option value="name-desc">🔤 По имени (Я→А)</option>
+    <option value="episodes">🎬 По эпизодам</option>
+    <option value="length-desc">📖 Длинные описания</option>
+    <option value="length-asc">📝 Короткие описания</option>
+    </select>
     <button class="admin-only" onclick="openEdit('races')">➕ Добавить расу</button>
   </div>
   <div class="grid" id="grid-races"><div class="card " data-idx="0" data-name="Бобыли" data-full="Узнаются по характерному клокочающему запаху. Но некоторые имеют толстую скорлупу, защищающую от коканья как у Реутеня. Бывают лесные и другие подвиды." data-img="">
@@ -4212,11 +4253,38 @@ function sortCharacters(arr, mode) {
   }
 }
 
+// Универсальная сортировка для любых сущностей (локации, предметы, ивенты и т.д.)
+function sortItems(arr, mode) {
+  const copy = [...arr];
+  switch(mode) {
+    case 'name-asc':
+      return copy.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+    case 'name-desc':
+      return copy.sort((a, b) => b.name.localeCompare(a.name, 'ru'));
+    case 'episodes':
+      return copy.sort((a, b) => {
+        const ea = (a.episodes || []).length;
+        const eb = (b.episodes || []).length;
+        if (ea !== eb) return eb - ea;
+        return a.name.localeCompare(b.name, 'ru');
+      });
+    case 'length-desc':
+      return copy.sort((a, b) => (b.full || '').length - (a.full || '').length);
+    case 'length-asc':
+      return copy.sort((a, b) => (a.full || '').length - (b.full || '').length);
+    default:
+      return copy;
+  }
+}
+
 function renderGeneric(type, fields) {
-  const q = normalizeText(document.getElementById('search-' + type).value);
-  const grid = document.getElementById('grid-' + type);
-  const filtered = data[type].filter(c => !q || normalizeText(c.name).includes(q) || normalizeText(c.short||'').includes(q) || normalizeText(c.full||'').includes(q));
-  if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
+const q = normalizeText(document.getElementById('search-' + type).value);
+const sortEl = document.getElementById('sort-' + type);
+const sortMode = sortEl ? sortEl.value : 'name-asc';
+const grid = document.getElementById('grid-' + type);
+let filtered = data[type].filter(c => !q || normalizeText(c.name).includes(q) || normalizeText(c.short||'').includes(q) || normalizeText(c.full||'').includes(q));
+filtered = sortItems(filtered, sortMode);
+if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
   grid.innerHTML = filtered.map(c => {
   const realIdx = data[type].indexOf(c);
   const rc = type === 'characters' ? raceClass(c.type) : '';
@@ -4239,10 +4307,13 @@ function renderGeneric(type, fields) {
 }
 
 function renderPlots() {
-  const q = normalizeText(document.getElementById('search-plots').value);
-  const grid = document.getElementById('grid-plots');
-  const filtered = data.plots.filter(c => !q || normalizeText(c.name).includes(q) || normalizeText(c.full).includes(q) || normalizeText(c.storyline||'').includes(q));
-  if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
+const q = normalizeText(document.getElementById('search-plots').value);
+const sortEl = document.getElementById('sort-plots');
+const sortMode = sortEl ? sortEl.value : 'name-asc';
+const grid = document.getElementById('grid-plots');
+let filtered = data.plots.filter(c => !q || normalizeText(c.name).includes(q) || normalizeText(c.full).includes(q) || normalizeText(c.storyline||'').includes(q));
+filtered = sortItems(filtered, sortMode);
+if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
   
   // Группировка по сюжетным линиям
   const grouped = {};
@@ -4283,11 +4354,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
     document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
     document.getElementById('tab-' + tab).classList.remove('hidden');
-    // Сброс поиска
-    const input = document.getElementById('search-' + tab);
-    if (input) input.value = '';
-    const filter = document.getElementById('filter-type');
-    if (filter) filter.value = '';
+    // Сброс поиска и сортировки
+const input = document.getElementById('search-' + tab);
+if (input) input.value = '';
+const filter = document.getElementById('filter-type');
+if (filter) filter.value = '';
+const sortSel = document.getElementById('sort-' + tab);
+if (sortSel) sortSel.value = 'name-asc';
     currentTab = tab;
     renderCurrentTab();
   });
@@ -4311,9 +4384,16 @@ function renderCurrentTab() {
 });
 const filterType = document.getElementById('filter-type');
 if (filterType) filterType.addEventListener('change', renderCharacters);
-
 const sortCharactersSelect = document.getElementById('sort-characters');
 if (sortCharactersSelect) sortCharactersSelect.addEventListener('change', renderCharacters);
+
+// Обработчики сортировки для остальных вкладок
+['locations', 'items', 'events', 'organizations', 'races'].forEach(t => {
+  const sel = document.getElementById('sort-' + t);
+  if (sel) sel.addEventListener('change', () => renderGeneric(t));
+});
+const sortPlots = document.getElementById('sort-plots');
+if (sortPlots) sortPlots.addEventListener('change', renderPlots);
 
 // ============ CRUD ============
 function openEdit(type, idx = -1) {
