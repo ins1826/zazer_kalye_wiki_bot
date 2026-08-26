@@ -545,6 +545,11 @@ color: #e0c0ff;
 text-decoration: none;
 }
 
+/* Кнопки админ-панели скрыты по умолчанию */
+.admin-only { display: none !important; }
+/* Показываем их только в режиме админа */
+body.admin-mode .admin-only { display: inline-block !important; }
+
 </style>
 </head>
 <body>
@@ -568,14 +573,9 @@ text-decoration: none;
       <div class="gr-short">Вонючий, прослыл странным среди майонезных</div>
     </div></div>
 </div>
-  <div class="toolbar">
-    <button class="primary" onclick="saveData()">💾 Сохранить HTML</button>
-    <button onclick="exportData()">📤 Экспорт данных</button>
-    <button onclick="document.getElementById('import-file').click()">📥 Импорт данных</button>
-    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
-    <button onclick="fullBackup()">📦 Полный бэкап</button>
-    <button class="danger" onclick="resetData()">🔄 Сброс</button>
-  </div>
+  <div class="toolbar admin-only">
+<button onclick="exportData()">📤 Экспорт данных (JSON)</button>
+</div>
 </header>
 
 <nav class="tabs">
@@ -612,12 +612,12 @@ text-decoration: none;
     <option value="length-desc">📖 Длинные описания</option>
     <option value="length-asc">📝 Короткие описания</option>
   </select>
-  <button class="primary" onclick="openEdit('characters')">➕ Добавить персонажа</button>
+  <button class="admin-only" onclick="openEdit('characters')">➕ Добавить персонажа</button>
 </div>
   <div class="grid" id="grid-characters"><div class="card race-Существо" data-idx="49" data-name="Акакий Куролесов" data-full="Акакий Куролесов любит нюхать пыльцу и ходить по росе, но пугается жабьего кваканья. Этот славный малый в курсе всего, что происходит в сумеречной роще, ничто не проходит мимо его глаз и ушей. Но он никогда не лезет в дела посторонних, предпочитая дрязгам спокойствие и наслаждение природой.
 Хорошо провёл сегодняшний день. Прогулка у болот ознаменовалась встречей с Бабой Жулей, показал ей самые грибные места неподалёку, после чего собирал зеленику, а когда стало смеркаться он направился к своему дому, заварил зеленичный компот и уснул. Это был хороший день.
 Он действительно славный малый." data-img="images/Акакий Куролесов.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',49)">🗑️</button>
         <button onclick="openEdit('characters',49)">✏️</button>
       </div>
@@ -626,7 +626,7 @@ text-decoration: none;
       <div class="short">Маленький гриб, славный малый</div>
       <div class="episodes"><span>ep.20</span><span>ep.39</span><span>ep.47</span><span>ep.56</span><span>ep.69</span></div>
     </div><div class="card race-Человек-Существо" data-idx="16" data-name="Алевтина" data-full="Выглядит как человек, но может принять истинную форму в виде павлина, если рассыпать её бисер." data-img="images/Алевтина.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',16)">🗑️</button>
         <button onclick="openEdit('characters',16)">✏️</button>
       </div>
@@ -635,7 +635,7 @@ text-decoration: none;
       <div class="short">Художница картин, затягивающих своим звучанием</div>
       <div class="episodes"><span>ep.6</span></div>
     </div><div class="card race-Существа" data-idx="78" data-name="Ароматные голуби" data-full="Ароматные голуби рассекают над удивлённым литолием." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',78)">🗑️</button>
         <button onclick="openEdit('characters',78)">✏️</button>
       </div>
@@ -644,7 +644,7 @@ text-decoration: none;
       <div class="short">Рассекают над литолием</div>
       
     </div><div class="card race-Существо" data-idx="1" data-name="Баба Жуля" data-full="Бабушка-фиолетовый Мопс. Выращивает на огороде хрычей и морковные пятки. Прогнала Евдокию со своего огорода." data-img="images/Баба Жуля.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',1)">🗑️</button>
         <button onclick="openEdit('characters',1)">✏️</button>
       </div>
@@ -653,7 +653,7 @@ text-decoration: none;
       <div class="short">Бабушка-Мопс</div>
       <div class="episodes"><span>ep.2</span><span>ep.14</span><span>ep.69</span></div>
     </div><div class="card race-Существо" data-idx="56" data-name="Баранча" data-full="Баранча никогда не откажется от мясного хлеба, голоден ли он, сыт или летуч. Но если воротит нос - бей тревогу, собирай народ, ищи укрытие." data-img="images/Баранча.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',56)">🗑️</button>
         <button onclick="openEdit('characters',56)">✏️</button>
       </div>
@@ -662,7 +662,7 @@ text-decoration: none;
       <div class="short">Один из трёх крепышей</div>
       <div class="episodes"><span>ep.28</span><span>ep.49</span><span>ep.51</span><span>ep.57</span></div>
     </div><div class="card race-Существо" data-idx="48" data-name="Болотный скрипач" data-full="В сумеречной роще иди на звук канифоли, пока не встретишь болотного скрипача. Он расскажет тебе под каким именно деревом находится спектральный колодец. Может обмануть." data-img="images/Болотный скрипач.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',48)">🗑️</button>
         <button onclick="openEdit('characters',48)">✏️</button>
       </div>
@@ -671,7 +671,7 @@ text-decoration: none;
       <div class="short">Играет звуки канифоли в сумеречной роще</div>
       <div class="episodes"><span>ep.20</span><span>ep.47</span></div>
     </div><div class="card race-Существо" data-idx="4" data-name="Большой Дима" data-full="Похож на Снежного человека. Лучший друг полипов, но не играет с ними, если их больше пяти." data-img="images/Большой Дима.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',4)">🗑️</button>
         <button onclick="openEdit('characters',4)">✏️</button>
       </div>
@@ -680,7 +680,7 @@ text-decoration: none;
       <div class="short">Друг Полипов</div>
       <div class="episodes"><span>ep.26</span></div>
     </div><div class="card race-Существо" data-idx="75" data-name="Борька" data-full="Выведенный им говорящий мясной хлеб Борька при виде Михаила должен был отвлечь его внимание разговорами про такую насущную для него тему, как создание Битубисаса." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',75)">🗑️</button>
         <button onclick="openEdit('characters',75)">✏️</button>
       </div>
@@ -689,7 +689,7 @@ text-decoration: none;
       <div class="short">Говорящий мясной хлеб</div>
       
     </div><div class="card race-Человек" data-idx="98" data-name="Брат Евдокии" data-full="" data-img="images/Брат Евдокии.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',98)">🗑️</button>
         <button onclick="openEdit('characters',98)">✏️</button>
       </div>
@@ -698,7 +698,7 @@ text-decoration: none;
       <div class="short">Построил карьеру на Псарне</div>
       <div class="episodes"><span>ep.27</span></div>
     </div><div class="card race-Существа" data-idx="47" data-name="Братья Мишеневы" data-full="Они сами не помнят своих имён, как и того, кто из них верховный, что часто приводит к забавным на вид потасовкам. Ведь они настолько стары, что застали зазеркалье ещё до собственно зеркал. Всё указывает на то, что они и создали Истукануса, чтобы внести хоть какой-то порядок в абсолютный хаос, но они сами этого не помнят. Если зажурчит Раковина на горе, братья Мишеневы размешают её своими палками, ведь на журчанье уже бежит Круглый Толик." data-img="images/Братья Мишеневы.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',47)">🗑️</button>
         <button onclick="openEdit('characters',47)">✏️</button>
       </div>
@@ -707,7 +707,7 @@ text-decoration: none;
       <div class="short">Древнейшие существа, прозваны так из-за узора на лбу</div>
       <div class="episodes"><span>ep.19</span><span>ep.68</span></div>
     </div><div class="card race-Существо" data-idx="95" data-name="Брунявая Чуня" data-full="Главный объект вопроса выбора Истукануса." data-img="images/Брунявая Чуня.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',95)">🗑️</button>
         <button onclick="openEdit('characters',95)">✏️</button>
       </div>
@@ -716,7 +716,7 @@ text-decoration: none;
       <div class="short">Лягушка-Муха</div>
       <div class="episodes"><span>ep.22</span><span>ep.61</span></div>
     </div><div class="card race-Синий-ящер" data-idx="54" data-name="Бубоня" data-full="Возможно, причастен к тому, что дождь опаздывает на три дня." data-img="images/Бубоня.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',54)">🗑️</button>
         <button onclick="openEdit('characters',54)">✏️</button>
       </div>
@@ -725,7 +725,7 @@ text-decoration: none;
       <div class="short">Один из синих ящеров</div>
       <div class="episodes"><span>ep.25</span></div>
     </div><div class="card race-Существо" data-idx="99" data-name="Бульдогзер" data-full="Участник гонок Вальтасара, заглох." data-img="images/Бульдогзер.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',99)">🗑️</button>
         <button onclick="openEdit('characters',99)">✏️</button>
       </div>
@@ -734,7 +734,7 @@ text-decoration: none;
       <div class="short">Механизм, созданный Мопсосвинами</div>
       <div class="episodes"><span>ep.30</span><span>ep.51</span><span>ep.57</span></div>
     </div><div class="card race-Существо" data-idx="62" data-name="Бутыльон" data-full="Твои горящие глаза пугают Бутыльона. Бутыльон - последний хранитель знания о том, где рассыпаны потерянные жемчужины. Не осушай его, хотя-бы не целиком. Обитает в Запретной пустыне." data-img="images/Бутыльон.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',62)">🗑️</button>
         <button onclick="openEdit('characters',62)">✏️</button>
       </div>
@@ -743,7 +743,7 @@ text-decoration: none;
       <div class="short">Последний хранитель знания о потерянных жемчужинах</div>
       <div class="episodes"><span>ep.33</span><span>ep.60</span></div>
     </div><div class="card race-Существа" data-idx="97" data-name="Валькирия" data-full="" data-img="images/Валькирия.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',97)">🗑️</button>
         <button onclick="openEdit('characters',97)">✏️</button>
       </div>
@@ -752,7 +752,7 @@ text-decoration: none;
       <div class="short">Их принимают в Орден босых ведьм</div>
       <div class="episodes"><span>ep.27</span></div>
     </div><div class="card race-Человек-Существо" data-idx="0" data-name="Вальтасар" data-full="Организатор викторин и гонок. Предлагает зелья с различными эффектами. Не верит Истуканусу." data-img="images/Вальтасар.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',0)">🗑️</button>
         <button onclick="openEdit('characters',0)">✏️</button>
       </div>
@@ -761,7 +761,7 @@ text-decoration: none;
       <div class="short">Организатор викторин и гонок</div>
       <div class="episodes"><span>ep.35</span><span>ep.43</span><span>ep.51</span><span>ep.57</span><span>ep.62</span><span>ep.66</span></div>
     </div><div class="card race-Бобыль" data-idx="23" data-name="Вандух" data-full="Известный бобыль." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',23)">🗑️</button>
         <button onclick="openEdit('characters',23)">✏️</button>
       </div>
@@ -770,7 +770,7 @@ text-decoration: none;
       <div class="short">Известный бобыль</div>
       
     </div><div class="card race-Существо" data-idx="9" data-name="Ванька-Буран" data-full="Большой шар из снега с чёрными кругами на манер глаз и рта." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',9)">🗑️</button>
         <button onclick="openEdit('characters',9)">✏️</button>
       </div>
@@ -779,7 +779,7 @@ text-decoration: none;
       <div class="short">Большой шар из снега</div>
       
     </div><div class="card race-Существо" data-idx="10" data-name="Великий Замаг" data-full="Гоблин, у которого ниже пояса пружина." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',10)">🗑️</button>
         <button onclick="openEdit('characters',10)">✏️</button>
       </div>
@@ -788,7 +788,7 @@ text-decoration: none;
       <div class="short">Гоблин с пружиной ниже пояса</div>
       
     </div><div class="card race-Существо" data-idx="69" data-name="Видус" data-full="Лучший игрок, судья/распорядитель." data-img="images/Видус.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',69)">🗑️</button>
         <button onclick="openEdit('characters',69)">✏️</button>
       </div>
@@ -797,7 +797,7 @@ text-decoration: none;
       <div class="short">Контролирует игру в чак-чак</div>
       <div class="episodes"><span>ep.38</span></div>
     </div><div class="card race-Существо" data-idx="79" data-name="Волнистый попугай Николай" data-full="Чьё объявление мне повесить на этот бесхозный камень? Волнистый попугай Николай, подпольный щекоточный клуб, Три корзины от зины..." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',79)">🗑️</button>
         <button onclick="openEdit('characters',79)">✏️</button>
       </div>
@@ -806,7 +806,7 @@ text-decoration: none;
       <div class="short">Объявления на бесхозных камнях</div>
       
     </div><div class="card race-Существо" data-idx="100" data-name="Глазастая Пицца" data-full="" data-img="images/Глазастая Пицца.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',100)">🗑️</button>
         <button onclick="openEdit('characters',100)">✏️</button>
       </div>
@@ -815,7 +815,7 @@ text-decoration: none;
       <div class="short"></div>
       <div class="episodes"><span>ep.35</span><span>ep.43</span></div>
     </div><div class="card race-Существа" data-idx="91" data-name="Головастики" data-full="" data-img="images/Головастики.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',91)">🗑️</button>
         <button onclick="openEdit('characters',91)">✏️</button>
       </div>
@@ -824,7 +824,7 @@ text-decoration: none;
       <div class="short">С ними можно веселиться.</div>
       <div class="episodes"><span>ep.8</span></div>
     </div><div class="card race-Существа" data-idx="105" data-name="Голуби" data-full="" data-img="images/Голубь.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',105)">🗑️</button>
         <button onclick="openEdit('characters',105)">✏️</button>
       </div>
@@ -833,7 +833,7 @@ text-decoration: none;
       <div class="short">Похожи на пескарей</div>
       <div class="episodes"><span>ep.35</span><span>ep.43</span></div>
     </div><div class="card race-Существо" data-idx="53" data-name="Горбатый крупоед" data-full="Перебирает вшиные ядрышки в поисках того самого, в котором спрятался вчерашний сон. Если найдёт - проглотит. Если нет - будет ждать до следующего дождя." data-img="images/Горбатый Крупоед.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',53)">🗑️</button>
         <button onclick="openEdit('characters',53)">✏️</button>
       </div>
@@ -842,7 +842,7 @@ text-decoration: none;
       <div class="short">Его удел перебирать вшиные ядрышки</div>
       <div class="episodes"><span>ep.25</span></div>
     </div><div class="card race-Человек" data-idx="61" data-name="Господин Кривин" data-full="Господин Кривин, тот ещё арестипнутый Гедонюга, в своём имении посреди сумеречной рощи он любит предаваться изысканным удовольствиям. Крайне чувствителен к сатире." data-img="images/Господин Кривин.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',61)">🗑️</button>
         <button onclick="openEdit('characters',61)">✏️</button>
       </div>
@@ -851,7 +851,7 @@ text-decoration: none;
       <div class="short">Арестипнутый гедонюга</div>
       <div class="episodes"><span>ep.32</span><span>ep.66</span></div>
     </div><div class="card race-Существо" data-idx="85" data-name="Грибной архивариус" data-full="Грибной архивариус снова перепутал полки. Теперь все справочники по мхам пахнут звонкими спорами, а ведь он клялся, что в этот раз точно не перепутает лево и право. Остаётся надеяться, что это не сильно задержит создание карты изведанного Зазеркалья." data-img="images/Грибной Архивариус.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',85)">🗑️</button>
         <button onclick="openEdit('characters',85)">✏️</button>
       </div>
@@ -860,7 +860,7 @@ text-decoration: none;
       <div class="short">Создаёт карту Зазеркалья</div>
       <div class="episodes"><span>ep.70</span></div>
     </div><div class="card race-Существо" data-idx="2" data-name="Григорий" data-full="Испытывает жуткое возмущение от красного цвета. Не пропускает, если перед ним не извиниться." data-img="images/Григорий.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',2)">🗑️</button>
         <button onclick="openEdit('characters',2)">✏️</button>
       </div>
@@ -869,7 +869,7 @@ text-decoration: none;
       <div class="short">Совладелец подпольного щекоточного клуба</div>
       <div class="episodes"><span>ep.7</span><span>ep.37</span><span>ep.53</span></div>
     </div><div class="card race-Существа" data-idx="76" data-name="Грочилы" data-full="Ноготки переливаются всеми цветами хлеба, привлекая грочил." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',76)">🗑️</button>
         <button onclick="openEdit('characters',76)">✏️</button>
       </div>
@@ -878,7 +878,7 @@ text-decoration: none;
       <div class="short">Привлекаются ноготками</div>
       
     </div><div class="card race-Существа" data-idx="104" data-name="Грузчики" data-full="Глядят и беесятся, что из каждого утюга вещает Дон Окунь." data-img="images/Грузчики.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',104)">🗑️</button>
         <button onclick="openEdit('characters',104)">✏️</button>
       </div>
@@ -887,7 +887,7 @@ text-decoration: none;
       <div class="short">Грузят утюги</div>
       <div class="episodes"><span>ep.42</span></div>
     </div><div class="card race-Бобыль" data-idx="26" data-name="Гузлик" data-full="Известный бобыль, выступал в фантасмагорическом цирке." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',26)">🗑️</button>
         <button onclick="openEdit('characters',26)">✏️</button>
       </div>
@@ -896,7 +896,7 @@ text-decoration: none;
       <div class="short">Выступал в фантасмагорическом цирке</div>
       
     </div><div class="card race-Человек-Существо" data-idx="86" data-name="Доктор Лист" data-full="Доктор Лист точно знает, как тебе помочь, если ты неважно себя чувствуешь. Помни, что выше любых подношений он ценит нектар подмыхана." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',86)">🗑️</button>
         <button onclick="openEdit('characters',86)">✏️</button>
       </div>
@@ -906,7 +906,7 @@ text-decoration: none;
       
     </div><div class="card race-Человек" data-idx="40" data-name="Доктор Эпикантус" data-full="Раньше он охотился за картинами Алевтины. Но, передав коллекцию в логово Вальтасара, пристрастился к скорлупе. Пытался спрятать её от Михаила, большого любителя скорлупы, в 5-и метровой яме за хрящёвкой. Одержим идеей заполучить скорлупу Реутени в свою коллекцию, так же, чтобы с её помощью защитить свою коллекцию скорлупы. Чтобы осуществить свой план написал Мультипрограмму, но Мультипрограмм не ответил.
 Для Дядюшки Фантасмагора на основе генома Полипов вывел способ для сверхбыстрого синтеза хрящевой ткани, чтобы возводить Хрящёвки в кратчайшие сроки." data-img="images/Доктор Эпикантус.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',40)">🗑️</button>
         <button onclick="openEdit('characters',40)">✏️</button>
       </div>
@@ -915,7 +915,7 @@ text-decoration: none;
       <div class="short">Искушённый коллекционер и сумашедший учёный</div>
       <div class="episodes"><span>ep.15</span><span>ep.46</span><span>ep.48</span><span>ep.56</span></div>
     </div><div class="card race-Существо" data-idx="58" data-name="Дон Окунь" data-full="Дон Окунь - невероятно солидный эстет. Его респектабельность оставляет равнодушным только Фукса. И не просто так. Дон Окунь вещает из каждого утюга" data-img="images/Дон Окунь.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',58)">🗑️</button>
         <button onclick="openEdit('characters',58)">✏️</button>
       </div>
@@ -924,7 +924,7 @@ text-decoration: none;
       <div class="short">Пескарь под прикрытием</div>
       <div class="episodes"><span>ep.31</span><span>ep.42</span><span>ep.50</span><span>ep.66</span></div>
     </div><div class="card race-Существа" data-idx="88" data-name="Духа" data-full="До сих пор не научились переходить дорогу без помощи, возможно в этом замешан Петька." data-img="images/Духа.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',88)">🗑️</button>
         <button onclick="openEdit('characters',88)">✏️</button>
       </div>
@@ -933,7 +933,7 @@ text-decoration: none;
       <div class="short">Появилась в Багетном сквере задолго до багетов.</div>
       <div class="episodes"><span>ep.3</span></div>
     </div><div class="card race-Человек-Существо" data-idx="33" data-name="Дядюшка Фантасмагор" data-full="Этот эксцентрик только и думает о том, как бы приумножить свои кукичи. Дело не в алчности, нет. Фантасмогор считает их отличным строительным материалом. Не доволен, если его алмазные соленья не доставляют в срок. За свои услуги только кукичами берёт. Нашёл возможность преумножить своё состояние на миллионы кукичей, а именно возводить Хрящёвки в кратчайшие сроки, на основе сверхбыстрого синтеза хрящевой ткани, выведенного доктором Эпикантусом." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',33)">🗑️</button>
         <button onclick="openEdit('characters',33)">✏️</button>
       </div>
@@ -942,7 +942,7 @@ text-decoration: none;
       <div class="short">Эксцентрик, так же известный как Гор Фантасмо</div>
       <div class="episodes"><span>ep.4</span><span>ep.42</span><span>ep.56</span></div>
     </div><div class="card race-Существо" data-idx="72" data-name="Дядя Егоня" data-full="Но даже шапец не спасёт тебя. Если ты досадишь дяде Егоне, ведь в таких вопросах он абсолютно беспринципен." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',72)">🗑️</button>
         <button onclick="openEdit('characters',72)">✏️</button>
       </div>
@@ -951,7 +951,7 @@ text-decoration: none;
       <div class="short">Абсолютно беспринципен</div>
       
     </div><div class="card race-Человек" data-idx="107" data-name="Евген" data-full="Всегда был заинтригован тем, что происходит в стенах подпольного щекоточного клуба, но его уши при одной мысли об этих стенах загоряются ярко-красным. Даже многочисленные извинения перед Григорием не спасают его заявки от отказов." data-img="images/Евген.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',107)">🗑️</button>
         <button onclick="openEdit('characters',107)">✏️</button>
       </div>
@@ -960,7 +960,7 @@ text-decoration: none;
       <div class="short">Желающий попасть в щекоточный клуб</div>
       <div class="episodes"><span>ep.53</span></div>
     </div><div class="card race-Существо" data-idx="31" data-name="Евдокия" data-full="Ей надоело щекотать морковные пятки, тем более, что баба Жуля прогнала с огорода, морковный хохот ей спать мешает. Всегда хотела стать Босой Ведьмой, но ей было не разрешено. Причины не разглашаются, но они не связаны с карьерой её брата на Псарне." data-img="images/Евдокия.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',31)">🗑️</button>
         <button onclick="openEdit('characters',31)">✏️</button>
       </div>
@@ -969,7 +969,7 @@ text-decoration: none;
       <div class="short">Хочет пощекотать роскошным зеленеющим пером</div>
       <div class="episodes"><span>ep.2</span><span>ep.27</span><span>ep.50</span></div>
     </div><div class="card race-Бобыль" data-idx="22" data-name="Ёксель-Моксель" data-full="Известный бобыль." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',22)">🗑️</button>
         <button onclick="openEdit('characters',22)">✏️</button>
       </div>
@@ -978,7 +978,7 @@ text-decoration: none;
       <div class="short">Известный бобыль</div>
       
     </div><div class="card race-Существо" data-idx="87" data-name="Епень" data-full="Бесхозные камни в готовности, ведь на горизонте появился епень, который ненавидит их. Зря волнуются, зря, сегодня ему не до них." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',87)">🗑️</button>
         <button onclick="openEdit('characters',87)">✏️</button>
       </div>
@@ -987,7 +987,7 @@ text-decoration: none;
       <div class="short">Ненавидит бесхозные камни</div>
       
     </div><div class="card race-Существа" data-idx="102" data-name="Жаба" data-full="" data-img="images/Жаба.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',102)">🗑️</button>
         <button onclick="openEdit('characters',102)">✏️</button>
       </div>
@@ -997,7 +997,7 @@ text-decoration: none;
       <div class="episodes"><span>ep.39</span></div>
     </div><div class="card race-Существо" data-idx="83" data-name="Жадность на лайке" data-full="Жадность на лайке появляется только в тёмное время. По мере того, как ОНА приближается к катушкам, они замедляются всё сильнее, вплоть до остановки.
 Для противостояния с ней, необходимо кинуть Подводного Гошу или задобрить кукичами и она убежит до следующего раза. Лайка опасности не представляет, её можно поставить охранять катушки." data-img="images/Жадность на лайке.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',83)">🗑️</button>
         <button onclick="openEdit('characters',83)">✏️</button>
       </div>
@@ -1006,7 +1006,7 @@ text-decoration: none;
       <div class="short">Зловредная сущность, появляется только в тёмное время</div>
       <div class="episodes"><span>ep.58</span><span>ep.64</span></div>
     </div><div class="card race-Существа" data-idx="94" data-name="Жвачники" data-full="Не нравятся Болотному скрипачу, просит от них избавиться." data-img="images/Жвачники.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',94)">🗑️</button>
         <button onclick="openEdit('characters',94)">✏️</button>
       </div>
@@ -1015,7 +1015,7 @@ text-decoration: none;
       <div class="short">Обитатели болот</div>
       <div class="episodes"><span>ep.20</span></div>
     </div><div class="card race-Существо" data-idx="37" data-name="Желейный князь" data-full="Желейный князь, фигура загадочная хотя бы тем, что постоянной фигуры не имеет. Немногие удосужились чести вкусить его мудрость." data-img="images/Желейный Князь.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',37)">🗑️</button>
         <button onclick="openEdit('characters',37)">✏️</button>
       </div>
@@ -1024,7 +1024,7 @@ text-decoration: none;
       <div class="short">Фигура загадочная, постоянной фигуры не имеет</div>
       <div class="episodes"><span>ep.11</span><span>ep.40</span><span>ep.59</span></div>
     </div><div class="card race-Существо" data-idx="103" data-name="Загадочный господин" data-full="Это отличное предложение, а-то остальные хорошо если 5 половин предлагают." data-img="images/Загадочный господин.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',103)">🗑️</button>
         <button onclick="openEdit('characters',103)">✏️</button>
       </div>
@@ -1033,7 +1033,7 @@ text-decoration: none;
       <div class="short">Даёт 2 кукича за 1 пакич</div>
       <div class="episodes"><span>ep.42</span></div>
     </div><div class="card race-Существо" data-idx="36" data-name="Зуб Зубыч" data-full="От зубцов, населяющих средний сегмент подземных труб. Внешне Зуб Зубыча отличает разве что размер. В отличие от своих уменьшенных копий, он куда медленнее передвигается." data-img="images/Зуб Зубыч.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',36)">🗑️</button>
         <button onclick="openEdit('characters',36)">✏️</button>
       </div>
@@ -1042,7 +1042,7 @@ text-decoration: none;
       <div class="short">Обитатель подземных труб</div>
       <div class="episodes"><span>ep.11</span><span>ep.47</span></div>
     </div><div class="card race-Бобыль" data-idx="25" data-name="Зубль-звак" data-full="Известный бобыль." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',25)">🗑️</button>
         <button onclick="openEdit('characters',25)">✏️</button>
       </div>
@@ -1051,7 +1051,7 @@ text-decoration: none;
       <div class="short">Известный бобыль</div>
       
     </div><div class="card race-Существо" data-idx="68" data-name="Зукя" data-full="Зукя отказывается от предлагаемых господином Кривиным кукичей. Зукя хочет быть свободным от любых подношений и возникающих в связи с ними обременений." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',68)">🗑️</button>
         <button onclick="openEdit('characters',68)">✏️</button>
       </div>
@@ -1060,7 +1060,7 @@ text-decoration: none;
       <div class="short">Лесное существо, хочет быть свободным</div>
       
     </div><div class="card race-Человек-Существо" data-idx="14" data-name="Идибикс" data-full="Гуттаперчивый человек с длинной шеей. Любит грибы, особенно бахромку." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',14)">🗑️</button>
         <button onclick="openEdit('characters',14)">✏️</button>
       </div>
@@ -1069,7 +1069,7 @@ text-decoration: none;
       <div class="short">Гуттаперчивый человек с длинной шеей</div>
       
     </div><div class="card race-Божество" data-idx="50" data-name="Истуканус" data-full="Однажды ты окажешься перед Истуканусом, он задаст тебе лишь один вопрос. Брунявая чуня или Чунявая бруня. Времени на размышления не будет." data-img="images/Истуканус.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',50)">🗑️</button>
         <button onclick="openEdit('characters',50)">✏️</button>
       </div>
@@ -1078,7 +1078,7 @@ text-decoration: none;
       <div class="short">Загадочная сущность, создан братьями Мишеневыми</div>
       <div class="episodes"><span>ep.22</span><span>ep.43</span><span>ep.55</span><span>ep.58</span><span>ep.68</span></div>
     </div><div class="card race-Существо" data-idx="6" data-name="Казимир" data-full="Человекоподобный кот. Ворует ложки у Пацаноидов (более 41 раза) для Сеньора Понполомео." data-img="images/Казимир.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',6)">🗑️</button>
         <button onclick="openEdit('characters',6)">✏️</button>
       </div>
@@ -1087,7 +1087,7 @@ text-decoration: none;
       <div class="short">Ворует ложки для Сеньора Понполомео</div>
       <div class="episodes"><span>ep.9</span><span>ep.57</span></div>
     </div><div class="card race-Существа" data-idx="89" data-name="Калач" data-full="Гречневые Калачи отпугиваются глазным молоком. Если в глазах 12 крапинок вместо 10 - это осы под прикрытием. Гречневый калач участвовал в гонках Вальтасара." data-img="images/Калач.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',89)">🗑️</button>
         <button onclick="openEdit('characters',89)">✏️</button>
       </div>
@@ -1096,7 +1096,7 @@ text-decoration: none;
       <div class="short">Существа, похожие на больших мотыльков. Аппетитно выглядят.</div>
       <div class="episodes"><span>ep.4</span><span>ep.51</span></div>
     </div><div class="card race-Существо" data-idx="18" data-name="Камнюки" data-full="Каменные големы в лавовом озере." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',18)">🗑️</button>
         <button onclick="openEdit('characters',18)">✏️</button>
       </div>
@@ -1105,7 +1105,7 @@ text-decoration: none;
       <div class="short">Каменные големы в лавовом озере</div>
       
     </div><div class="card race-Существо" data-idx="51" data-name="Колбасный страж" data-full="Не пускает никого дальше третьего поворота. Говорит, там уже всё съели. Но если пообещаешь принести ему свежий укроп, может и пропустит." data-img="images/Колбасный страж.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',51)">🗑️</button>
         <button onclick="openEdit('characters',51)">✏️</button>
       </div>
@@ -1114,7 +1114,7 @@ text-decoration: none;
       <div class="short">Охраняет лабиринты Г-на Кривина.</div>
       <div class="episodes"><span>ep.23</span></div>
     </div><div class="card race-Существо" data-idx="45" data-name="Коленыч" data-full="Если коленыч преклонит перед тобой полено. Лучше даже не думать про это. Если это произошло - есть три простых шага. 1. Задобри его, кинув горстку войлочных катышков, может кинуться тереться о них, если нет, шаг два. 2. Прислушайся, слышишь ли постукивание суствава? Если да, то у тебя считанные секунды, чтобы перейти к шагу три. 3. Отпрыгивай в сторону и убегай от свирепеющего Коленыча зигзагами. Участвовал в гонках Вальтасара." data-img="images/Коленыч.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',45)">🗑️</button>
         <button onclick="openEdit('characters',45)">✏️</button>
       </div>
@@ -1123,7 +1123,7 @@ text-decoration: none;
       <div class="short">Опасно если преклонил полено</div>
       <div class="episodes"><span>ep.18</span><span>ep.29</span><span>ep.51</span></div>
     </div><div class="card race-Существо" data-idx="46" data-name="Круглый Толик" data-full="Бежит на журчанье раковины прямиком из забытого высокогорья." data-img="images/Круглый Толик.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',46)">🗑️</button>
         <button onclick="openEdit('characters',46)">✏️</button>
       </div>
@@ -1132,7 +1132,7 @@ text-decoration: none;
       <div class="short">Бежит на журчание раковины.</div>
       <div class="episodes"><span>ep.19</span><span>ep.68</span></div>
     </div><div class="card race-Существо" data-idx="19" data-name="Лаван" data-full="Каменно-лавовое большое существо, страж острова в лавовом озере. Закидывает чужаков камнюками." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',19)">🗑️</button>
         <button onclick="openEdit('characters',19)">✏️</button>
       </div>
@@ -1141,7 +1141,7 @@ text-decoration: none;
       <div class="short">Страж острова в лавовом озере</div>
       
     </div><div class="card race-Существа" data-idx="101" data-name="Ламантины" data-full="" data-img="images/Ламантины.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',101)">🗑️</button>
         <button onclick="openEdit('characters',101)">✏️</button>
       </div>
@@ -1150,7 +1150,7 @@ text-decoration: none;
       <div class="short">Склонны к ангине</div>
       <div class="episodes"><span>ep.35</span></div>
     </div><div class="card race-Бобыль" data-idx="90" data-name="Лесной бобыль" data-full="Узнаётся по характерному клокочающему запаху." data-img="images/Лесной бобыль.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',90)">🗑️</button>
         <button onclick="openEdit('characters',90)">✏️</button>
       </div>
@@ -1159,7 +1159,7 @@ text-decoration: none;
       <div class="short">Распространённый тип бобылей.</div>
       <div class="episodes"><span>ep.5</span><span>ep.55</span></div>
     </div><div class="card race-Существо" data-idx="30" data-name="Лесной Курбак" data-full="Из-за простуды ты говоришь слишком волнисто, чтобы он мог тебя услышать, нужно было надевать бурлешку." data-img="images/Лесной Курбак.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',30)">🗑️</button>
         <button onclick="openEdit('characters',30)">✏️</button>
       </div>
@@ -1168,7 +1168,7 @@ text-decoration: none;
       <div class="short">Не уйдёт с дороги, пока не увидит твой голос</div>
       <div class="episodes"><span>ep.1</span></div>
     </div><div class="card race-Бобыль" data-idx="21" data-name="Летописный Артём" data-full="Помощник грибного архивариуса, ведёт сводки." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',21)">🗑️</button>
         <button onclick="openEdit('characters',21)">✏️</button>
       </div>
@@ -1177,7 +1177,7 @@ text-decoration: none;
       <div class="short">Помощник грибного архивариуса</div>
       
     </div><div class="card race-Существо" data-idx="77" data-name="Литолий" data-full="Ароматные голуби рассекают над удивлённым литолием. Сразу скажу, не путай его с круглым толиком." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',77)">🗑️</button>
         <button onclick="openEdit('characters',77)">✏️</button>
       </div>
@@ -1186,7 +1186,7 @@ text-decoration: none;
       <div class="short">Слизень, не путать с круглым толиком</div>
       <div class="episodes"><span>ep.35</span><span>ep.43</span></div>
     </div><div class="card race-Существо" data-idx="81" data-name="Магога" data-full="Хочешь впечатлить Магогу? Делай раз. Воззови к его инстинктам, сократив в себе число вершин. Двери его подземелья откроются тебе." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',81)">🗑️</button>
         <button onclick="openEdit('characters',81)">✏️</button>
       </div>
@@ -1195,7 +1195,7 @@ text-decoration: none;
       <div class="short">Охраняет вход в подземелье</div>
       
     </div><div class="card race-Существо" data-idx="11" data-name="Мадам Плюсна" data-full="Человек с ногой вместо головы, а на голове пальцы ног." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',11)">🗑️</button>
         <button onclick="openEdit('characters',11)">✏️</button>
       </div>
@@ -1204,7 +1204,7 @@ text-decoration: none;
       <div class="short">Человек с ногой вместо головы</div>
       
     </div><div class="card race-Существо" data-idx="12" data-name="Малыш" data-full="Похож на человеческий живот с большим ртом и вытянутым вверх глазом, как у улитки." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',12)">🗑️</button>
         <button onclick="openEdit('characters',12)">✏️</button>
       </div>
@@ -1213,7 +1213,7 @@ text-decoration: none;
       <div class="short">Человеческий живот с большим ртом</div>
       
     </div><div class="card race-Существо" data-idx="109" data-name="Мальчик-Педаль" data-full="Не скупись, отблагодари его нажатием." data-img="images/Мальчик-Педаль.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',109)">🗑️</button>
         <button onclick="openEdit('characters',109)">✏️</button>
       </div>
@@ -1222,7 +1222,7 @@ text-decoration: none;
       <div class="short">Всегда поможет тебе на твоём пути</div>
       <div class="episodes"><span>ep.65</span></div>
     </div><div class="card race-Существо" data-idx="52" data-name="Мангальщик" data-full="Ну что за пикник? Уже неделю не несут вилки. Да и мангальщик какой-то подозрительный. Вечереет. Опять фасолину развлекать." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',52)">🗑️</button>
         <button onclick="openEdit('characters',52)">✏️</button>
       </div>
@@ -1231,7 +1231,7 @@ text-decoration: none;
       <div class="short">Подозрительный мангальщик</div>
       
     </div><div class="card race-Человек-Существо" data-idx="64" data-name="Микаэлла" data-full="" data-img="images/Щекоточный клуб.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',64)">🗑️</button>
         <button onclick="openEdit('characters',64)">✏️</button>
       </div>
@@ -1240,7 +1240,7 @@ text-decoration: none;
       <div class="short">Управляет подпольным щекоточным клубом</div>
       <div class="episodes"><span>ep.37</span></div>
     </div><div class="card race-Существо" data-idx="41" data-name="Михаил" data-full="Баранча и Михаил любят порезвиться и поиграть в чак-чак попавшимися прохожими. Любит скорлупу бобылей, прятать её от него бесполезно." data-img="images/Михаил.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',41)">🗑️</button>
         <button onclick="openEdit('characters',41)">✏️</button>
       </div>
@@ -1249,7 +1249,7 @@ text-decoration: none;
       <div class="short">Один из трёх крепышей</div>
       <div class="episodes"><span>ep.15</span><span>ep.48</span><span>ep.49</span><span>ep.51</span><span>ep.57</span></div>
     </div><div class="card race-Существо" data-idx="38" data-name="Многоликий Филипп" data-full="Он причина ночной икоты бабы Жули. Если ему понравится твоё, то сразу кидай в него подводного Гошу и беги." data-img="images/Многоликий Филипп.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',38)">🗑️</button>
         <button onclick="openEdit('characters',38)">✏️</button>
       </div>
@@ -1258,7 +1258,7 @@ text-decoration: none;
       <div class="short">Сегодня он сменил 103 лица</div>
       <div class="episodes"><span>ep.14</span></div>
     </div><div class="card race-Существа" data-idx="57" data-name="Мопсосвины" data-full="Даже к репке прикрутят шестерёнки и паровое двигало, а уж из сородича сделают целый Бульдогзер. Они сами не знают, откуда они произошли. Создатели Мигунов. Помогают Грязунам, в обмен на доступ к их грязевым угодьям, чего так желает свинная половина натуры этих необычных созданий." data-img="images/Мопсосвины.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',57)">🗑️</button>
         <button onclick="openEdit('characters',57)">✏️</button>
       </div>
@@ -1267,7 +1267,7 @@ text-decoration: none;
       <div class="short">Прирождённые механизаторы</div>
       <div class="episodes"><span>ep.30</span><span>ep.44</span></div>
     </div><div class="card race-Существо" data-idx="17" data-name="Н'ясортеп" data-full="Абсолютно неописуемый ужас, образующийся, когда собирается больше пяти полипов. Умеет захватывать чужую речь. Любит печень, впивается в неё языком." data-img="images/Нясортеп.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',17)">🗑️</button>
         <button onclick="openEdit('characters',17)">✏️</button>
       </div>
@@ -1276,7 +1276,7 @@ text-decoration: none;
       <div class="short">Ужас из пяти+ полипов</div>
       <div class="episodes"><span>ep.12</span><span>ep.45</span></div>
     </div><div class="card race-Божество" data-idx="84" data-name="ОНА" data-full="А ОНА ещё более красива. Смотрящая за Зазеркальем в темноту. ОНА запретила щекотку, поскольку считает её слишком пустяковым испытанием и времяпровождением. Не считает Жадность на лайке угрозой." data-img="images/ОНА.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',84)">🗑️</button>
         <button onclick="openEdit('characters',84)">✏️</button>
       </div>
@@ -1285,7 +1285,7 @@ text-decoration: none;
       <div class="short">Ещё более красива, чем ОНО</div>
       <div class="episodes"><span>ep.64</span></div>
     </div><div class="card race-Божество" data-idx="63" data-name="ОНО" data-full="ОНО присматривает за всем Зазеркальем свысока, следит, чтобы не совершались проступки вроде уклонения от появления перед Истуканусом или не появлялись зловредные сущности вроде Жадности на лайке. В светлое время ничто не проходит мимо его взора. Его пока устраивает твоё поведение. Только не ешь уравнение времени. Это карается ссылкой в сладкий хлев." data-img="images/ОНО.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',63)">🗑️</button>
         <button onclick="openEdit('characters',63)">✏️</button>
       </div>
@@ -1294,7 +1294,7 @@ text-decoration: none;
       <div class="short">Орбитальный Непревзойдённый Объект</div>
       <div class="episodes"><span>ep.16</span><span>ep.36</span><span>ep.58</span></div>
     </div><div class="card race-Существо" data-idx="55" data-name="Орлундий" data-full="Всем известно, что Орлундий вонючий. Прогоняет Полипов вон лучше всех. Прослыл странным среди майонезных тётенек, изгой среди них, они требуют, чтобы он дружил с полипами, как Большой Дима. Среди волн может быть собой." data-img="images/Орлундий.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',55)">🗑️</button>
         <button onclick="openEdit('characters',55)">✏️</button>
       </div>
@@ -1303,7 +1303,7 @@ text-decoration: none;
       <div class="short">Вонючий, прослыл странным среди майонезных</div>
       <div class="episodes"><span>ep.26</span><span>ep.67</span></div>
     </div><div class="card race-Существа" data-idx="67" data-name="Осы" data-full="Бойся осов, ты же не Реутень. Как только увидишь их, прыгай в ближайшее болото. Осы, пока не освоили перемещение в трясине, их в ней трясет." data-img="images/Осы.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',67)">🗑️</button>
         <button onclick="openEdit('characters',67)">✏️</button>
       </div>
@@ -1312,7 +1312,7 @@ text-decoration: none;
       <div class="short">Вредители, не освоили перемещение в трясине, делают мёд</div>
       <div class="episodes"><span>ep.41</span></div>
     </div><div class="card race-Существо" data-idx="110" data-name="Пальчик-Медаль" data-full="Не верь ему и гони подальше." data-img="images/Пальчик-Медаль.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',110)">🗑️</button>
         <button onclick="openEdit('characters',110)">✏️</button>
       </div>
@@ -1321,7 +1321,7 @@ text-decoration: none;
       <div class="short">Будет пакостить</div>
       <div class="episodes"><span>ep.65</span></div>
     </div><div class="card race-Существо" data-idx="42" data-name="Пахомий" data-full="Пахомий вылезает из своего дупла настолько редко, что члены Ордена босых ведьм верят в то, что его следующий выход ознаменует крайне значительные события. Любит пахомить. Живёт вместе с Фуксом. Спрятал Рудло у себя в дупле." data-img="images/Пахомий.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',42)">🗑️</button>
         <button onclick="openEdit('characters',42)">✏️</button>
       </div>
@@ -1330,7 +1330,7 @@ text-decoration: none;
       <div class="short">Один из трёх крепышей, редко вылезает из дупла.</div>
       <div class="episodes"><span>ep.16</span><span>ep.49</span><span>ep.54</span><span>ep.51</span><span>ep.57</span><span>ep.59</span></div>
     </div><div class="card race-Существо" data-idx="92" data-name="Пацаноиды" data-full="Не злы по натуре, но всегда злятся на Казимира из-за его проделок. Между ними обязательно должно быть равновесие. Нельзя пахомить. Участвовали в гонке Вальтасара, из-за проникшего на трассу Казимира, их распёрла ярость, один из них побежал за Казимиром, а второй развил невероятную скорость и финишировал первым." data-img="images/Пацаноиды.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',92)">🗑️</button>
         <button onclick="openEdit('characters',92)">✏️</button>
       </div>
@@ -1339,7 +1339,7 @@ text-decoration: none;
       <div class="short">Существа с магией Истукануса.</div>
       <div class="episodes"><span>ep.9</span><span>ep.51</span><span>ep.57</span></div>
     </div><div class="card race-Существо" data-idx="35" data-name="Пескарь" data-full="Существа, похожие на голубей. Дон Окунь - пескарь под прикрытием. Пескарь участвовал в гонках Вальтасара." data-img="images/Пескарь.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',35)">🗑️</button>
         <button onclick="openEdit('characters',35)">✏️</button>
       </div>
@@ -1348,7 +1348,7 @@ text-decoration: none;
       <div class="short">Похожи на голубей</div>
       <div class="episodes"><span>ep.10</span><span>ep.51</span></div>
     </div><div class="card race-Существа" data-idx="73" data-name="Петухи" data-full="Петухи разбежались. Будут сейчас урчать да плюхаться об землю. Ты их не трогай, хуже будет. Сами заскучают, соберутся в пучок и залезут обратно под мох." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',73)">🗑️</button>
         <button onclick="openEdit('characters',73)">✏️</button>
       </div>
@@ -1357,7 +1357,7 @@ text-decoration: none;
       <div class="short">Разбежались, будут урчать и плюхаться</div>
       
     </div><div class="card race-Существо" data-idx="32" data-name="Петька" data-full="Вероятно, замешан в том, что духи в Багетном сквере до сих пор не научилась переходить дорогу без помощи." data-img="images/Петька.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',32)">🗑️</button>
         <button onclick="openEdit('characters',32)">✏️</button>
       </div>
@@ -1366,7 +1366,7 @@ text-decoration: none;
       <div class="short">Возможно, замешан в том, что духи не переходят дорогу</div>
       <div class="episodes"><span>ep.3</span></div>
     </div><div class="card race-Существо" data-idx="39" data-name="Подводный Гоша" data-full="За всей красотой подводного мира наблюдает подводный Гоша. Увидишь, угости его мёдом — он оценит. Может помочь с Многоликим Филиппом." data-img="images/Подводный Гоша.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',39)">🗑️</button>
         <button onclick="openEdit('characters',39)">✏️</button>
       </div>
@@ -1375,7 +1375,7 @@ text-decoration: none;
       <div class="short">Существо в воде, любит мёд</div>
       <div class="episodes"><span>ep.14</span><span>ep.64</span></div>
     </div><div class="card race-Существо" data-idx="71" data-name="Подмыхан" data-full="Подмыхан не даст тебе пройти через запретную пустыню, не заплатив ему. Если ты понравишься подмыхану, он спасёт тебя от жары своим душистым нектаром." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',71)">🗑️</button>
         <button onclick="openEdit('characters',71)">✏️</button>
       </div>
@@ -1384,7 +1384,7 @@ text-decoration: none;
       <div class="short">Не пустит через запретную пустыню без оплаты</div>
       
     </div><div class="card race-Существо" data-idx="44" data-name="Поленыч" data-full="Поленыч сам выйдет за теми, кому путь открыт и преклонит колено, это дружеский жест и/или приглашение в Зазеркалье." data-img="images/Поленыч.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',44)">🗑️</button>
         <button onclick="openEdit('characters',44)">✏️</button>
       </div>
@@ -1393,7 +1393,7 @@ text-decoration: none;
       <div class="short">Проводник в Зазеркалье</div>
       <div class="episodes"><span>ep.18</span><span>ep.50</span><span>ep.55</span></div>
     </div><div class="card race-Существа" data-idx="28" data-name="Полипы" data-full="По отдельности милые комочки с невинной наружностью, их глаза полны очарования, но при сборе более 5 штук превращаются в Н'ясортепа. Орлундий прогоняет их вон, поэтому они обращаются за помощью к Большому Диме." data-img="images/Полипы.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',28)">🗑️</button>
         <button onclick="openEdit('characters',28)">✏️</button>
       </div>
@@ -1402,7 +1402,7 @@ text-decoration: none;
       <div class="short">Милые комочки, опасные в группе</div>
       <div class="episodes"><span>ep.26</span><span>ep.45</span><span>ep.56</span></div>
     </div><div class="card race-Человек-Существо" data-idx="13" data-name="Провансалла" data-full="Одна из майонезных тётенек, не любит странных." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',13)">🗑️</button>
         <button onclick="openEdit('characters',13)">✏️</button>
       </div>
@@ -1411,7 +1411,7 @@ text-decoration: none;
       <div class="short">Майонезная тётенька</div>
       <div class="episodes"><span>ep.67</span></div>
     </div><div class="card race-Существо" data-idx="8" data-name="Профессор Игорь Диод" data-full="Человек с головой-лампочкой и клювом как у птицы. Создал дегенератор." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',8)">🗑️</button>
         <button onclick="openEdit('characters',8)">✏️</button>
       </div>
@@ -1420,7 +1420,7 @@ text-decoration: none;
       <div class="short">Человек с головой-лампочкой и клювом</div>
       
     </div><div class="card race-Существо" data-idx="3" data-name="Птозный Эдгар" data-full="Единственный, кому не только удалось сбежать из Сладкого хлева, но и приспособить его обитателей, чтобы доставлять в Запретную пустыню столь редкие там воду и пыльцу. Назад Корованы везут алмазы. Подкармливает кукушек. Участвовал в гонках Вальтасара." data-img="images/Птозный Эдгар.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',3)">🗑️</button>
         <button onclick="openEdit('characters',3)">✏️</button>
       </div>
@@ -1429,7 +1429,7 @@ text-decoration: none;
       <div class="short">Глаз в шапце</div>
       <div class="episodes"><span>ep.47</span><span>ep.51</span><span>ep.60</span></div>
     </div><div class="card race-Бобыль" data-idx="20" data-name="Реутень" data-full="Уникальный бобыль, ему повезло родиться с толстой скорлупой, которая надёжно защищает от коканья. Делает упражнения для кабанения, которые дают +7 децибел уже через неделю, если делать каждый день: 1. поднимай обсидиановые блины крупом, 2. Разводи когти в стороны с утяжелялами, 3. Прыгай на месте пара часов. Не забывай про питание." data-img="images/Реутень.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',20)">🗑️</button>
         <button onclick="openEdit('characters',20)">✏️</button>
       </div>
@@ -1438,7 +1438,7 @@ text-decoration: none;
       <div class="short">Бобыль с толстой скорлупой</div>
       <div class="episodes"><span>ep.46</span><span>ep.48</span><span>ep.52</span></div>
     </div><div class="card race-Человек" data-idx="15" data-name="Ржаной Борис" data-full="Просит позвонить в колокол, но если его вынести, сошки разбегутся." data-img="images/Ржаной Борис.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',15)">🗑️</button>
         <button onclick="openEdit('characters',15)">✏️</button>
       </div>
@@ -1447,7 +1447,7 @@ text-decoration: none;
       <div class="short">Гопник, главнюк сошек.</div>
       <div class="episodes"><span>ep.21</span></div>
     </div><div class="card race-Существо" data-idx="66" data-name="Рудло" data-full="Рудло готов поделиться услышанным от Желейного князя, едва не был кокнут, когда собирался рассказать. Спрятался в ближайшем дупле, где обитал Пахомий, он его не обидел, но теперь Рудло боится незваных ушей, поэтому будет делиться услышанным в письменном виде." data-img="images/Рудло.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',66)">🗑️</button>
         <button onclick="openEdit('characters',66)">✏️</button>
       </div>
@@ -1456,7 +1456,7 @@ text-decoration: none;
       <div class="short">Говорящий крот</div>
       <div class="episodes"><span>ep.40</span><span>ep.59</span></div>
     </div><div class="card race-Человек" data-idx="34" data-name="Сатор Арепыч" data-full="Сатор Арепыч один из тех немногих, кто попал в Зазеркалье из нашего мира. В миру Георгий Николаевич Крукопацкий. Офицер русской императорской армии. Во время визита в Мариинский театр он проходил мимо гримёрки и согласился на приглашение появившегося в зеркале Поленыча. От шока или осознанно мы не знаем, ведь свою прежнюю личность в Зазеркалье он забыл, а новое имя получил от Истукануса. Беспощаден к бобылям, его первое сильное впечатление в Зазеркалье произвёл взбесивший его клокочащий запах бобыля, так и охотится за ними, пока в нашем мире прошло уже более ста лет. В бешенстве от Реутеня." data-img="images/Сатор Арепыч.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',34)">🗑️</button>
         <button onclick="openEdit('characters',34)">✏️</button>
       </div>
@@ -1465,7 +1465,7 @@ text-decoration: none;
       <div class="short">Ранее Г. Н. Крукопацкий. Охотник на бобылей из нашего мира</div>
       <div class="episodes"><span>ep.5</span><span>ep.46</span><span>ep.55</span></div>
     </div><div class="card race-Существо" data-idx="106" data-name="Сектор сыра на баране" data-full="Пришёл вторым, после пацаноида." data-img="images/Сектор сыра на баране.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',106)">🗑️</button>
         <button onclick="openEdit('characters',106)">✏️</button>
       </div>
@@ -1474,7 +1474,7 @@ text-decoration: none;
       <div class="short">Участник гонок Вальтасара</div>
       <div class="episodes"><span>ep.51</span><span>ep.57</span></div>
     </div><div class="card race-Существо" data-idx="7" data-name="Сеньор Понполомео" data-full="Красный шар со шляпой и большим носом. Коллекционирует ложки." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',7)">🗑️</button>
         <button onclick="openEdit('characters',7)">✏️</button>
       </div>
@@ -1483,7 +1483,7 @@ text-decoration: none;
       <div class="short">Красный шар со шляпой и большим носом</div>
       
     </div><div class="card race-Существо" data-idx="5" data-name="Смоломаз" data-full="Телохранитель господина Кривина. Проверяет все места и уборные, где может прятаться Сортирный Сатир." data-img="images/Смоломаз.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',5)">🗑️</button>
         <button onclick="openEdit('characters',5)">✏️</button>
       </div>
@@ -1492,7 +1492,7 @@ text-decoration: none;
       <div class="short">Смоляной голем</div>
       <div class="episodes"><span>ep.32</span></div>
     </div><div class="card race-Существа" data-idx="80" data-name="Совяне" data-full="Главное, чтобы рядом не оказались совяне. Кислый Борька так и норовит залезть им под перья." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',80)">🗑️</button>
         <button onclick="openEdit('characters',80)">✏️</button>
       </div>
@@ -1501,7 +1501,7 @@ text-decoration: none;
       <div class="short">Кислый Борька норовит залезть им под перья</div>
       
     </div><div class="card race-Существо" data-idx="60" data-name="Сортирный Сатир" data-full="Сортирный Сатир славится, что иронично своей сатирой. Его хлёсткий язык задел и господина Кривина." data-img="images/Сортирный Сатир.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',60)">🗑️</button>
         <button onclick="openEdit('characters',60)">✏️</button>
       </div>
@@ -1510,7 +1510,7 @@ text-decoration: none;
       <div class="short">Славится ироничной сатирой</div>
       <div class="episodes"><span>ep.32</span><span>ep.61</span></div>
     </div><div class="card race-Существо" data-idx="65" data-name="Сырный Джо" data-full="Сырный Джо вырос из чана молока из сладкого хлева, купленного дядюшкой Фантасмагором для живительных ванн. По популярности сырный Джо обходил даже Гузлика." data-img="images/Сырный Джо.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',65)">🗑️</button>
         <button onclick="openEdit('characters',65)">✏️</button>
       </div>
@@ -1519,7 +1519,7 @@ text-decoration: none;
       <div class="short">Вырос из чана молока</div>
       <div class="episodes"><span>ep.62</span></div>
     </div><div class="card race-Человек" data-idx="111" data-name="Тест" data-full="Тест" data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',111)">🗑️</button>
         <button onclick="openEdit('characters',111)">✏️</button>
       </div>
@@ -1528,7 +1528,7 @@ text-decoration: none;
       <div class="short">Тест</div>
       <div class="episodes"><span>ep.1</span></div>
     </div><div class="card race-Существо" data-idx="43" data-name="Тётя Варя" data-full="Любит делать беспощадный массаж мягким и нежным пяткам. Выбора нет." data-img="images/Тётя Варя.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',43)">🗑️</button>
         <button onclick="openEdit('characters',43)">✏️</button>
       </div>
@@ -1537,7 +1537,7 @@ text-decoration: none;
       <div class="short">Любит мягкие пятки</div>
       <div class="episodes"><span>ep.17</span></div>
     </div><div class="card race-Существо" data-idx="82" data-name="Тонкий феодал" data-full="Тонкий феодал появляется везде, хочешь ты этого или нет. Благо, из-за своей тонкости он быстро рвётся, не успев по-настоящему навредить." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',82)">🗑️</button>
         <button onclick="openEdit('characters',82)">✏️</button>
       </div>
@@ -1546,7 +1546,7 @@ text-decoration: none;
       <div class="short">Появляется везде, но быстро рвётся</div>
       
     </div><div class="card race-Существо" data-idx="59" data-name="Фукс" data-full="Фукс знает очень много. Он знает, что Дон никакой не окунь, а всего лишь шифрующийся пескарь. Знает содержание ритуалов Ордена босых ведьм. Знает, где рассыпаны потерянные жемчужины. Научить говорить Фукса не кому, его соседу по дуплу, Пахомию, не до этого." data-img="images/Фукс.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',59)">🗑️</button>
         <button onclick="openEdit('characters',59)">✏️</button>
       </div>
@@ -1555,7 +1555,7 @@ text-decoration: none;
       <div class="short">Умный филин, не умеет говорить</div>
       <div class="episodes"><span>ep.31</span><span>ep.54</span><span>ep.59</span></div>
     </div><div class="card race-Человек-Существо" data-idx="70" data-name="Харитон Ряков" data-full="Председатель Конгресса путешественников Харитон Ряков не терпит спорщиков." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',70)">🗑️</button>
         <button onclick="openEdit('characters',70)">✏️</button>
       </div>
@@ -1564,7 +1564,7 @@ text-decoration: none;
       <div class="short">Председатель Конгресса путешественников</div>
       
     </div><div class="card race-Растение-Существо" data-idx="29" data-name="Хрычи" data-full="Похожи на тыквы с лицом. Выращиваются Бабой Жулей. Гремучее древо любит хрычей и, скорее всего, питается ими. Используется для приготовления Разваристого Хрыча" data-img="images/Хрыч.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',29)">🗑️</button>
         <button onclick="openEdit('characters',29)">✏️</button>
       </div>
@@ -1573,7 +1573,7 @@ text-decoration: none;
       <div class="short">Похожи на тыквы с лицом</div>
       <div class="episodes"><span>ep.62</span></div>
     </div><div class="card race-Человек" data-idx="108" data-name="Чёрно-Белый Кот" data-full="" data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',108)">🗑️</button>
         <button onclick="openEdit('characters',108)">✏️</button>
       </div>
@@ -1582,7 +1582,7 @@ text-decoration: none;
       <div class="short">Обитает в Почтампе</div>
       <div class="episodes"><span>ep.61</span></div>
     </div><div class="card race-Бобыль" data-idx="27" data-name="Чёрный эклер" data-full="Известный бобыль." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',27)">🗑️</button>
         <button onclick="openEdit('characters',27)">✏️</button>
       </div>
@@ -1591,7 +1591,7 @@ text-decoration: none;
       <div class="short">Известный бобыль</div>
       
     </div><div class="card race-Существо" data-idx="96" data-name="Чунявая Бруня" data-full="Главный объект вопроса выбора Истукануса. Обитает в Запретной пустыне." data-img="images/Чунявая Бруня.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',96)">🗑️</button>
         <button onclick="openEdit('characters',96)">✏️</button>
       </div>
@@ -1600,7 +1600,7 @@ text-decoration: none;
       <div class="short">Змея-Кролик</div>
       <div class="episodes"><span>ep.22</span><span>ep.60</span><span>ep.61</span></div>
     </div><div class="card race-Бобыль" data-idx="24" data-name="Шнеки-шмяк" data-full="Известный бобыль." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',24)">🗑️</button>
         <button onclick="openEdit('characters',24)">✏️</button>
       </div>
@@ -1609,7 +1609,7 @@ text-decoration: none;
       <div class="short">Известный бобыль</div>
       
     </div><div class="card race-Существо" data-idx="93" data-name="Шустрый Пескарь" data-full="Более шустрые, чем обычные пескари." data-img="images/Шустрый Пескарь.png">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',93)">🗑️</button>
         <button onclick="openEdit('characters',93)">✏️</button>
       </div>
@@ -1618,7 +1618,7 @@ text-decoration: none;
       <div class="short">Похожи на голубей</div>
       <div class="episodes"><span>ep.10</span></div>
     </div><div class="card race-Существа" data-idx="74" data-name="Ягодники" data-full="На пути в сумеречной роще, когда наконец-то стал слышен звук канифоли, тебя окружили ягодники." data-img="">
-      <div class="actions">
+      ${IS_ADMIN ? `<div class="actions">
         <button onclick="deleteItem('characters',74)">🗑️</button>
         <button onclick="openEdit('characters',74)">✏️</button>
       </div>
@@ -1641,10 +1641,10 @@ text-decoration: none;
 <div id="tab-locations" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-locations" placeholder="🔍 Поиск локации...">
-    <button class="primary" onclick="openEdit('locations')">➕ Добавить локацию</button>
+    <button class="admin-only" onclick="openEdit('locations')">➕ Добавить локацию</button>
   </div>
   <div class="grid" id="grid-locations"><div class="card " data-idx="0" data-name="Лавовое озеро" data-full="Озеро с островом в центре, охраняемым Лаваном. Там хранится Маска." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',0)">🗑️</button>
       <button onclick="openEdit('locations',0)">✏️</button>
     </div>
@@ -1653,7 +1653,7 @@ text-decoration: none;
     <div class="short">Озеро с островом в центре</div>
     
   </div><div class="card " data-idx="1" data-name="Подпольный щекоточный клуб" data-full="Организация/локация, управляемая Микаэллой и партнёрами. Совладелец Григорий. Высокие требования к кандидатам." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',1)">🗑️</button>
       <button onclick="openEdit('locations',1)">✏️</button>
     </div>
@@ -1662,7 +1662,7 @@ text-decoration: none;
     <div class="short">Организация/локация</div>
     
   </div><div class="card " data-idx="2" data-name="Фантасмагорический цирк" data-full="Цирк, в котором выступали Сырный Джо и Гузлик." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',2)">🗑️</button>
       <button onclick="openEdit('locations',2)">✏️</button>
     </div>
@@ -1671,7 +1671,7 @@ text-decoration: none;
     <div class="short">Цирк</div>
     
   </div><div class="card " data-idx="3" data-name="Сумеречная роща" data-full="Место обитания Акакия Куролесова, Пахомия и других существ. Здесь добывается пыльца, Зеленика и прочее." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',3)">🗑️</button>
       <button onclick="openEdit('locations',3)">✏️</button>
     </div>
@@ -1680,7 +1680,7 @@ text-decoration: none;
     <div class="short">Место обитания многих существ</div>
     
   </div><div class="card " data-idx="4" data-name="Запретная пустыня" data-full="Территория огромных пустых пространств и необычных существ. Отсюда Птозный Эдгар возит воду и пыльцу, обратно - алмазы, которые там сами по себе вылезают из под земли." data-img="images/Запретная пустыня.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',4)">🗑️</button>
       <button onclick="openEdit('locations',4)">✏️</button>
     </div>
@@ -1689,7 +1689,7 @@ text-decoration: none;
     <div class="short">Территория огромных пустых пространств</div>
     <div class="episodes"><span>ep.60</span></div>
   </div><div class="card " data-idx="5" data-name="Багетный сквер" data-full="Отличное место, чтобы перевести дух. Первая духа появилась здесь задолго до багетов." data-img="images/Багетный сквер.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',5)">🗑️</button>
       <button onclick="openEdit('locations',5)">✏️</button>
     </div>
@@ -1698,7 +1698,7 @@ text-decoration: none;
     <div class="short">Отличное место, чтобы перевести дух</div>
     <div class="episodes"><span>ep.3</span></div>
   </div><div class="card " data-idx="6" data-name="Медный град" data-full="Город в забытом высокогорье. Пристанище Корпоратов, которые верят в эффективность." data-img="images/Медный град.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',6)">🗑️</button>
       <button onclick="openEdit('locations',6)">✏️</button>
     </div>
@@ -1707,7 +1707,7 @@ text-decoration: none;
     <div class="short">Город в забытом высокогорье</div>
     <div class="episodes"><span>ep.19</span></div>
   </div><div class="card " data-idx="7" data-name="Сладкий хлев" data-full="Место, куда ОНО отправляет провинившихся. Движется высоко в небе. Птозный Эдгар единственный сбежавший из него, прихватив несколько его обитателей." data-img="images/Сладкий хлев.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',7)">🗑️</button>
       <button onclick="openEdit('locations',7)">✏️</button>
     </div>
@@ -1716,7 +1716,7 @@ text-decoration: none;
     <div class="short">Место, куда ОНО отправляет провинившихся</div>
     <div class="episodes"><span>ep.60</span></div>
   </div><div class="card " data-idx="8" data-name="Подземные трубы" data-full="Трубы запутаннее, чем кажется, здесь легко заплутать меж трёх дёсен, а выходов на землю совсем немного. Старая же часть этого лабиринта поражает своей приподнятой темнотой. Среди тех, кто смог из неё выбраться очень немногие сохранили лицо. Место обитания многоликого Филиппа." data-img="images/Подземные трубы.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',8)">🗑️</button>
       <button onclick="openEdit('locations',8)">✏️</button>
     </div>
@@ -1725,7 +1725,7 @@ text-decoration: none;
     <div class="short">Ведут в старый лабиринт</div>
     <div class="episodes"><span>ep.63</span></div>
   </div><div class="card " data-idx="9" data-name="Спектральный колодец" data-full="Находится под деревом в сумеречной роще, о котором рассказывает болотный скрипач." data-img="images/Спектральный колодец.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',9)">🗑️</button>
       <button onclick="openEdit('locations',9)">✏️</button>
     </div>
@@ -1734,7 +1734,7 @@ text-decoration: none;
     <div class="short">Находится под деревом в сумеречной роще</div>
     <div class="episodes"><span>ep.20</span></div>
   </div><div class="card " data-idx="10" data-name="Хрящёвка" data-full="Возводится Дядюшкой Фантасмагором, чтобы приумножить своё состояние, не известно, променяют ли жители сумеречной рощи их на природу." data-img="images/Хрящёвка.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',10)">🗑️</button>
       <button onclick="openEdit('locations',10)">✏️</button>
     </div>
@@ -1743,7 +1743,7 @@ text-decoration: none;
     <div class="short">Пятиэтажное здание из хрящевой ткани</div>
     <div class="episodes"><span>ep.15</span><span>ep.56</span><span>ep.62</span></div>
   </div><div class="card " data-idx="11" data-name="Раковина на горе" data-full="Ухо на горе. Если зажурчит, братья Мишеневы размешают её своими палками, ведь на журчанье уже бежит Круглый Толик." data-img="images/Раковина на горе.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',11)">🗑️</button>
       <button onclick="openEdit('locations',11)">✏️</button>
     </div>
@@ -1752,7 +1752,7 @@ text-decoration: none;
     <div class="short">Ухо на горе</div>
     <div class="episodes"><span>ep.19</span><span>ep.59</span></div>
   </div><div class="card " data-idx="12" data-name="Псарня" data-full="" data-img="images/Брат Евдокии.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',12)">🗑️</button>
       <button onclick="openEdit('locations',12)">✏️</button>
     </div>
@@ -1761,7 +1761,7 @@ text-decoration: none;
     <div class="short">Там работает брат Евдокии</div>
     <div class="episodes"><span>ep.27</span></div>
   </div><div class="card " data-idx="13" data-name="Почтамп" data-full="" data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',13)">🗑️</button>
       <button onclick="openEdit('locations',13)">✏️</button>
     </div>
@@ -1770,7 +1770,7 @@ text-decoration: none;
     <div class="short">Обиталище Чёрно-белого кота</div>
     <div class="episodes"><span>ep.34</span><span>ep.61</span></div>
   </div><div class="card " data-idx="14" data-name="ПВЗ" data-full="Расположены по Санкт-Петербургу. Сам проход находится в зеркале за ширмой, но открывается он лишь единицам, не стоит стучать в закрытую дверь, Поленыч сам выйдет за теми кому путь открыт и даже им стоит помнить, что дорога назад гораздо труднее." data-img="images/ПВЗ.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',14)">🗑️</button>
       <button onclick="openEdit('locations',14)">✏️</button>
     </div>
@@ -1779,7 +1779,7 @@ text-decoration: none;
     <div class="short">Порталы в Зазеркалье</div>
     <div class="episodes"><span>ep.50</span></div>
   </div><div class="card " data-idx="15" data-name="Катушки" data-full="Жадность на лайке замедляет катушки вплоть до их остановки." data-img="images/Катушки.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',15)">🗑️</button>
       <button onclick="openEdit('locations',15)">✏️</button>
     </div>
@@ -1788,7 +1788,7 @@ text-decoration: none;
     <div class="short">?</div>
     <div class="episodes"><span>ep.64</span></div>
   </div><div class="card " data-idx="16" data-name="Древние времена" data-full="Небо было другим, кирпичи делали из мёда, просторы бороздили иные сущности, а на месте Истукануса была пустота." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('locations',16)">🗑️</button>
       <button onclick="openEdit('locations',16)">✏️</button>
     </div>
@@ -1802,10 +1802,10 @@ text-decoration: none;
 <div id="tab-items" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-items" placeholder="🔍 Поиск предмета...">
-    <button class="primary" onclick="openEdit('items')">➕ Добавить предмет</button>
+    <button class="admin-only" onclick="openEdit('items')">➕ Добавить предмет</button>
   </div>
   <div class="grid" id="grid-items"><div class="card " data-idx="0" data-name="Маска" data-full="Артефакт, хранящийся на острове в лавовом озере. Даёт фору в битве с многоликим Филиппом." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',0)">🗑️</button>
       <button onclick="openEdit('items',0)">✏️</button>
     </div>
@@ -1814,7 +1814,7 @@ text-decoration: none;
     <div class="short">Артефакт в лавовом озере</div>
     
   </div><div class="card " data-idx="1" data-name="Шапец" data-full="Предмет одежды. Символ статуса. Даёт проход без оплаты у Подмыхана и серенады от петухов, но не защищает от дяди Егони. Может помощь от Алевтины, принявшей свою истинную форму, пока она не добралась до молота." data-img="images/Шапец.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',1)">🗑️</button>
       <button onclick="openEdit('items',1)">✏️</button>
     </div>
@@ -1823,7 +1823,7 @@ text-decoration: none;
     <div class="short">Предмет одежды. Символ статуса.</div>
     <div class="episodes"><span>ep.6</span></div>
   </div><div class="card " data-idx="2" data-name="Битубисас" data-full="Выглядит как игрушка-клоун, но внешность обманчива. Создаётся за кукичи. Гуляют слухи, что скоро вылезет из под земли в Запретной пустыне." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',2)">🗑️</button>
       <button onclick="openEdit('items',2)">✏️</button>
     </div>
@@ -1832,7 +1832,7 @@ text-decoration: none;
     <div class="short">Артефакт</div>
     <div class="episodes"><span>ep.60</span></div>
   </div><div class="card " data-idx="3" data-name="Уравнение времени" data-full="Её поедание карается ссылкой в сладкий хлев." data-img="images/Уравнение времени.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',3)">🗑️</button>
       <button onclick="openEdit('items',3)">✏️</button>
     </div>
@@ -1841,7 +1841,7 @@ text-decoration: none;
     <div class="short">Артефакт</div>
     <div class="episodes"><span>ep.62</span></div>
   </div><div class="card " data-idx="4" data-name="Кокалка" data-full="Расчёска для щекотки. Герой отдаёт её ОНЕ как дар." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',4)">🗑️</button>
       <button onclick="openEdit('items',4)">✏️</button>
     </div>
@@ -1850,7 +1850,7 @@ text-decoration: none;
     <div class="short">Расчёска для щекотки</div>
     <div class="episodes"><span>ep.35</span></div>
   </div><div class="card " data-idx="5" data-name="Мясной хлеб" data-full="Любимая еда Баранчи. Борька - говорящий мясной хлеб." data-img="images/Баранча.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',5)">🗑️</button>
       <button onclick="openEdit('items',5)">✏️</button>
     </div>
@@ -1859,7 +1859,7 @@ text-decoration: none;
     <div class="short">Любимая еда Баранчи</div>
     <div class="episodes"><span>ep.28</span><span>ep.49</span><span>ep.57</span></div>
   </div><div class="card " data-idx="6" data-name="Кукичи" data-full="Валюта Зазеркалья. Дядюшка Фантасмогор даёт два кукича за один пакич." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',6)">🗑️</button>
       <button onclick="openEdit('items',6)">✏️</button>
     </div>
@@ -1868,7 +1868,7 @@ text-decoration: none;
     <div class="short">Валюта Зазеркалья</div>
     
   </div><div class="card " data-idx="7" data-name="Пыльца" data-full="Добывается в Сумеречной роще, редкий ресурс." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',7)">🗑️</button>
       <button onclick="openEdit('items',7)">✏️</button>
     </div>
@@ -1877,7 +1877,7 @@ text-decoration: none;
     <div class="short">Добывается в Сумеречной роще</div>
     
   </div><div class="card " data-idx="8" data-name="Бурлешка" data-full="Предмет одежды. Необходимо носить, чтобы не простудиться, от чего голос будет слишком волнистым." data-img="images/Бурлешка.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',8)">🗑️</button>
       <button onclick="openEdit('items',8)">✏️</button>
     </div>
@@ -1886,7 +1886,7 @@ text-decoration: none;
     <div class="short">Предмет одежды</div>
     <div class="episodes"><span>ep.1</span></div>
   </div><div class="card " data-idx="9" data-name="Молот" data-full="Инструмент Алевтины. Использует во время принятия своей истинной формы." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',9)">🗑️</button>
       <button onclick="openEdit('items',9)">✏️</button>
     </div>
@@ -1895,7 +1895,7 @@ text-decoration: none;
     <div class="short">Инструмент Алевтины</div>
     
   </div><div class="card " data-idx="10" data-name="Хамон" data-full="Гасит их интерес к грязи, пусть и ненадолго. Имей в виду, если захочешь связаться с ними." data-img="images/Хамон.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',10)">🗑️</button>
       <button onclick="openEdit('items',10)">✏️</button>
     </div>
@@ -1904,7 +1904,7 @@ text-decoration: none;
     <div class="short">Гасит интерес грязунов к грязи</div>
     <div class="episodes"><span>ep.34</span></div>
   </div><div class="card " data-idx="11" data-name="Свежий Укроп" data-full="Может подкупить Колбасного Стража." data-img="images/Свежий Укроп.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',11)">🗑️</button>
       <button onclick="openEdit('items',11)">✏️</button>
     </div>
@@ -1913,7 +1913,7 @@ text-decoration: none;
     <div class="short">Еда</div>
     <div class="episodes"><span>ep.23</span></div>
   </div><div class="card " data-idx="12" data-name="Морковные пятки" data-full="Выращивает на огороде Баба Жуля, издают морковный хохот при щекотании их." data-img="images/Морковные пятки.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',12)">🗑️</button>
       <button onclick="openEdit('items',12)">✏️</button>
     </div>
@@ -1922,7 +1922,7 @@ text-decoration: none;
     <div class="short">Растение</div>
     <div class="episodes"><span>ep.2</span><span>ep.62</span><span>ep.66</span></div>
   </div><div class="card " data-idx="13" data-name="Войлочные катышки" data-full="" data-img="images/Войлочные катышки.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',13)">🗑️</button>
       <button onclick="openEdit('items',13)">✏️</button>
     </div>
@@ -1931,7 +1931,7 @@ text-decoration: none;
     <div class="short">Отвлекающие Коленыча предметы</div>
     <div class="episodes"><span>ep.29</span></div>
   </div><div class="card " data-idx="14" data-name="Алмазы" data-full="Сами по себе вылезают из под земли." data-img="images/Алмазы.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',14)">🗑️</button>
       <button onclick="openEdit('items',14)">✏️</button>
     </div>
@@ -1940,7 +1940,7 @@ text-decoration: none;
     <div class="short">Добываются в Запретной пустыне</div>
     <div class="episodes"><span>ep.60</span></div>
   </div><div class="card " data-idx="15" data-name="Крототуй" data-full="В основе блюда крот." data-img="images/Крототуй.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',15)">🗑️</button>
       <button onclick="openEdit('items',15)">✏️</button>
     </div>
@@ -1949,7 +1949,7 @@ text-decoration: none;
     <div class="short">Еда</div>
     <div class="episodes"><span>ep.62</span></div>
   </div><div class="card " data-idx="16" data-name="Пыль с ног босой ведьмы" data-full="Деликатес." data-img="images/Пыль с ног босой ведьмы.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',16)">🗑️</button>
       <button onclick="openEdit('items',16)">✏️</button>
     </div>
@@ -1958,7 +1958,7 @@ text-decoration: none;
     <div class="short">Приправа</div>
     <div class="episodes"><span>ep.62</span><span>ep.66</span></div>
   </div><div class="card " data-idx="17" data-name="Рожок на глазном молоке" data-full="Наверно вкусно." data-img="images/Рожок на глазном молоке.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',17)">🗑️</button>
       <button onclick="openEdit('items',17)">✏️</button>
     </div>
@@ -1967,7 +1967,7 @@ text-decoration: none;
     <div class="short">Еда</div>
     <div class="episodes"><span>ep.62</span></div>
   </div><div class="card " data-idx="18" data-name="Желе по-княжески" data-full="Наверняка связана с Желейным Князем." data-img="images/Желе по-княжески.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',18)">🗑️</button>
       <button onclick="openEdit('items',18)">✏️</button>
     </div>
@@ -1976,7 +1976,7 @@ text-decoration: none;
     <div class="short">Еда</div>
     <div class="episodes"><span>ep.62</span></div>
   </div><div class="card " data-idx="19" data-name="Золотая открытка с розами" data-full="Отлично подойдёт майонезной тётеньке." data-img="images/Золотая открытка с розами.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',19)">🗑️</button>
       <button onclick="openEdit('items',19)">✏️</button>
     </div>
@@ -1985,7 +1985,7 @@ text-decoration: none;
     <div class="short">Подарок</div>
     <div class="episodes"><span>ep.67</span></div>
   </div><div class="card " data-idx="20" data-name="Зеленика" data-full="Отлично идёт на компот." data-img="images/Зеленика.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('items',20)">🗑️</button>
       <button onclick="openEdit('items',20)">✏️</button>
     </div>
@@ -1999,10 +1999,10 @@ text-decoration: none;
 <div id="tab-events" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-events" placeholder="🔍 Поиск ивента...">
-    <button class="primary" onclick="openEdit('events')">➕ Добавить ивент</button>
+    <button class="admin-only" onclick="openEdit('events')">➕ Добавить ивент</button>
   </div>
   <div class="grid" id="grid-events"><div class="card " data-idx="0" data-name="Викторины Вальтасара" data-full="Темы: «Кныши из предлесья», «Фантазмагорические отжиги Арепыча», «Размеры ног босых ведьм» и др. Итоги: трое бобылей получили техническое поражение и были кокнуты за неадекватное поведение. Реутень выжил благодаря скорлупе." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('events',0)">🗑️</button>
       <button onclick="openEdit('events',0)">✏️</button>
     </div>
@@ -2012,7 +2012,7 @@ text-decoration: none;
     
   </div><div class="card " data-idx="1" data-name="Гонки Вальтасара" data-full="Участники: сектор сыра на баране, бульдогзер, три крепыша, корован из сладкого хлева, разъярённый коленыч, пескарь, пацаноиды, гречневый калач.
 Итоги: Победил Пацаноид, развивший невероятную скорость на пике ярости из-за проникшего на трассу Казимира." data-img="images/Гонки Вальтасара.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('events',1)">🗑️</button>
       <button onclick="openEdit('events',1)">✏️</button>
     </div>
@@ -2022,7 +2022,7 @@ text-decoration: none;
     <div class="episodes"><span>ep.51</span><span>ep.57</span></div>
   </div><div class="card " data-idx="2" data-name="Выбор зелья Вальтасара" data-full="Эффекты: Распознавать ложных Мигунов, Кокать Бобылей на расстоянии, знать наперёд планы Синих Ящеров, бежать быстрее Глазастой Пиццы, иммунитет от ангины Ламантинов, парить над слизнями.
 Итоги: Зелье парения над слизнями действует только на голубей. Вальтасар выпустил глазастую пиццу." data-img="images/Выбор зелья Вальтасара.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('events',2)">🗑️</button>
       <button onclick="openEdit('events',2)">✏️</button>
     </div>
@@ -2031,7 +2031,7 @@ text-decoration: none;
     <div class="short">Вальтасар предлагает зелья на выбор</div>
     <div class="episodes"><span>ep.35</span><span>ep.43</span></div>
   </div><div class="card " data-idx="3" data-name="Игра в чак-чак" data-full="Правила изменились: вместо цыплёнка используют тебя. Победитель забирает всё. ОНА покровительствует игре, нарушителей отправляет к Видусу." data-img="images/Чак-Чак.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('events',3)">🗑️</button>
       <button onclick="openEdit('events',3)">✏️</button>
     </div>
@@ -2040,7 +2040,7 @@ text-decoration: none;
     <div class="short">Игра с постоянно меняющимися правилами</div>
     <div class="episodes"><span>ep.38</span><span>ep.66</span></div>
   </div><div class="card " data-idx="4" data-name="Бешбармачный вторник" data-full="Известен только один, он был не очень." data-img="images/Бешбармачный вторник.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('events',4)">🗑️</button>
       <button onclick="openEdit('events',4)">✏️</button>
     </div>
@@ -2050,7 +2050,7 @@ text-decoration: none;
     <div class="episodes"><span>ep.24</span></div>
   </div><div class="card " data-idx="5" data-name="Ужин в имении Г-на Кривина" data-full="Морковные пятки, Крототуй, Сырный Джо, Пыль с ног босой ведьмы, кирпич от Хрящёвки, Рожок на глазном молоке, Желе по-княжески, уравнение времени, разваристый хрыч.
 Итоги: Приём удался! На ужин собралась самая достопочтенная публика, сыворотка общества. Крототуй был непропёкшийся и сбежал от Дона Окуня. Дон оценил Алмазные соления, которые по традиции захватил с собой Дядюшка Фантасмагор. От Желейного Князя и Сырного Джо публика получила и живые беседы и гастрономические открытия. Свежие морковные приправленные душистой пылью с ног босой ведьмы пятки никого не оставили равнодушными. Завершила ужин игра в Чак-Чак по особым правилам." data-img="images/Ужин Вальтасара.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('events',5)">🗑️</button>
       <button onclick="openEdit('events',5)">✏️</button>
     </div>
@@ -2064,11 +2064,11 @@ text-decoration: none;
 <div id="tab-plots" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-plots" placeholder="🔍 Поиск сюжета...">
-    <button class="primary" onclick="openEdit('plots')">➕ Добавить сюжет</button>
+    <button class="admin-only" onclick="openEdit('plots')">➕ Добавить сюжет</button>
   </div>
   <div id="grid-plots"><div class="storyline-group">
       <h2 class="storyline-title">📚 Без линии</h2><div class="plot-card">
-        <div style="float:right">
+        ${IS_ADMIN ? `<div style="float:right">
           <button onclick="deleteItem('plots',0)">🗑️</button>
           <button onclick="openEdit('plots',0)">✏️</button>
         </div>
@@ -2076,7 +2076,7 @@ text-decoration: none;
         <div class="short" style="margin-bottom:8px">Пацаноид пропал</div>
         <div>Пацаноид пропал. Пацаноидное равновесие должно быть восстановлено. Поиски ведутся в сумеречной роще, трубах и складках Провансаллы.</div>
       </div><div class="plot-card">
-        <div style="float:right">
+        ${IS_ADMIN ? `<div style="float:right">
           <button onclick="deleteItem('plots',1)">🗑️</button>
           <button onclick="openEdit('plots',1)">✏️</button>
         </div>
@@ -2084,7 +2084,7 @@ text-decoration: none;
         <div class="short" style="margin-bottom:8px">Незнакомец даёт загадку</div>
         <div>Незнакомец даёт загадку: «Тот, кто дёргает струну, отведёт тебя к нему. Но словам его не верь, лучше к ней открой ты дверь».</div>
       </div><div class="plot-card">
-        <div style="float:right">
+        ${IS_ADMIN ? `<div style="float:right">
           <button onclick="deleteItem('plots',2)">🗑️</button>
           <button onclick="openEdit('plots',2)">✏️</button>
         </div>
@@ -2092,7 +2092,7 @@ text-decoration: none;
         <div class="short" style="margin-bottom:8px">Герой отдаёт ОНЕ кокалку</div>
         <div>Герой добирается до болотного скрипача в темноту. Небо заполняют тучи, появляется ОНА. Герой отдаёт ей кокалку как дар, чтобы она не могла щекотать.</div>
       </div><div class="plot-card">
-        <div style="float:right">
+        ${IS_ADMIN ? `<div style="float:right">
           <button onclick="deleteItem('plots',3)">🗑️</button>
           <button onclick="openEdit('plots',3)">✏️</button>
         </div>
@@ -2105,10 +2105,10 @@ text-decoration: none;
 <div id="tab-organizations" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-organizations" placeholder="🔍 Поиск организации...">
-    <button class="primary" onclick="openEdit('organizations')">➕ Добавить организацию</button>
+    <button class="admin-only" onclick="openEdit('organizations')">➕ Добавить организацию</button>
   </div>
   <div class="grid" id="grid-organizations"><div class="card " data-idx="0" data-name="Орден босых ведьм" data-full="Когда небо темнеет, собираются в своём логове под кривой горой для того, чтобы осветить мир своим смехом. Членов Ордена набирают из Валькирий. Без их ритуалов с пером Золотого Какаду ночи были бы слишком тёмными. Они верят, что следующий выход Пахомия из своего дупла ознаменует крайне значительные события." data-img="images/Орден босых ведьм.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('organizations',0)">🗑️</button>
       <button onclick="openEdit('organizations',0)">✏️</button>
     </div>
@@ -2117,7 +2117,7 @@ text-decoration: none;
     <div class="short">Древний орден</div>
     <div class="episodes"><span>ep.27</span></div>
   </div><div class="card " data-idx="1" data-name="Подпольный щекоточный клуб" data-full="Щекотка запрещена, но клуб существует. Совладельцы: Микаэлла и партнёры, а так же Григорий. Высокие требования к кандидатам. Если исправишь излишнюю красноту ушей - шансы на одобрение есть." data-img="images/Щекоточный клуб.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('organizations',1)">🗑️</button>
       <button onclick="openEdit('organizations',1)">✏️</button>
     </div>
@@ -2126,7 +2126,7 @@ text-decoration: none;
     <div class="short">Управляется Микаэллой</div>
     <div class="episodes"><span>ep.37</span></div>
   </div><div class="card " data-idx="2" data-name="Конгресс путешественников" data-full="Конгресс путешественников под руководством Харитона Рякова. Не терпит спорщиков." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('organizations',2)">🗑️</button>
       <button onclick="openEdit('organizations',2)">✏️</button>
     </div>
@@ -2140,10 +2140,10 @@ text-decoration: none;
 <div id="tab-races" class="tab-content hidden">
   <div class="controls">
     <input type="text" id="search-races" placeholder="🔍 Поиск расы...">
-    <button class="primary" onclick="openEdit('races')">➕ Добавить расу</button>
+    <button class="admin-only" onclick="openEdit('races')">➕ Добавить расу</button>
   </div>
   <div class="grid" id="grid-races"><div class="card " data-idx="0" data-name="Бобыли" data-full="Узнаются по характерному клокочающему запаху. Но некоторые имеют толстую скорлупу, защищающую от коканья как у Реутеня. Бывают лесные и другие подвиды." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',0)">🗑️</button>
       <button onclick="openEdit('races',0)">✏️</button>
     </div>
@@ -2152,7 +2152,7 @@ text-decoration: none;
     <div class="short">Распространённая раса Зазеркалья</div>
     
   </div><div class="card " data-idx="1" data-name="Синие ящеры" data-full="Синие ящеры: Бубоня, Кубоня, Лубоня, Нубоня, Чубоня и прочие. Любят всякие шалости, такие как поменять местами Бруню и Чуню, расщепить атом, запустить слухи под псевдонимом &quot;Сортирный Сатир&quot;, напугать чёрно-белого кота из Почтампа. Их легко спутать, поэтому за проказы одного почти всегда попадается другой." data-img="images/Синие Ящеры.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',1)">🗑️</button>
       <button onclick="openEdit('races',1)">✏️</button>
     </div>
@@ -2161,7 +2161,7 @@ text-decoration: none;
     <div class="short">Любители шалостей</div>
     <div class="episodes"><span>ep.35</span><span>ep.61</span></div>
   </div><div class="card " data-idx="2" data-name="Люди" data-full="Люди встречаются как коренные жители Зазеркалья (Ржаной Борис, Сатор Арепыч), так и пришельцы из нашего мира." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',2)">🗑️</button>
       <button onclick="openEdit('races',2)">✏️</button>
     </div>
@@ -2170,7 +2170,7 @@ text-decoration: none;
     <div class="short">Обитатели Зазеркалья и нашего мира</div>
     
   </div><div class="card " data-idx="3" data-name="Мопсосвины" data-full="Даже к репке прикрутят шестерёнки и паровое двигало, а уж из сородича сделают целый бульдогзер." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',3)">🗑️</button>
       <button onclick="openEdit('races',3)">✏️</button>
     </div>
@@ -2179,7 +2179,7 @@ text-decoration: none;
     <div class="short">Прирождённые механизаторы</div>
     
   </div><div class="card " data-idx="4" data-name="Мигуны" data-full="Мигуны всегда воевали с грязунами, ведь грязь мешает им светить. Их противостояние может показаться потешным, но на самом деле это тщательно спланированная схема мопсосвинов." data-img="images/Мигуны.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',4)">🗑️</button>
       <button onclick="openEdit('races',4)">✏️</button>
     </div>
@@ -2188,7 +2188,7 @@ text-decoration: none;
     <div class="short">Воевали с грязунами</div>
     <div class="episodes"><span>ep.35</span><span>ep.44</span></div>
   </div><div class="card " data-idx="5" data-name="Грязуны" data-full="Грязуны и близко не подойдут к почтамту. Зачем им письма, когда можно целыми днями пачкаться? Только Хамон гасит их интерес к грязи, пусть и не на долго. Мигуны всегда воевали с Грязунами, ведь грязь мешает им светить." data-img="images/Грязуны.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',5)">🗑️</button>
       <button onclick="openEdit('races',5)">✏️</button>
     </div>
@@ -2197,7 +2197,7 @@ text-decoration: none;
     <div class="short">Любят пачкаться, воюют с мигунами</div>
     <div class="episodes"><span>ep.34</span></div>
   </div><div class="card " data-idx="6" data-name="Пацаноиды" data-full="Не злы по натуре, но всегда злятся на Казимира. Между ними и Казимиром должно быть равновесие." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',6)">🗑️</button>
       <button onclick="openEdit('races',6)">✏️</button>
     </div>
@@ -2206,7 +2206,7 @@ text-decoration: none;
     <div class="short">Существа с магией Истукануса</div>
     
   </div><div class="card " data-idx="7" data-name="Петухи" data-full="Разбежались. Будут урчать да плюхаться об землю. Сами заскучают, соберутся в пучок и залезут обратно под мох." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',7)">🗑️</button>
       <button onclick="openEdit('races',7)">✏️</button>
     </div>
@@ -2215,7 +2215,7 @@ text-decoration: none;
     <div class="short">Урчат и плюхаются</div>
     
   </div><div class="card " data-idx="8" data-name="Осы" data-full="Пока не освоили перемещение в трясине, их в ней трясёт." data-img="images/Осы.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',8)">🗑️</button>
       <button onclick="openEdit('races',8)">✏️</button>
     </div>
@@ -2224,7 +2224,7 @@ text-decoration: none;
     <div class="short">Трясутся в трясине, делают мёд</div>
     <div class="episodes"><span>ep.41</span></div>
   </div><div class="card " data-idx="9" data-name="Пескари" data-full="Существа, похожие на голубей. Дон Окунь — пескарь под прикрытием." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',9)">🗑️</button>
       <button onclick="openEdit('races',9)">✏️</button>
     </div>
@@ -2233,7 +2233,7 @@ text-decoration: none;
     <div class="short">Похожи на голубей</div>
     
   </div><div class="card " data-idx="10" data-name="Ароматные голуби" data-full="Ароматные голуби рассекают над удивлённым литолием." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',10)">🗑️</button>
       <button onclick="openEdit('races',10)">✏️</button>
     </div>
@@ -2242,7 +2242,7 @@ text-decoration: none;
     <div class="short">Рассекают над литолием</div>
     
   </div><div class="card " data-idx="11" data-name="Духа" data-full="Появились в Багетном сквере задолго до багетов. До сих пор не научились переходить дорогу без помощи." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',11)">🗑️</button>
       <button onclick="openEdit('races',11)">✏️</button>
     </div>
@@ -2251,7 +2251,7 @@ text-decoration: none;
     <div class="short">Из Багетного сквера</div>
     
   </div><div class="card " data-idx="12" data-name="Калачи" data-full="Существа, похожие на больших мотыльков. Гречневые Калачи отпугиваются глазным молоком." data-img="images/Калач.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',12)">🗑️</button>
       <button onclick="openEdit('races',12)">✏️</button>
     </div>
@@ -2260,7 +2260,7 @@ text-decoration: none;
     <div class="short">Аппетитные</div>
     <div class="episodes"><span>ep.4</span><span>ep.51</span></div>
   </div><div class="card " data-idx="13" data-name="Головастики" data-full="С ними можно веселиться." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',13)">🗑️</button>
       <button onclick="openEdit('races',13)">✏️</button>
     </div>
@@ -2269,7 +2269,7 @@ text-decoration: none;
     <div class="short">С ними можно веселиться</div>
     
   </div><div class="card " data-idx="14" data-name="Совяне" data-full="Кислый Борька так и норовит залезть им под перья." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',14)">🗑️</button>
       <button onclick="openEdit('races',14)">✏️</button>
     </div>
@@ -2278,7 +2278,7 @@ text-decoration: none;
     <div class="short">Берегись Кислого Борьки</div>
     
   </div><div class="card " data-idx="15" data-name="Ягодники" data-full="На пути в сумеречной роще, когда наконец-то стал слышен звук канифоли, тебя окружают ягодники." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',15)">🗑️</button>
       <button onclick="openEdit('races',15)">✏️</button>
     </div>
@@ -2287,7 +2287,7 @@ text-decoration: none;
     <div class="short">Окружают в сумеречной роще</div>
     
   </div><div class="card " data-idx="16" data-name="Грочилы" data-full="Ноготки переливаются всеми цветами хлеба, привлекая грочил." data-img="">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',16)">🗑️</button>
       <button onclick="openEdit('races',16)">✏️</button>
     </div>
@@ -2296,7 +2296,7 @@ text-decoration: none;
     <div class="short">Привлекаются ноготками</div>
     
   </div><div class="card " data-idx="17" data-name="Крепыши" data-full="Три крепыша нашедших себе пристанище на окраине Сумеречной рощи. Баранча и Михаил любят порезвиться и поиграть в Чак-чак попавшимися прохожими, но Пахомий вылезает из своего дупла настолько редко, что члены Ордена босых ведьм верят в то, что его следующий выход ознаменует крайне значительные события. Участвовали в гонках Вальтасара, подрались на старте из-за мясного хлеба." data-img="images/Три Крепыша.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',17)">🗑️</button>
       <button onclick="openEdit('races',17)">✏️</button>
     </div>
@@ -2305,7 +2305,7 @@ text-decoration: none;
     <div class="short">Баранча, Михаил и Пахомий</div>
     <div class="episodes"><span>ep.49</span><span>ep.51</span><span>ep.57</span></div>
   </div><div class="card " data-idx="18" data-name="Майонезные тётеньки" data-full="Если расскажешь шепоток или подаришь золотую открытку с розами - убедятся, что ты не странный. Если прослыть странным среди майонезных... лучше не надо." data-img="images/Майонезные тётеньки.png">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('races',18)">🗑️</button>
       <button onclick="openEdit('races',18)">✏️</button>
     </div>
@@ -4096,6 +4096,15 @@ const DEFAULT_DATA = {
 
 // ============ СОСТОЯНИЕ ============
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+// === РЕЖИМ АДМИНИСТРАТОРА ===
+const ADMIN_SECRET = "x4Yv9Z"; // <-- ПРИДУМАЙ СВОЙ ПАРОЛЬ!
+const urlParams = new URLSearchParams(window.location.search);
+const IS_ADMIN = urlParams.get('admin') === ADMIN_SECRET;
+
+if (IS_ADMIN) {
+  console.log("🔓 Режим администратора активирован");
+  document.body.classList.add('admin-mode');
+}
 let currentTab = 'characters';
 let editingType = null;
 let editingIndex = -1;
@@ -4164,10 +4173,10 @@ function renderCharacters() {
   const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
   const hasThumb = c.image ? 'has-thumb' : '';
   return `<div class="card race-${rc} ${hasThumb}" data-idx="${realIdx}" data-name="${escapeHtml(c.name)}" data-full="${escapeHtml(c.full)}" data-img="${escapeHtml(c.image || '')}">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('characters',${realIdx})">🗑️</button>
       <button onclick="openEdit('characters',${realIdx})">✏️</button>
-    </div>
+    </div>` : ''}
     ${thumb}
     <h3>${escapeHtml(c.name)}</h3>
     <span class="type tag-${rc}">${escapeHtml(c.type)}</span>
@@ -4215,10 +4224,10 @@ function renderGeneric(type, fields) {
   const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
   const hasThumb = c.image ? 'has-thumb' : '';
   return `<div class="card ${rc ? 'race-'+rc : ''} ${hasThumb}" data-idx="${realIdx}" data-name="${escapeHtml(c.name)}" data-full="${escapeHtml(c.full||'')}" data-img="${escapeHtml(c.image||'')}">
-    <div class="actions">
+    ${IS_ADMIN ? `<div class="actions">
       <button onclick="deleteItem('${type}',${realIdx})">🗑️</button>
       <button onclick="openEdit('${type}',${realIdx})">✏️</button>
-    </div>
+    </div>` : ''}
     ${thumb}
     <h3>${escapeHtml(c.name)}</h3>
     ${c.type ? `<span class="type tag-${raceClass(c.type)}">${escapeHtml(c.type)}</span>` : ''}
@@ -4250,10 +4259,10 @@ function renderPlots() {
     grouped[lineName].forEach(c => {
       const realIdx = data.plots.indexOf(c);
       html += `<div class="plot-card">
-        <div style="float:right">
+        ${IS_ADMIN ? `<div style="float:right">
           <button onclick="deleteItem('plots',${realIdx})">🗑️</button>
           <button onclick="openEdit('plots',${realIdx})">✏️</button>
-        </div>
+        </div>` : ''}
         <h3>${escapeHtml(c.name)}</h3>
         <div class="short" style="margin-bottom:8px">${escapeHtml(c.short)}</div>
         <div>${escapeHtml(c.full)}</div>
@@ -4593,9 +4602,26 @@ canvas.addEventListener('wheel', e => {
   graphTransform.scale = Math.max(0.2, Math.min(3, graphTransform.scale));
 });
 
+// === ЗАГРУЗКА ДАННЫХ ИЗ JSON ===
+async function loadInitialData() {
+  try {
+    const response = await fetch('data.json');
+    if (response.ok) {
+      data = await response.json();
+      console.log("✅ Данные успешно загружены из data.json");
+    } else {
+      console.log("⚠️ data.json не найден, используем встроенные данные");
+    }
+  } catch (e) {
+    console.log("⚠️ Не удалось загрузить data.json, используем встроенные данные");
+  }
+  updateStats();
+  renderCurrentTab();
+}
+
+
 // ============ СТАРТ ============
-updateStats();
-renderCharacters();
+loadInitialData();
 tickGraph();
 // ============ ГЛОБАЛЬНЫЙ ПОИСК ============
 const globalSearchInput = document.getElementById('global-search');
@@ -4857,7 +4883,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия v35 · Обновлено: 26.08.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия alpha4 · Обновлено: 26.08.2026.</div>
 </footer>
 
 </body></html>
