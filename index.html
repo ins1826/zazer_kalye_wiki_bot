@@ -600,7 +600,6 @@ body.admin-mode .admin-only { display: inline-block !important; }
     <option>Синий ящер</option>
     <option>Божество</option>
     <option>Существа</option>
-    <option>Существо/Человек</option>
     <option>Человек/Существо</option>
     <option>Растение/Существо</option>
   </select>
@@ -4413,7 +4412,7 @@ function openEdit(type, idx = -1) {
   if (type === 'characters') {
   html += `<label>🏷️ Тип</label>
     <select id="f-type">
-      ${['Человек','Существо','Бобыль','Синий ящер','Божество','Существа','Существо/Человек','Человек/Существо','Растение/Существо'].map(t => `<option ${item.type===t?'selected':''}>${t}</option>`).join('')}
+      ${['Человек','Существо','Бобыль','Синий ящер','Божество','Существа','Человек/Существо','Растение/Существо'].map(t => `<option ${item.type===t?'selected':''}>${t}</option>`).join('')}
     </select>`;
 }
   html += `<label>📛 Название</label><input id="f-name" value="${escapeHtml(item.name||'')}">`;
@@ -4970,7 +4969,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия alpha5 · Обновлено: 26.08.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия beta2 · Обновлено: 28.08.2026.</div>
 </footer>
 
 </body></html>

@@ -25,11 +25,9 @@ def health_check():
     return "🪞 Бот Зазеркалья работает!", 200
 
 def run_flask():
-    # Render автоматически назначает порт через переменную окружения PORT
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
 
-# Запускаем Flask в отдельном потоке
 threading.Thread(target=run_flask, daemon=True).start()
 
 # === ЗАГРУЗКА ДАННЫХ ===
@@ -71,7 +69,7 @@ def escape_html(text):
 def get_main_keyboard():
     keyboard = telebot.types.InlineKeyboardMarkup()
     keyboard.row(
-        telebot.types.InlineKeyboardButton("🎲 Случайный персонаж", callback_data='random_char'),
+        telebot.types.InlineKeyboardButton("🎲 Ещё персонажа", callback_data='random_char'),
         telebot.types.InlineKeyboardButton("✉️ Написать автору", callback_data='feedback_mode')
     )
     keyboard.row(
@@ -96,10 +94,36 @@ def callback_handler(call):
     if call.data == 'random_char':
         send_random_character(call.message.chat.id)
         bot.answer_callback_query(call.id, "🎲 Держи нового персонажа!")
+    
     elif call.data == 'feedback_mode':
+        # Включаем режим
         feedback_mode[call.from_user.id] = True
-        bot.send_message(call.message.chat.id, "✉️ <b>Режим обратной связи включён!</b>\n\nНапиши своё сообщение, и я передам его хранительнице Зазеркалья. 🪞", parse_mode="HTML")
-        bot.answer_callback_query(call.id, "✉️ Режим обратной связи активирован!")
+        
+        # Создаём клавиатуру с кнопкой отмены
+        cancel_kb = telebot.types.InlineKeyboardMarkup()
+        cancel_kb.add(telebot.types.InlineKeyboardButton("❌ Отменить", callback_data='cancel_feedback'))
+        
+        bot.send_message(
+            call.message.chat.id, 
+            "✉️ <b>Режим обратной связи включён!</b>\n\nНапиши своё сообщение, и я передам его помощнице Грибного Архивариуса. 🪞\n\n<i>(Если передумал, нажми кнопку ниже)</i>",
+            reply_markup=cancel_kb,
+            parse_mode="HTML"
+        )
+        bot.answer_callback_query(call.id, "✉️ Режим активирован!")
+
+    elif call.data == 'cancel_feedback':
+        # Отключаем режим
+        if call.from_user.id in feedback_mode:
+            del feedback_mode[call.from_user.id]
+        
+        # Красиво меняем сообщение, убирая клавиатуру
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            text="❌ <b>Режим обратной связи отменён.</b>\n\nЕсли захочешь написать снова, просто нажми кнопку «✉️ Написать автору» в главном меню.",
+            parse_mode="HTML"
+        )
+        bot.answer_callback_query(call.id, "Режим отменён")
 
 # === 3. КОМАНДА /random ===
 @bot.message_handler(commands=['random'])
@@ -136,15 +160,26 @@ def send_item_card(chat_id, item, label):
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
     if message.text.startswith('/'):
+        # Добавляем поддержку команды /cancel текстом, на всякий случай
+        if message.text.lower() == '/cancel':
+            if message.from_user.id in feedback_mode:
+                del feedback_mode[message.from_user.id]
+                bot.send_message(message.chat.id, "❌ <b>Режим обратной связи отменён.</b>", parse_mode="HTML", reply_markup=get_main_keyboard())
+            else:
+                bot.send_message(message.chat.id, "У тебя и так не включён режим обратной связи.", reply_markup=get_main_keyboard())
         return
+    
+    # Проверяем, в режиме ли обратной связи пользователь
     if feedback_mode.get(message.from_user.id):
         username = f"@{message.from_user.username}" if message.from_user.username else "Без username"
         forward_text = f"💬 <b>Новое сообщение!</b>\n👤 <b>От:</b> {escape_html(message.from_user.first_name)} ({escape_html(username)})\n🆔 <b>ID:</b> <code>{message.from_user.id}</code>\n📝 <b>Текст:</b>\n{escape_html(message.text)}"
         try:
             bot.send_message(OWNER_ID, forward_text, parse_mode="HTML")
-            bot.send_message(message.chat.id, "✅ Спасибо! Сообщение отправлено помощнице Грибного Архивариуса. Я передам его на рассмотрение! 🪞✨", reply_markup=get_main_keyboard(), parse_mode="HTML")
+            bot.send_message(message.chat.id, "✅ Спасибо! Сообщение отправлено помощнице Грибного Архивариуса! 🪞✨", reply_markup=get_main_keyboard(), parse_mode="HTML")
         except:
             bot.send_message(message.chat.id, "❌ Не удалось отправить сообщение.")
+        
+        # Выключаем режим после успешной отправки
         del feedback_mode[message.from_user.id]
         return
     
