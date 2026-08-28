@@ -105,7 +105,7 @@ def callback_handler(call):
     if call.data == 'random_char':
         send_random_character(call.message.chat.id)
         bot.answer_callback_query(call.id, "🎲 Держи нового персонажа!")
-    
+        
     elif call.data == 'feedback_mode':
         feedback_mode[call.from_user.id] = True
         cancel_kb = telebot.types.InlineKeyboardMarkup()
@@ -117,8 +117,8 @@ def callback_handler(call):
             parse_mode="HTML"
         )
         bot.answer_callback_query(call.id, "✉️ Режим активирован!")
-
-        elif call.data == 'cancel_feedback':
+        
+    elif call.data == 'cancel_feedback':
         # Отключаем режим
         if call.from_user.id in feedback_mode:
             del feedback_mode[call.from_user.id]
@@ -130,7 +130,7 @@ def callback_handler(call):
             parse_mode="HTML"
         )
         bot.answer_callback_query(call.id, "Режим отменён")
-
+        
     elif call.data == 'cancel_search':
         # Отменяем поиск — меняем сообщение и убираем кнопки выбора
         bot.edit_message_text(
@@ -141,6 +141,18 @@ def callback_handler(call):
             reply_markup=get_main_keyboard()
         )
         bot.answer_callback_query(call.id, "Поиск отменён")
+        
+    elif call.data.startswith('select_'):
+        # ⭐ Обработка выбора из результатов поиска
+        result_id = call.data.replace('select_', '')
+        user_id = call.from_user.id
+        
+        if user_id in search_results_cache and result_id in search_results_cache[user_id]:
+            result = search_results_cache[user_id][result_id]
+            send_item_card(call.message.chat.id, result['item'], result['label'])
+            del search_results_cache[user_id]  # Очищаем кэш после выбора
+        
+        bot.answer_callback_query(call.id, "Выбрано!")
 
 # === 3. КОМАНДА /random ===
 
