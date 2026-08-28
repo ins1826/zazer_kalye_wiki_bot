@@ -118,9 +118,11 @@ def callback_handler(call):
         )
         bot.answer_callback_query(call.id, "✉️ Режим активирован!")
 
-    elif call.data == 'cancel_feedback':
+        elif call.data == 'cancel_feedback':
+        # Отключаем режим
         if call.from_user.id in feedback_mode:
             del feedback_mode[call.from_user.id]
+        
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
@@ -128,6 +130,19 @@ def callback_handler(call):
             parse_mode="HTML"
         )
         bot.answer_callback_query(call.id, "Режим отменён")
+
+    elif call.data == 'cancel_search':
+        # Отменяем поиск — меняем сообщение и убираем кнопки выбора
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            text="❌ <b>Поиск отменён.</b>\n\nНапиши другое имя или используй кнопки ниже:",
+            parse_mode="HTML",
+            reply_markup=get_main_keyboard()
+        )
+        bot.answer_callback_query(call.id, "Поиск отменён")
+
+# === 3. КОМАНДА /random ===
 
     # ⭐ НОВОЕ: Обработка выбора из результатов поиска
     elif call.data.startswith('select_'):
@@ -257,17 +272,6 @@ def handle_number_selection(message):
             send_item_card(message.chat.id, result['item'], result['label'])
             del search_results_cache[user_id]
             return
-
-# Отмена поиска
-@bot.callback_query_handler(func=lambda call: call.data == 'cancel_search')
-def cancel_search(call):
-    bot.edit_message_text(
-        chat_id=call.message.chat.id,
-        message_id=call.message.message_id,
-        text="❌ Поиск отменён.",
-        reply_markup=get_main_keyboard()
-    )
-    bot.answer_callback_query(call.id, "Поиск отменён")
 
 # === 5. КОМАНДА /reload ===
 @bot.message_handler(commands=['reload'])
