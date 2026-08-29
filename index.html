@@ -271,6 +271,7 @@ margin-right: auto;
 .race-Существо { border-left-color: #8a8a9a !important; }
 .race-Бобыль { border-left-color: #7ac74f !important; }
 .race-Синий-ящер { border-left-color: #3ab8ff !important; }
+.race-Кокша { border-left-color: #ff6b9d !important; }
 .race-Божество { border-left-color: #ffd700 !important; }
 .race-Растение-Существо { border-left-color: #b88a3a !important; }
 .race-Существа { border-left-color: #8a8a9a !important; }
@@ -290,6 +291,7 @@ margin-right: auto;
 .tag-Существо { background: #8a8a9a33 !important; color: #bbb !important; }
 .tag-Бобыль { background: #7ac74f33 !important; color: #7ac74f !important; }
 .tag-Синий-ящер { background: #3ab8ff33 !important; color: #3ab8ff !important; }
+.tag-Кокша { background: #ff6b9d33 !important; color: #ff6b9d !important; }
 .tag-Божество { background: #ffd70033 !important; color: #ffd700 !important; }
 .tag-Растение-Существо { background: #b88a3a33 !important; color: #d4a05a !important; }
 .tag-Человек-Существо { background: #c9a0ff33 !important; color: #c9a0ff !important; }
@@ -602,6 +604,7 @@ body.admin-mode .admin-only { display: inline-block !important; }
     <option>Существо</option>
     <option>Бобыль</option>
     <option>Синий ящер</option>
+    <option>Кокша</option>
     <option>Божество</option>
     <option>Существа</option>
     <option>Человек/Существо</option>
@@ -4167,6 +4170,7 @@ function raceClass(type) {
     'Существо': 'Существо',
     'Бобыль': 'Бобыль',
     'Синий ящер': 'Синий-ящер',
+    'Кокша': 'Кокша',
     'Божество': 'Божество',
     'Существа': 'Существа',
     'Существо/Человек': 'Человек-Существо',
@@ -4416,7 +4420,7 @@ function openEdit(type, idx = -1) {
   if (type === 'characters') {
   html += `<label>🏷️ Тип</label>
     <select id="f-type">
-      ${['Человек','Существо','Бобыль','Синий ящер','Божество','Существа','Человек/Существо','Растение/Существо'].map(t => `<option ${item.type===t?'selected':''}>${t}</option>`).join('')}
+      ${['Человек','Существо','Бобыль','Синий ящер','Кокша','Божество','Существа','Человек/Существо','Растение/Существо'].map(t => `<option ${item.type===t?'selected':''}>${t}</option>`).join('')}
     </select>`;
 }
   html += `<label>📛 Название</label><input id="f-name" value="${escapeHtml(item.name||'')}">`;
@@ -4973,7 +4977,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия beta2 · Обновлено: 28.08.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия beta3 · Обновлено: 29.08.2026.</div>
 </footer>
 
 </body></html>
