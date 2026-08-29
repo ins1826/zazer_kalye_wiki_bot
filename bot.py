@@ -6,13 +6,18 @@ import re
 import os
 import threading
 from flask import Flask
+from io import BytesIO
 
 # === НАСТРОЙКИ ===
 TOKEN = "8991988855:AAFL12okgGp6WfGuSVHTxHWA1MxaoM25-30"
 WIKI_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 OWNER_ID = 412598271
 
+# Ссылка на data.json на GitHub
 DATA_URL = "https://raw.githubusercontent.com/ins1826/zazer_kalye_wiki_bot/refs/heads/main/data.json"
+
+# Базовый URL для картинок (GitHub Pages)
+IMAGES_BASE_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -51,7 +56,7 @@ def load_wiki_data():
 load_wiki_data()
 
 feedback_mode = {}
-search_results_cache = {}  # Кэш для хранения результатов поиска
+search_results_cache = {}
 
 # === ФУНКЦИИ ===
 def parse_wiki_links(text):
@@ -77,7 +82,8 @@ def get_main_keyboard():
     )
     return keyboard
 
-def send_item_card(chat_id, item, label):
+def send_item_card(chat_id, item, label, send_photo=True):
+    """Отправляет карточку элемента с картинкой (если есть)"""
     text = f"{label}: <b>{escape_html(item['name'])}</b>\n"
     if item.get('type'): text += f"🏷️ {escape_html(item['type'])}\n"
     if item.get('short'): text += f"\n📜 {escape_html(parse_wiki_links(item['short']))}\n"
@@ -85,13 +91,29 @@ def send_item_card(chat_id, item, label):
         full_text = parse_wiki_links(item['full'])
         text += f"\n{escape_html(full_text[:500] + '...' if len(full_text) > 500 else full_text)}\n"
     if item.get('episodes') and len(item['episodes']) > 0:
-        text += f"\n🎬 Эпизоды: {', '.join([f'ep.{e}' for e in item['episodes'][:5]])}"
+        text += f"\n Эпизоды: {', '.join([f'ep.{e}' for e in item['episodes'][:5]])}"
+    
+    # Отправляем с картинкой (если есть и включена отправка фото)
+    if send_photo and item.get('image'):
+        try:
+            image_url = IMAGES_BASE_URL + item['image']
+            response = requests.get(image_url, timeout=10)
+            if response.status_code == 200:
+                # Отправляем фото с текстом в caption
+                photo_file = BytesIO(response.content)
+                bot.send_photo(chat_id, photo_file, caption=text, parse_mode="HTML", reply_markup=get_main_keyboard())
+                return
+        except Exception as e:
+            print(f"❌ Не удалось отправить картинку: {e}")
+            # Если не получилось отправить картинку, отправляем просто текст
+    
+    # Если нет картинки или не удалось отправить — отправляем текст
     bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
 
 # === 1. КОМАНДА /start ===
 @bot.message_handler(commands=['start'])
 def start(message):
-    text = """🪞 <b>Добро пожаловать в Зазеркалье!</b>
+    text = """ <b>Добро пожаловать в Зазеркалье!</b>
 
 Ты стоишь на пороге мира, где Хрычи растут на огороде у бабы Жули, а в подпольном щекоточном клубе высокие требования к кандидатам...
 
@@ -104,25 +126,23 @@ def start(message):
 def callback_handler(call):
     if call.data == 'random_char':
         send_random_character(call.message.chat.id)
-        bot.answer_callback_query(call.id, "🎲 Держи нового персонажа!")
-        
+        bot.answer_callback_query(call.id, " Держи нового персонажа!")
+    
     elif call.data == 'feedback_mode':
         feedback_mode[call.from_user.id] = True
         cancel_kb = telebot.types.InlineKeyboardMarkup()
         cancel_kb.add(telebot.types.InlineKeyboardButton("❌ Отменить", callback_data='cancel_feedback'))
         bot.send_message(
             call.message.chat.id, 
-            "✉️ <b>Режим обратной связи включён!</b>\n\nНапиши своё сообщение, и я передам его помощнице Грибного Архивариуса. 🪞\n\n<i>(Если передумал, нажми кнопку ниже)</i>",
+            "✉️ <b>Режим обратной связи включён!</b>\n\nНапиши своё сообщение, и я передам его помощнице Грибного Архивариуса. \n\n<i>(Если передумал, нажми кнопку ниже)</i>",
             reply_markup=cancel_kb,
             parse_mode="HTML"
         )
         bot.answer_callback_query(call.id, "✉️ Режим активирован!")
-        
+
     elif call.data == 'cancel_feedback':
-        # Отключаем режим
         if call.from_user.id in feedback_mode:
             del feedback_mode[call.from_user.id]
-        
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
@@ -132,7 +152,6 @@ def callback_handler(call):
         bot.answer_callback_query(call.id, "Режим отменён")
         
     elif call.data == 'cancel_search':
-        # Отменяем поиск — меняем сообщение и убираем кнопки выбора
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
@@ -143,28 +162,13 @@ def callback_handler(call):
         bot.answer_callback_query(call.id, "Поиск отменён")
         
     elif call.data.startswith('select_'):
-        # ⭐ Обработка выбора из результатов поиска
         result_id = call.data.replace('select_', '')
         user_id = call.from_user.id
         
         if user_id in search_results_cache and result_id in search_results_cache[user_id]:
             result = search_results_cache[user_id][result_id]
             send_item_card(call.message.chat.id, result['item'], result['label'])
-            del search_results_cache[user_id]  # Очищаем кэш после выбора
-        
-        bot.answer_callback_query(call.id, "Выбрано!")
-
-# === 3. КОМАНДА /random ===
-
-    # ⭐ НОВОЕ: Обработка выбора из результатов поиска
-    elif call.data.startswith('select_'):
-        result_id = call.data.replace('select_', '')
-        user_id = call.from_user.id
-        
-        if user_id in search_results_cache and result_id in search_results_cache[user_id]:
-            result = search_results_cache[user_id][result_id]
-            send_item_card(call.message.chat.id, result['item'], result['label'])
-            del search_results_cache[user_id]  # Очищаем кэш после выбора
+            del search_results_cache[user_id]
         
         bot.answer_callback_query(call.id, "Выбрано!")
 
@@ -178,15 +182,7 @@ def send_random_character(chat_id):
         bot.send_message(chat_id, "❌ Ой, данные ещё не загрузились. Попробуй через минуту!")
         return
     char = random.choice(wiki_data['characters'])
-    text = f"🎲 <b>Случайный обитатель Зазеркалья:</b>\n\n👤 <b>{escape_html(char['name'])}</b>\n"
-    if char.get('type'): text += f"🏷️ {escape_html(char['type'])}\n"
-    if char.get('short'): text += f"\n📜 {escape_html(parse_wiki_links(char['short']))}\n"
-    if char.get('full'):
-        full_text = parse_wiki_links(char['full'])
-        text += f"\n{escape_html(full_text[:500] + '...' if len(full_text) > 500 else full_text)}\n"
-    if char.get('episodes') and len(char['episodes']) > 0:
-        text += f"\n🎬 Эпизоды: {', '.join([f'ep.{e}' for e in char['episodes'][:5]])}"
-    bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
+    send_item_card(chat_id, char, "👤 Персонаж")
 
 # === 4. ПОИСК С УМНЫМ ВЫБОРОМ ===
 @bot.message_handler(content_types=['text'])
@@ -200,25 +196,24 @@ def handle_text(message):
                 bot.send_message(message.chat.id, "У тебя и так не включён режим обратной связи.", reply_markup=get_main_keyboard())
         return
     
-    # Режим обратной связи
     if feedback_mode.get(message.from_user.id):
         username = f"@{message.from_user.username}" if message.from_user.username else "Без username"
-        forward_text = f"💬 <b>Новое сообщение!</b>\n👤 <b>От:</b> {escape_html(message.from_user.first_name)} ({escape_html(username)})\n🆔 <b>ID:</b> <code>{message.from_user.id}</code>\n <b>Текст:</b>\n{escape_html(message.text)}"
+        forward_text = f"💬 <b>Новое сообщение!</b>\n👤 <b>От:</b> {escape_html(message.from_user.first_name)} ({escape_html(username)})\n🆔 <b>ID:</b> <code>{message.from_user.id}</code>\n📝 <b>Текст:</b>\n{escape_html(message.text)}"
         try:
             bot.send_message(OWNER_ID, forward_text, parse_mode="HTML")
             bot.send_message(message.chat.id, "✅ Спасибо! Сообщение отправлено помощнице Грибного Архивариуса! 🪞✨", reply_markup=get_main_keyboard(), parse_mode="HTML")
         except:
-            bot.send_message(message.chat.id, " Не удалось отправить сообщение.")
+            bot.send_message(message.chat.id, "❌ Не удалось отправить сообщение.")
         del feedback_mode[message.from_user.id]
         return
     
     if not wiki_data:
-        bot.send_message(message.chat.id, "⏳ Данные ещё загружаются!")
+        bot.send_message(message.chat.id, " Данные ещё загружаются!")
         return
     
     query = message.text.strip().lower()
     found_items = []
-    categories = {'characters': '👤 Персонаж', 'locations': '🗺️ Локация', 'items': '🎒 Предмет', 'events': '🎭 Ивент', 'organizations': '🏛️ Организация', 'races': ' Раса'}
+    categories = {'characters': '👤 Персонаж', 'locations': '️ Локация', 'items': ' Предмет', 'events': '🎭 Ивент', 'organizations': '🏛️ Организация', 'races': '🧬 Раса'}
     
     for category, label in categories.items():
         if category not in wiki_data: continue
@@ -226,18 +221,15 @@ def handle_text(message):
             if query == item.get('name', '').lower() or query in item.get('name', '').lower():
                 found_items.append({'category': category, 'label': label, 'item': item})
     
-    # ⭐ УМНАЯ ЛОГИКА ВЫБОРА
     if not found_items:
         bot.send_message(message.chat.id, "🤔 Хм, я не нашёл такого в базе. Попробуй написать точное имя или используй кнопки:", reply_markup=get_main_keyboard(), parse_mode="HTML")
         return
     
-    # Если найден только 1 результат - сразу показываем
     if len(found_items) == 1:
         result = found_items[0]
         send_item_card(message.chat.id, result['item'], result['label'])
         return
     
-    # Если найдено 2-6 результатов - показываем кнопки
     if len(found_items) <= 6:
         keyboard = telebot.types.InlineKeyboardMarkup()
         user_id = message.from_user.id
@@ -258,21 +250,18 @@ def handle_text(message):
         )
         return
     
-    # Если найдено больше 6 результатов - показываем нумерованный список
-    text = f"🔍 Найдено {len(found_items)} результатов. Напиши номер нужного:\n\n"
-    for i, result in enumerate(found_items[:10], 1):  # Показываем максимум 10
+    text = f" Найдено {len(found_items)} результатов. Напиши номер нужного:\n\n"
+    for i, result in enumerate(found_items[:10], 1):
         text += f"{i}. {result['label']} {result['item']['name']}\n"
     
     if len(found_items) > 10:
         text += f"\n...и ещё {len(found_items) - 10} результатов. Уточни запрос!"
     
-    # Сохраняем результаты для обработки номера
     user_id = message.from_user.id
     search_results_cache[user_id] = {str(i): result for i, result in enumerate(found_items[:10], 1)}
     
     bot.send_message(message.chat.id, text, reply_markup=get_main_keyboard())
 
-# Обработка выбора по номеру (для случаев когда больше 6 результатов)
 @bot.message_handler(content_types=['text'])
 def handle_number_selection(message):
     if message.text.isdigit():
