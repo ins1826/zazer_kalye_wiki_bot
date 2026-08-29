@@ -82,6 +82,105 @@ def get_main_keyboard():
     )
     return keyboard
 
+# === СЛОВАРЬ СТИКЕРОВ ===
+STICKERS = {
+    "Коленыч": ["CAACAgIAAxkBAAFTCuVqk1Gsjo9H5j009LQ1ZAuFGdj5OAACzLIAAsem0UsmUDzySoinAT0E"],
+    "Акакий Куролесов": [
+        "CAACAgIAAxkBAAFTCulqk1GyFTtCxtb7Za0F3Cy3evGMlgAClKQAAvjJ0UsRpht3yVpbgT0E",
+        "CAACAgIAAxkBAAFTCutqk1G2rdNWLfg5OcPX-V8jMKNOxwACHasAAshRgEgwiGMJ1hm9tD0E",
+        "CAACAgIAAxkBAAFTCvdqk1HLemkwR7MVjrWCb_1y4G3newACwJcAAshsKUj97YMpXPBZzj0E"
+    ],
+    "ПВЗ": ["CAACAgIAAxkBAAFTCu1qk1G54034Vd5iNNbh37zYSJTzJgACX7MAArNy0EsGJFZFHJ0JkD0E"],
+    "Поленыч": ["CAACAgIAAxkBAAFTCu1qk1G54034Vd5iNNbh37zYSJTzJgACX7MAArNy0EsGJFZFHJ0JkD0E"],
+    "Доктор Эпикантус": ["CAACAgIAAxkBAAFTCu9qk1G8AeVfrDLSh3tzkiMWOpB1rgACAaoAAu2K0EsX60LcXYD2eT0E"],
+    "Вальтасар": [
+        "CAACAgIAAxkBAAFTCu9qk1G8AeVfrDLSh3tzkiMWOpB1rgACAaoAAu2K0EsX60LcXYD2eT0E",
+        "CAACAgIAAxkBAAFTCxBqk1HzGP-t3w6SAgVqUiWoWU62uAACpK0AAhDD6EtXJKbixbcWsj0E",
+        "CAACAgIAAxkBAAFTCvFqk1HBuJvUCK_URUjQvRhQBhlBzwACT7EAAnDdeUgzAnv7tV7Lpz0E",
+        "CAACAgIAAxkBAAFTCxJqk1H2JAmmPduOe5EaoTcoKVMXWQACy5cAAmcNgUgPcTdR0xGnjj0E"
+    ],
+    "Выбор зелья Вальтасара": ["CAACAgIAAxkBAAFTCxJqk1H2JAmmPduOe5EaoTcoKVMXWQACy5cAAmcNgUgPcTdR0xGnjj0E"],
+    "Истуканус": ["CAACAgIAAxkBAAFTCvNqk1HFnkAu7y3eqk-Ri0O5dt9HHAACz6UAAjph0EvH342gWx6sSD0E"],
+    "Дон Окунь": ["CAACAgIAAxkBAAFTCvVqk1HIDHRo4UZ5AAHL9FEguEMwchUAAtmxAALbF9FLxtdZhV1AFWg9BA"],
+    "Пацаноиды": [
+        "CAACAgIAAxkBAAFTCvlqk1HOUUaDU7_Gje-KPOnPmAK-hAACC6sAAu2o0Usm-vgvixRWAT0E",
+        "CAACAgIAAxkBAAFTCvtqk1HSmuuI5qVJW7k0jqC58q6fUgACfKkAAq8cEEidpolWgmHh6D0E",
+        "CAACAgIAAxkBAAFTCttqk1DdCtK140wd2E4jXQ9TfIIu1QACvqAAAryMKEhxcEib__xeMD0E"
+    ],
+    "Бобыли": ["CAACAgIAAxkBAAFTCv1qk1HWAAHFIUt_D8fnJQ7VDzf-oEYAAn2pAALJ19FLcb1M3EVoQiY9BA"],
+    "Лесной бобыль": ["CAACAgIAAxkBAAFTCv1qk1HWAAHFIUt_D8fnJQ7VDzf-oEYAAn2pAALJ19FLcb1M3EVoQiY9BA"],
+    "Сатор Арепыч": ["CAACAgIAAxkBAAFTCv9qk1Ha_JZZEfQtkTmCJF845cD2ygACTKIAAoJr4UuN6bkqhtCziz0E"],
+    "Кокалка": [
+        "CAACAgIAAxkBAAFTCv9qk1Ha_JZZEfQtkTmCJF845cD2ygACTKIAAoJr4UuN6bkqhtCziz0E",
+        "CAACAgIAAxkBAAFTC0Jqk1JR0-192CVpyXQKb_g3g8KSVgACxqkAAqClEEgm05Dj2lIaJj0E"
+    ],
+    "ОНО": ["CAACAgIAAxkBAAFTCwNqk1HeGIHzrHv2lzJ9J3fERtE7gwACzZ4AApCw2UtOrQPh_6vRLT0E"],
+    "ОНА": ["CAACAgIAAxkBAAFTCwVqk1HhaDZkH5-DDgPKplFltizbBgAC8KMAAvfm0EtpGJW18CY4Wz0E"],
+    "Евдокия": ["CAACAgIAAxkBAAFTCwpqk1HnIWRNbybqnbYghqct4MI83AACLrAAArjA2Ev3WAy5Y5T4-D0E"],
+    "Михаил": ["CAACAgIAAxkBAAFTCwxqk1HrLkV0epDp_CzD5jaMbMRLMAAC6JsAAhIf0UuDw-f0HDDRID0E"],
+    "Пахомий": ["CAACAgIAAxkBAAFTCw5qk1HvOFXtMGu1YBXrwCJXwkfIlgAC86UAAudtIEh4ZVIU35iM5T0E"],
+    "Раз - и квас!": ["CAACAgIAAxkBAAFTCxBqk1HzGP-t3w6SAgVqUiWoWU62uAACpK0AAhDD6EtXJKbixbcWsj0E"],
+    "Господин Кривин": ["CAACAgIAAxkBAAFTCxRqk1H6dccOUWvXlD9xnP1vAceQ7gAC2qYAAskAAdBLRBDemo10hOI9BA"],
+    "Дядюшка Фантасмагор": ["CAACAgIAAxkBAAFTCxZqk1H-izBaJzB5qhqHPXfW8zu-lAACE6AAAnNr0UunCaQnVthVxz0E"],
+    "Подводный Гоша": ["CAACAgIAAxkBAAFTCxhqk1IB8CvbxoWJqDZ5IJOTUDBvAwAC1bMAAunF0UtMTycOMn4pwj0E"],
+    "Тётя Варя": ["CAACAgIAAxkBAAFTCxpqk1IGLKzZooWfN1rsvmY8Q0sZKQACH6sAAmDe0Eub8IX0xiSsVj0E"],
+    "Подпольный щекоточный клуб": ["CAACAgIAAxkBAAFTCxpqk1IGLKzZooWfN1rsvmY8Q0sZKQACH6sAAmDe0Eub8IX0xiSsVj0E"],
+    "Евген": ["CAACAgIAAxkBAAFTCxxqk1IJZDaAw36sYmxQKAskDj9J-QACmZ0AAqs28Es0y3Yjmx1SOT0E"],
+    "Грибной Архивариус": ["CAACAgIAAxkBAAFTCx5qk1IOtXIvl3ToezJ_gMkN5qnjKAACaKoAAugQ0Euu9mYXxOXkBz0E"],
+    "Баба Жуля": ["CAACAgIAAxkBAAFTCyBqk1IRw3ITxXZG4PJpIuFg1iMjmgACw6sAAv8z4EvMtzrYEkFeFj0E"],
+    "Толстомясочка": ["CAACAgIAAxkBAAFTCyJqk1IV62G1A4Faet3OXCCJ0IjqbwACOrIAAlhtmEi0D0sCHKoptD0E"],
+    "Жадность на лайке": ["CAACAgIAAxkBAAFTCyRqk1IY2Kp4vS5cnCmWbE4Mrm4eTgACUJwAAqhm-Etas7UTJD7a1D0E"],
+    "Зукя": ["CAACAgIAAxkBAAFTCyZqk1Ic0gxZ96ktz6H5ERlSkbDmRQAC958AAmQnIEh5nzsq_mLwpT0E"],
+    "Пуча": ["CAACAgIAAxkBAAFTCyhqk1IfkSXFCfT76G-1ugGFNudhfwAC7aAAAmc1KEgL2MpnC255Uj0E"],
+    "Борька": ["CAACAgIAAxkBAAFTCypqk1IiUHkCqgXOm4Ff_pYIwFyyEAACTLQAAl3l0Es1mt5r9M1jSj0E"],
+    "Провансалла": ["CAACAgIAAxkBAAFTCyxqk1IlkgNo1-3O2pkW-jHu3GrqdgACEaUAAu0P2Utv4hCU8sEEHT0E"],
+    "Майонезные тётеньки": ["CAACAgIAAxkBAAFTCyxqk1IlkgNo1-3O2pkW-jHu3GrqdgACEaUAAu0P2Utv4hCU8sEEHT0E"],
+    "Хрычи": ["CAACAgIAAxkBAAFTCy5qk1IoZNGmrhN9Ym7wNWUbjAjrwAAC4KsAAsZB0UspKcWE_kUhDj0E"],
+    "Смоломаз": ["CAACAgIAAxkBAAFTCzRqk1Ivq11JdPIdsuEYCEuKg1ZHzwACKaMAAmHV2UtDtpNWrfgzED0E"],
+    "Морковные пятки": ["CAACAgIAAxkBAAFTCzZqk1IzUihVY8XrlrYBcAnkhWoesQACc6IAAqhV2Uu-uIKpmJJHIz0E"],
+    "Битубисас": ["CAACAgIAAxkBAAFTCzhqk1I2AAF3jMSbbaaN-KneqgXpqgEAAl-cAAITTtlLxseuKXPD9WM9BA"],
+    "Бубоня": ["CAACAgIAAxkBAAFTCzpqk1I5u6QWo7JOLuzF_1rnCFjEEwACF6UAAusb2EvHY-wO3NeEUj0E"],
+    "Синие ящеры": ["CAACAgIAAxkBAAFTCzpqk1I5u6QWo7JOLuzF_1rnCFjEEwACF6UAAusb2EvHY-wO3NeEUj0E"],
+    "Реутень": [
+        "CAACAgIAAxkBAAFTCzxqk1I8hphL34UUaU7PNtB3mduoMQACfKQAAtJd4EukOo_gKnt4CD0E",
+        "CAACAgIAAxkBAAFTCz5qk1JDGiU9yHf7PBL2LqVOU8VFzgACoqgAAr2B4EuYxuf2RyjrjD0E"
+    ],
+    "Подмыхан": ["CAACAgIAAxkBAAFTC0Bqk1JM6E8ml8jD4rOAL2e9LMIHnQACO6gAAkkJ6EtV-eZwjcTAND0E"],
+    "Лесной Курбак": ["CAACAgIAAxkBAAFTC4Bqk1KxejJOThJhHp1WYk5mB-k3mgAC16cAAvHmmEhvFvjGS8jjST0E"],
+    "Калач": ["CAACAgIAAxkBAAFTC35qk1KvEKJPsH8dTKGlc6K813DDVAACaq0AArYnKUjjoc77h49J-j0E"],
+    "Харитон Ряков": ["CAACAgIAAxkBAAFTC3xqk1KsKECJqPA_CwVSQk3ieqsieQACTqoAAuJmIUi5iZdIHxDisD0E"],
+    "Конгресс путешественников": ["CAACAgIAAxkBAAFTC3xqk1KsKECJqPA_CwVSQk3ieqsieQACTqoAAuJmIUi5iZdIHxDisD0E"],
+    "Сеньор Понполомео": ["CAACAgIAAxkBAAFTC3pqk1Ko52Z7xO9lW9OD5FIgpDiJVAAChKAAAqCbMEg_HC3--4mhxD0E"],
+    "Гузлик": ["CAACAgIAAxkBAAFTC0Rqk1JUSqdgGdIkZpyhPQ6wRyixyAACvpwAAgrP-UuFMiQAAVw5MHo9BA"],
+    "Летописный Артём": [
+        "CAACAgIAAxkBAAFTC0Zqk1JYcvtxoUcirgZDhWJ5wS8k_wACV6IAApI9-EvqUXEIs8EV_j0E",
+        "CAACAgIAAxkBAAFTC0hqk1JbNDAcT_iG7AABzK-2s_Sr6p4AAsGfAAKhz2FIfTOKN3tvn4A9BA"
+    ],
+    "Мопсосвины": ["CAACAgIAAxkBAAFTC0pqk1JefY-ZnPr6mjjz6jX2d0rQFAACMKAAAp12UUju8ZPhuUtGZj0E"],
+    "Грязуны": ["CAACAgIAAxkBAAFTC0xqk1Jh1Qp1sVC45EzzDEhlXOzGBwACJZ8AArUwmUh2Nee5Ad9Rej0E"],
+    "Григорий": ["CAACAgIAAxkBAAFTC05qk1JkG6GWxuGwXNmGhUSneydCaQAC2KEAAmxvCUhxZIooEbnJnT0E"],
+    "Кокша": ["CAACAgIAAxkBAAFTC1Bqk1JoY41z09x0V9yf97aWMxc7tAACLaUAAg9MQUiZ4I0FnDp5ij0E"],
+    "Маня Понич": ["CAACAgIAAxkBAAFTC1Bqk1JoY41z09x0V9yf97aWMxc7tAACLaUAAg9MQUiZ4I0FnDp5ij0E"],
+    "Мальчик-Педаль": ["CAACAgIAAxkBAAFTC1Jqk1JtLtCCSHO0MfRKlgHm-dJ1iAACcK0AAq_QMEjyIUpi8K57PT0E"],
+    "Пальчик-Медаль": ["CAACAgIAAxkBAAFTC1Rqk1JwQ7KlP2UanvoKC8IDf85f4QADowACVqhZSAsCi9BjpQPYPQQ"],
+    "Пыльный Глеб": ["CAACAgIAAxkBAAFTC1Zqk1Jz4mIhDXZ60n0SG1ob7MPtlAACdq8AAtzQcEiaGzQM6U_E9D0E"],
+    "Многоликий Филипп": ["CAACAgIAAxkBAAFTC1hqk1J3oD8K-IcAASI4WAMw39QFFjUAAlSqAAIBW3BI5y5ce48v-qU9BA"],
+    "Профессор Игорь Диод": ["CAACAgIAAxkBAAFTC1pqk1J615GEej5oePrl9tyO9wOv2wACHbYAAr8AAQhI1Ta2SAgG1us9BA"],
+    "Сырный Джо": ["CAACAgIAAxkBAAFTC15qk1J9sSYqk182m1Hd7BgExN8hrgAC1KQAAsCnCUg2IJ49oRE8MD0E"],
+    "Принцесса Пармезанна": ["CAACAgIAAxkBAAFTC2Bqk1KA3pauT990rL96Puz7uAwdMAAC0pwAAsn9gEgOZ1ceeAUmRD0E"],
+    "Птозный Эдгар": ["CAACAgIAAxkBAAFTC2Jqk1KD5JYhEXgXUUet3e0SvsuavwACD6oAAozvEUgoWoRSg1LMqj0E"],
+    "Большой Дима": ["CAACAgIAAxkBAAFTC2Rqk1KHW6esC82XEg47sv8yOJF5iwACaq4AAlHFOUiAZx6Oq28DZT0E"],
+    "Волнистый попугай Николай": ["CAACAgIAAxkBAAFTC2Zqk1KK7Qth2oVgtIZ2HHLGlQZvYgAC86MAAtZ0kEhWc_sErCP-Gj0E"],
+    "Луп Лупыч": ["CAACAgIAAxkBAAFTC2hqk1KOK3rdNSWSTF-2cOKBbCbQBQACCa4AAi0n6EuSfn-EZc_QkT0E"],
+    "Улитолий": ["CAACAgIAAxkBAAFTC2pqk1KRWEij6Y2OKKI9GQPg9KdVgwACQ9cAAv0BOEglR1smInc4FT0E"],
+    "Грочилы": ["CAACAgIAAxkBAAFTC2xqk1KUurvNwbjRkiY9uIr01uFOGAACB6gAAuNPUEhJ6qiSKhj1dT0E"],
+    "Шапец": ["CAACAgIAAxkBAAFTC3Bqk1KXeJU4gesxYrDpkVi3sf_qigACYp8AAlfoaUjxErIad-LXMj0E"],
+    "Доктор Лист": ["CAACAgIAAxkBAAFTC3Jqk1Kak4vOBV-VeFbZ8o2XhkeZ5QAC1a8AAhTVWEiSRMQhECPgKD0E"],
+    "Пакет": ["CAACAgIAAxkBAAFTC3Rqk1KewCyo_u3wzCqUnBMXH7BbBAACBZoAAhn3mEgure_syXenCT0E"],
+    "Дырки от дверей": ["CAACAgIAAxkBAAFTC3Zqk1Kh3r5gfvPqfHKQz3TJRq6wJAACGbAAAphnWEgE8dLJRGnIeD0E"],
+    "Магога": ["CAACAgIAAxkBAAFTC3hqk1Klc14pBpwT2O7PGY1-mjhQhwACqaoAAu5ZSEiXRnB-6LFp9j0E"],
+}
+
 def send_item_card(chat_id, item, label, send_photo=True):
     """Отправляет карточку элемента с картинкой (если есть)"""
     text = f"{label}: <b>{escape_html(item['name'])}</b>\n"
@@ -93,22 +192,30 @@ def send_item_card(chat_id, item, label, send_photo=True):
     if item.get('episodes') and len(item['episodes']) > 0:
         text += f"\n Эпизоды: {', '.join([f'ep.{e}' for e in item['episodes'][:5]])}"
     
-    # Отправляем с картинкой (если есть и включена отправка фото)
+    # 1. Сначала отправляем карточку (с картинкой или без)
     if send_photo and item.get('image'):
         try:
             image_url = IMAGES_BASE_URL + item['image']
             response = requests.get(image_url, timeout=10)
             if response.status_code == 200:
-                # Отправляем фото с текстом в caption
                 photo_file = BytesIO(response.content)
                 bot.send_photo(chat_id, photo_file, caption=text, parse_mode="HTML", reply_markup=get_main_keyboard())
-                return
+            else:
+                bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
         except Exception as e:
             print(f"❌ Не удалось отправить картинку: {e}")
-            # Если не получилось отправить картинку, отправляем просто текст
+            bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
+    else:
+        bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
     
-    # Если нет картинки или не удалось отправить — отправляем текст
-    bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
+    # 2. Затем отправляем случайный стикер (если есть)
+    if item['name'] in STICKERS:
+        try:
+            sticker_list = STICKERS[item['name']]
+            random_sticker = random.choice(sticker_list)
+            bot.send_sticker(chat_id, random_sticker)
+        except Exception as e:
+            print(f"❌ Не удалось отправить стикер для {item['name']}: {e}")
 
 # === 1. КОМАНДА /start ===
 @bot.message_handler(commands=['start'])
