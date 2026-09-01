@@ -107,13 +107,16 @@ nav.tabs button.active {
 }
 .card .short { font-size: 0.95em; color: #aaa; margin-bottom: 6px; }
 .card .episodes { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-.card .episodes span {
-  font-size: 0.7em;
+.card .episodes span,
+.card .episodes a {
+  font-size: 0.85em;
   background: #2a2a3a;
   color: #c9a0ff;
-  padding: 1px 6px;
-  border-radius: 8px;
+  padding: 4px 10px;
+  border-radius: 10px;
   border: 1px solid #3a3a4a;
+  text-decoration: none;
+  display: inline-block;
 }
 .card .actions {
   position: absolute;
@@ -311,14 +314,14 @@ margin-right: auto;
 }
 .modal-bg.active { display: flex; }
 .modal {
-  background: #1a1a25;
-  border: 1px solid #c9a0ff;
-  border-radius: 10px;
-  padding: 20px;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
+background: #1a1a25;
+border: 1px solid #c9a0ff;
+border-radius: 10px;
+padding: 24px 28px;
+max-width: 780px;
+width: 95%;
+max-height: 92vh;
+overflow-y: auto;
 }
 .modal h2 { margin-bottom: 15px; color: #c9a0ff; }
 .modal label {
@@ -338,7 +341,7 @@ margin-right: auto;
   font-size: 0.9em;
   font-family: inherit;
 }
-.modal textarea { min-height: 80px; resize: vertical; }
+.modal textarea { min-height: 320px; resize: vertical; }
 .modal .btns {
   display: flex;
   gap: 8px;
@@ -4211,7 +4214,13 @@ function renderCharacters() {
   grid.innerHTML = filtered.map(c => {
   const realIdx = data.characters.indexOf(c);
   const rc = raceClass(c.type);
-  const eps = (c.episodes || []).map(e => `<span>ep.${escapeHtml(e)}</span>`).join('');
+  const eps = (c.episodes || []).map(e => {
+  const num = parseInt(e);
+  if (!isNaN(num)) {
+    return `<a href="https://t.me/+qbqyWUN_54xmYmMy/${num}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
+  }
+  return `<span>ep.${escapeHtml(e)}</span>`;
+}).join('');
   const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
   const hasThumb = c.image ? 'has-thumb' : '';
   return `<div class="card race-${rc} ${hasThumb}" data-idx="${realIdx}" data-name="${escapeHtml(c.name)}" data-full="${escapeHtml(c.full)}" data-img="${escapeHtml(c.image || '')}">
@@ -4901,12 +4910,18 @@ function openWikiModal(item) {
   }
   
   if (item.episodes && item.episodes.length) {
-    modalEpisodes.innerHTML = 'Эпизоды: ' + 
-      item.episodes.map(e => `<span>ep.${e}</span>`).join('');
-    modalEpisodes.style.display = 'block';
-  } else {
-    modalEpisodes.style.display = 'none';
-  }
+  const episodeLinks = item.episodes.map(e => {
+    const num = parseInt(e);
+    if (!isNaN(num)) {
+      return `<a href="https://t.me/zazer_episodes/${num}" target="_blank" class="episode-link">ep.${e}</a>`;
+    }
+    return `<span>ep.${e}</span>`;
+  }).join('');
+  modalEpisodes.innerHTML = 'Эпизоды: ' + episodeLinks;
+  modalEpisodes.style.display = 'block';
+} else {
+  modalEpisodes.style.display = 'none';
+}
   
   wikiModal.classList.add('active');
 document.body.style.overflow = 'hidden';
