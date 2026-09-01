@@ -237,19 +237,30 @@ margin-right: auto;
 }
 
 .modal-episodes {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid #2a2a33;
-  font-size: 13px;
-  color: #9aa0b4;
+margin-top: 18px;
+padding-top: 14px;
+border-top: 1px solid #2a2a33;
+font-size: 13px;
+color: #9aa0b4;
+display: flex;
+flex-wrap: wrap;
+gap: 6px;
+align-items: center;
+}
+.modal-episodes::before {
+content: 'Эпизоды:';
+margin-right: 8px;
+color: #9aa0b4;
 }
 .modal-episodes span {
-  display: inline-block;
-  background: #2d2d38;
-  padding: 3px 9px;
-  border-radius: 12px;
-  margin: 2px 4px 2px 0;
-  color: #c8cde0;
+display: inline-block;
+background: #2a2a3a;
+color: #c9a0ff;
+padding: 3px 10px;
+border-radius: 10px;
+border: 1px solid #3a3a4a;
+font-size: 0.85em;
+margin: 0;
 }
 
 /* Гиперссылки внутри описания */
@@ -4217,7 +4228,7 @@ function renderCharacters() {
   const eps = (c.episodes || []).map(e => {
   const num = parseInt(e);
   if (!isNaN(num)) {
-    return `<a href="https://t.me/+qbqyWUN_54xmYmMy/${num}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
+    return `<a href="https://t.me/zazer_kalye_bot_database/${num}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
   }
   return `<span>ep.${escapeHtml(e)}</span>`;
 }).join('');
@@ -4913,14 +4924,14 @@ function openWikiModal(item) {
   const episodeLinks = item.episodes.map(e => {
     const num = parseInt(e);
     if (!isNaN(num)) {
-      return `<a href="https://t.me/zazer_episodes/${num}" target="_blank" class="episode-link">ep.${e}</a>`;
+      return `<a href="https://t.me/zazer_kalye_bot_database/${num}" target="_blank" class="episode-link">ep.${e}</a>`;
     }
     return `<span>ep.${e}</span>`;
   }).join('');
-  modalEpisodes.innerHTML = 'Эпизоды: ' + episodeLinks;
-  modalEpisodes.style.display = 'block';
+  modalEpisodes.innerHTML = item.episodes.map(e => `<span>ep.${e}</span>`).join('');
+  modalEpisodes.style.display = 'flex';
 } else {
-  modalEpisodes.style.display = 'none';
+modalEpisodes.style.display = 'none';
 }
   
   wikiModal.classList.add('active');
