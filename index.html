@@ -4243,18 +4243,21 @@ function escapeHtml(s) {
 
 function parseEpisodeLinks(episodes) {
   if (!episodes || !episodes.length) return '';
-  
   return episodes.map(e => {
     e = e.trim();
-    // Проверяем формат [[ссылка|текст]]
+    // 1. Проверяем формат [[ссылка|текст]]
     const wikiMatch = e.match(/^\[\[(.+?)\|(.+?)\]\]$/);
     if (wikiMatch) {
-      const url = wikiMatch[1];
-      const text = wikiMatch[2];
+      const url = wikiMatch[1].trim();
+      const text = wikiMatch[2].trim();
       return `<a href="${escapeHtml(url)}" target="_blank" class="episode-link">ep.${escapeHtml(text)}</a>`;
     }
-    // Обычный эпизод без ссылки
-    return `<span>ep.${escapeHtml(e)}</span>`;
+    // 2. Если это полная ссылка (начинается с http)
+    if (e.startsWith('http')) {
+      return `<a href="${escapeHtml(e)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
+    }
+    // 3. Если это просто номер эпизода (автоматически подставляем ссылку на твой канал)
+    return `<a href="https://t.me/+qbqyWUN_54xmYmMy/${escapeHtml(e)}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
   }).join('');
 }
 
@@ -4279,13 +4282,7 @@ function renderCharacters() {
     const rc = raceClass(c.type);
     
     // Правильная обработка эпизодов (без дублирования!)
-    const eps = (c.episodes || []).map(e => {
-      const ep = e.trim();
-      if (ep.startsWith('http')) {
-        return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
-      }
-      return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
-    }).join('');
+      const eps = parseEpisodeLinks(c.episodes);
     
     const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
     const hasThumb = c.image ? 'has-thumb' : '';
@@ -4369,13 +4366,7 @@ function renderGeneric(type, fields) {
     const rc = type === 'characters' ? raceClass(c.type) : '';
     
     // Правильная обработка эпизодов
-    const eps = (c.episodes || []).map(e => {
-      const ep = e.trim();
-      if (ep.startsWith('http')) {
-        return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
-      }
-      return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
-    }).join('');
+      const eps = parseEpisodeLinks(c.episodes);
     
     const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
     const hasThumb = c.image ? 'has-thumb' : '';
@@ -4988,14 +4979,7 @@ function openWikiModal(item) {
   }
   
   if (item.episodes && item.episodes.length) {
-  const episodeLinks = item.episodes.map(e => {
-    const ep = e.trim();
-    if (ep.startsWith('http')) {
-      return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
-    }
-    return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
-  }).join('');
-  modalEpisodes.innerHTML = episodeLinks;
+  modalEpisodes.innerHTML = parseEpisodeLinks(item.episodes);
   modalEpisodes.style.display = 'flex';
 } else {
   modalEpisodes.style.display = 'none';
@@ -5070,7 +5054,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия beta6 · Обновлено: 01.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия beta7 · Обновлено: 01.09.2026.</div>
 </footer>
 
 </body></html>
