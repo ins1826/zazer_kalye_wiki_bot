@@ -565,6 +565,32 @@ color: #e0c0ff;
 text-decoration: none;
 }
 
+/* Кликабельные ссылки на эпизоды */
+.episode-link {
+  display: inline-block;
+  background: #2a2a3a;
+  color: #c9a0ff;
+  padding: 4px 10px;
+  border-radius: 10px;
+  border: 1px solid #3a3a4a;
+  text-decoration: none;
+  font-size: 0.85em;
+  transition: all 0.2s;
+}
+.episode-link:hover {
+  background: #3a3a4a;
+  border-color: #c9a0ff;
+  transform: translateY(-1px);
+}
+.modal-episodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #2a2a33;
+}
+
 /* Кнопки админ-панели скрыты по умолчанию */
 .admin-only { display: none !important; }
 /* Показываем их только в режиме админа */
@@ -4309,7 +4335,13 @@ if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не �
   grid.innerHTML = filtered.map(c => {
   const realIdx = data[type].indexOf(c);
   const rc = type === 'characters' ? raceClass(c.type) : '';
-  const eps = (c.episodes || []).map(e => `<span>ep.${escapeHtml(e)}</span>`).join('');
+  const eps = (c.episodes || []).map(e => {
+  e = e.trim();
+  if (e.startsWith('http')) {
+    return `<a href="${escapeHtml(e)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
+  }
+  return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(e)}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
+}).join('');
   const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
   const hasThumb = c.image ? 'has-thumb' : '';
   return `<div class="card ${rc ? 'race-'+rc : ''} ${hasThumb}" data-idx="${realIdx}" data-name="${escapeHtml(c.name)}" data-full="${escapeHtml(c.full||'')}" data-img="${escapeHtml(c.image||'')}">
@@ -4452,7 +4484,7 @@ function openEdit(type, idx = -1) {
   html += `<label>🖼️ Изображение (файл в папке с HTML)</label><input id="f-image" value="${escapeHtml(item.image||'')}" placeholder="valtasar.jpg или images/valtasar.jpg">`;
 }
 if (type === 'characters' || type === 'locations' || type === 'items' || type === 'events' || type === 'organizations' || type === 'races') {
-  html += `<label>🎬 Эпизоды (через запятую: 1, 5, 12)</label><input id="f-episodes" value="${(item.episodes||[]).join(', ')}" placeholder="1, 5, 12">`;
+  html += `<label>🎬 Эпизоды (полные ссылки на видео или номера через запятую)</label><input id="f-episodes" value="${(item.episodes||[]).join(', ')}" placeholder="https://t.me/.../45, 46, 47">`;
 }
 if (type === 'plots') {
 html += `<label>📚 Сюжетная линия</label><input id="f-storyline" value="${escapeHtml(item.storyline||'')}" placeholder="Например: Поиск пацаноидов">`;
@@ -4922,16 +4954,16 @@ function openWikiModal(item) {
   
   if (item.episodes && item.episodes.length) {
   const episodeLinks = item.episodes.map(e => {
-    const num = parseInt(e);
-    if (!isNaN(num)) {
-      return `<a href="https://t.me/zazer_kalye_bot_database/${num}" target="_blank" class="episode-link">ep.${e}</a>`;
+    e = e.trim();
+    if (e.startsWith('http')) {
+      return `<a href="${escapeHtml(e)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
     }
-    return `<span>ep.${e}</span>`;
+    return `<a href="https://t.me/+qbqyWUN_54xmYmMy/${escapeHtml(e)}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
   }).join('');
-  modalEpisodes.innerHTML = item.episodes.map(e => `<span>ep.${e}</span>`).join('');
+  modalEpisodes.innerHTML = episodeLinks;
   modalEpisodes.style.display = 'flex';
 } else {
-modalEpisodes.style.display = 'none';
+  modalEpisodes.style.display = 'none';
 }
   
   wikiModal.classList.add('active');
