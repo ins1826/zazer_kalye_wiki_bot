@@ -118,6 +118,18 @@ nav.tabs button.active {
   text-decoration: none;
   display: inline-block;
 }
+
+.card .episodes a.episode-link {
+  color: #c9a0ff;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.card .episodes a.episode-link:hover {
+  color: #e0c0ff;
+  text-decoration: none;
+}
+
 .card .actions {
   position: absolute;
   top: 8px;
@@ -4229,6 +4241,23 @@ function escapeHtml(s) {
   return (s || '').replace(/[&<>"'\n\r]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','\n':'&#10;','\r':''}[c]));
 }
 
+function parseEpisodeLinks(episodes) {
+  if (!episodes || !episodes.length) return '';
+  
+  return episodes.map(e => {
+    e = e.trim();
+    // Проверяем формат [[ссылка|текст]]
+    const wikiMatch = e.match(/^\[\[(.+?)\|(.+?)\]\]$/);
+    if (wikiMatch) {
+      const url = wikiMatch[1];
+      const text = wikiMatch[2];
+      return `<a href="${escapeHtml(url)}" target="_blank" class="episode-link">ep.${escapeHtml(text)}</a>`;
+    }
+    // Обычный эпизод без ссылки
+    return `<span>ep.${escapeHtml(e)}</span>`;
+  }).join('');
+}
+
 // ============ РЕНДЕР КАРТОЧЕК ============
 function renderCharacters() {
   const q = normalizeText(document.getElementById('search-characters').value);
@@ -4252,6 +4281,12 @@ function renderCharacters() {
   const realIdx = data.characters.indexOf(c);
   const rc = raceClass(c.type);
   const eps = (c.episodes || []).map(e => {
+  const ep = e.trim();
+  if (ep.startsWith('http')) {
+    return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
+  }
+  return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
+}).join('');
   const num = parseInt(e);
   if (!isNaN(num)) {
     return `<a href="https://t.me/zazer_kalye_bot_database/${num}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
@@ -4336,11 +4371,11 @@ if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не �
   const realIdx = data[type].indexOf(c);
   const rc = type === 'characters' ? raceClass(c.type) : '';
   const eps = (c.episodes || []).map(e => {
-  e = e.trim();
-  if (e.startsWith('http')) {
-    return `<a href="${escapeHtml(e)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
+  const ep = e.trim();
+  if (ep.startsWith('http')) {
+    return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
   }
-  return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(e)}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
+  return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
 }).join('');
   const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
   const hasThumb = c.image ? 'has-thumb' : '';
@@ -4954,11 +4989,11 @@ function openWikiModal(item) {
   
   if (item.episodes && item.episodes.length) {
   const episodeLinks = item.episodes.map(e => {
-    e = e.trim();
-    if (e.startsWith('http')) {
-      return `<a href="${escapeHtml(e)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
+    const ep = e.trim();
+    if (ep.startsWith('http')) {
+      return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
     }
-    return `<a href="https://t.me/+qbqyWUN_54xmYmMy/${escapeHtml(e)}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
+    return `<a href="https://t.me/+qbqyWUN_54xmYmMy/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
   }).join('');
   modalEpisodes.innerHTML = episodeLinks;
   modalEpisodes.style.display = 'flex';
@@ -5035,7 +5070,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия beta4 · Обновлено: 01.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия beta6 · Обновлено: 01.09.2026.</div>
 </footer>
 
 </body></html>
