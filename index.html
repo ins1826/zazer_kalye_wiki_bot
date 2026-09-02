@@ -4245,19 +4245,37 @@ function parseEpisodeLinks(episodes) {
   if (!episodes || !episodes.length) return '';
   return episodes.map(e => {
     e = e.trim();
-    // 1. Проверяем формат [[ссылка|текст]]
+    
+    // 1. Приоритет №1: Ручная вики-ссылка [[https://...|1]]
     const wikiMatch = e.match(/^\[\[(.+?)\|(.+?)\]\]$/);
     if (wikiMatch) {
       const url = wikiMatch[1].trim();
       const text = wikiMatch[2].trim();
       return `<a href="${escapeHtml(url)}" target="_blank" class="episode-link">ep.${escapeHtml(text)}</a>`;
     }
-    // 2. Если это полная ссылка (начинается с http)
+    
+    // 2. Приоритет №2: Прямая полная ссылка
     if (e.startsWith('http')) {
       return `<a href="${escapeHtml(e)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
     }
-    // 3. Если это просто номер эпизода (автоматически подставляем ссылку на твой канал)
-    return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(e)}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
+    
+    // 3. Приоритет №3: Автоматический расчёт смещения для обычных чисел
+    const num = parseInt(e, 10);
+    if (!isNaN(num)) {
+      let messageId = num;
+      
+      // Логика смещения, которую ты запросила:
+      if (num >= 1 && num <= 124) {
+        messageId = num + 2;
+      } else if (num >= 125) {
+        messageId = num + 3;
+      }
+      
+      return `<a href="https://t.me/zazer_kalye_bot_database/${messageId}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
+    }
+    
+    // 4. Если введено что-то нечисловое (на всякий случай)
+    return `<span>ep.${escapeHtml(e)}</span>`;
   }).join('');
 }
 
