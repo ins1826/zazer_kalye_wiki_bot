@@ -4265,49 +4265,43 @@ function renderCharacters() {
   const sortMode = document.getElementById('sort-characters').value;
   const grid = document.getElementById('grid-characters');
   
-  // Фильтрация
   let filtered = data.characters.filter((c, i) => {
     const matchQ = !q || normalizeText(c.name).includes(q) || normalizeText(c.short).includes(q) || normalizeText(c.full).includes(q);
     const matchT = !typeFilter || c.type === typeFilter;
     return matchQ && matchT;
   });
-
-  // Сортировка
-  filtered = sortCharacters(filtered, sortMode);
   
+  filtered = sortCharacters(filtered, sortMode);
   if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
   
   grid.innerHTML = filtered.map(c => {
-  const realIdx = data.characters.indexOf(c);
-  const rc = raceClass(c.type);
-  const eps = (c.episodes || []).map(e => {
-  const ep = e.trim();
-  if (ep.startsWith('http')) {
-    return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
-  }
-  return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
-}).join('');
-  const num = parseInt(e);
-  if (!isNaN(num)) {
-    return `<a href="https://t.me/zazer_kalye_bot_database/${num}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
-  }
-  return `<span>ep.${escapeHtml(e)}</span>`;
-}).join('');
-  const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
-  const hasThumb = c.image ? 'has-thumb' : '';
-  return `<div class="card race-${rc} ${hasThumb}" data-idx="${realIdx}" data-name="${escapeHtml(c.name)}" data-full="${escapeHtml(c.full)}" data-img="${escapeHtml(c.image || '')}">
-    ${IS_ADMIN ? `<div class="actions">
-      <button onclick="deleteItem('characters',${realIdx})">🗑️</button>
-      <button onclick="openEdit('characters',${realIdx})">✏️</button>
-    </div>` : ''}
-    ${thumb}
-    <h3>${escapeHtml(c.name)}</h3>
-    <span class="type tag-${rc}">${escapeHtml(c.type)}</span>
-    <div class="short">${escapeHtml(c.short)}</div>
-    ${eps ? `<div class="episodes">${eps}</div>` : ''}
-  </div>`;
-}).join('');
-  
+    const realIdx = data.characters.indexOf(c);
+    const rc = raceClass(c.type);
+    
+    // Правильная обработка эпизодов (без дублирования!)
+    const eps = (c.episodes || []).map(e => {
+      const ep = e.trim();
+      if (ep.startsWith('http')) {
+        return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
+      }
+      return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
+    }).join('');
+    
+    const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
+    const hasThumb = c.image ? 'has-thumb' : '';
+    
+    return `<div class="card race-${rc} ${hasThumb}" data-idx="${realIdx}" data-name="${escapeHtml(c.name)}" data-full="${escapeHtml(c.full)}" data-img="${escapeHtml(c.image || '')}">
+${IS_ADMIN ? `<div class="actions">
+<button onclick="deleteItem('characters',${realIdx})">🗑️</button>
+<button onclick="openEdit('characters',${realIdx})">✏️</button>
+</div>` : ''}
+${thumb}
+<h3>${escapeHtml(c.name)}</h3>
+<span class="type tag-${rc}">${escapeHtml(c.type)}</span>
+<div class="short">${escapeHtml(c.short)}</div>
+${eps ? `<div class="episodes">${eps}</div>` : ''}
+</div>`;
+  }).join('');
 }
 
 function sortCharacters(arr, mode) {
@@ -4360,38 +4354,44 @@ function sortItems(arr, mode) {
 }
 
 function renderGeneric(type, fields) {
-const q = normalizeText(document.getElementById('search-' + type).value);
-const sortEl = document.getElementById('sort-' + type);
-const sortMode = sortEl ? sortEl.value : 'name-asc';
-const grid = document.getElementById('grid-' + type);
-let filtered = data[type].filter(c => !q || normalizeText(c.name).includes(q) || normalizeText(c.short||'').includes(q) || normalizeText(c.full||'').includes(q));
-filtered = sortItems(filtered, sortMode);
-if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
+  const q = normalizeText(document.getElementById('search-' + type).value);
+  const sortEl = document.getElementById('sort-' + type);
+  const sortMode = sortEl ? sortEl.value : 'name-asc';
+  const grid = document.getElementById('grid-' + type);
+  
+  let filtered = data[type].filter(c => !q || normalizeText(c.name).includes(q) || normalizeText(c.short||'').includes(q) || normalizeText(c.full||'').includes(q));
+  filtered = sortItems(filtered, sortMode);
+  
+  if (!filtered.length) { grid.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
+  
   grid.innerHTML = filtered.map(c => {
-  const realIdx = data[type].indexOf(c);
-  const rc = type === 'characters' ? raceClass(c.type) : '';
-  const eps = (c.episodes || []).map(e => {
-  const ep = e.trim();
-  if (ep.startsWith('http')) {
-    return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
-  }
-  return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
-}).join('');
-  const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
-  const hasThumb = c.image ? 'has-thumb' : '';
-  return `<div class="card ${rc ? 'race-'+rc : ''} ${hasThumb}" data-idx="${realIdx}" data-name="${escapeHtml(c.name)}" data-full="${escapeHtml(c.full||'')}" data-img="${escapeHtml(c.image||'')}">
-    ${IS_ADMIN ? `<div class="actions">
-      <button onclick="deleteItem('${type}',${realIdx})">🗑️</button>
-      <button onclick="openEdit('${type}',${realIdx})">✏️</button>
-    </div>` : ''}
-    ${thumb}
-    <h3>${escapeHtml(c.name)}</h3>
-    ${c.type ? `<span class="type tag-${raceClass(c.type)}">${escapeHtml(c.type)}</span>` : ''}
-    ${c.short ? `<div class="short">${escapeHtml(c.short)}</div>` : ''}
-    ${eps ? `<div class="episodes">${eps}</div>` : ''}
-  </div>`;
-}).join('');
-
+    const realIdx = data[type].indexOf(c);
+    const rc = type === 'characters' ? raceClass(c.type) : '';
+    
+    // Правильная обработка эпизодов
+    const eps = (c.episodes || []).map(e => {
+      const ep = e.trim();
+      if (ep.startsWith('http')) {
+        return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
+      }
+      return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
+    }).join('');
+    
+    const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
+    const hasThumb = c.image ? 'has-thumb' : '';
+    
+    return `<div class="card ${rc ? 'race-'+rc : ''} ${hasThumb}" data-idx="${realIdx}" data-name="${escapeHtml(c.name)}" data-full="${escapeHtml(c.full||'')}" data-img="${escapeHtml(c.image||'')}">
+${IS_ADMIN ? `<div class="actions">
+<button onclick="deleteItem('${type}',${realIdx})">🗑️</button>
+<button onclick="openEdit('${type}',${realIdx})">✏️</button>
+</div>` : ''}
+${thumb}
+<h3>${escapeHtml(c.name)}</h3>
+${c.type ? `<span class="type tag-${raceClass(c.type)}">${escapeHtml(c.type)}</span>` : ''}
+${c.short ? `<div class="short">${escapeHtml(c.short)}</div>` : ''}
+${eps ? `<div class="episodes">${eps}</div>` : ''}
+</div>`;
+  }).join('');
 }
 
 function renderPlots() {
@@ -4993,7 +4993,7 @@ function openWikiModal(item) {
     if (ep.startsWith('http')) {
       return `<a href="${escapeHtml(ep)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
     }
-    return `<a href="https://t.me/+qbqyWUN_54xmYmMy/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
+    return `<a href="https://t.me/zazer_kalye_bot_database/${escapeHtml(ep)}" target="_blank" class="episode-link">ep.${escapeHtml(ep)}</a>`;
   }).join('');
   modalEpisodes.innerHTML = episodeLinks;
   modalEpisodes.style.display = 'flex';
