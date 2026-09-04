@@ -302,7 +302,7 @@ margin: 0;
 .race-Человек { border-left-color: #4a9eff !important; }
 .race-Существо { border-left-color: #8a8a9a !important; }
 .race-Бобыль { border-left-color: #7ac74f !important; }
-.race-Синий-ящер { border-left-color: #3ab8ff !important; }
+.race-Синий-ящер { border-left-color: #1a5fff !important; }
 .race-Кокша { border-left-color: #ff6b9d !important; }
 .race-Божество { border-left-color: #ffd700 !important; }
 .race-Растение-Существо { border-left-color: #b88a3a !important; }
@@ -322,7 +322,7 @@ margin: 0;
 .tag-Человек { background: #4a9eff33 !important; color: #4a9eff !important; }
 .tag-Существо { background: #8a8a9a33 !important; color: #bbb !important; }
 .tag-Бобыль { background: #7ac74f33 !important; color: #7ac74f !important; }
-.tag-Синий-ящер { background: #3ab8ff33 !important; color: #3ab8ff !important; }
+.tag-Синий-ящер { background: #1a5fff33 !important; color: #1a5fff !important; }
 .tag-Кокша { background: #ff6b9d33 !important; color: #ff6b9d !important; }
 .tag-Божество { background: #ffd70033 !important; color: #ffd700 !important; }
 .tag-Растение-Существо { background: #b88a3a33 !important; color: #d4a05a !important; }
@@ -378,26 +378,184 @@ overflow-y: auto;
   justify-content: flex-end;
 }
 
-/* Graph */
+/* ===== ГРАФ: адаптивность ===== */
 #graph-container {
-  width: 100%;
-  height: 600px;
-  background: #0a0a12;
-  border: 1px solid #2a2a3a;
-  border-radius: 8px;
-  position: relative;
-  overflow: hidden;
+width: 100%;
+height: 70vh;
+min-height: 400px;
+max-height: 800px;
+background: #0a0a12;
+border: 1px solid #2a2a3a;
+border-radius: 8px;
+position: relative;
+overflow: hidden;
+touch-action: none;
 }
 #graph-canvas { width: 100%; height: 100%; display: block; }
+
+/* Контейнер графа: слева граф, справа список (на ПК) */
+.graph-layout {
+display: grid;
+grid-template-columns: 1fr 280px;
+gap: 12px;
+align-items: start;
+}
+@media (max-width: 900px) {
+.graph-layout { grid-template-columns: 1fr; }
+#graph-container { height: 60vh; min-height: 320px; }
+.graph-sidebar { position: static !important; width: 100% !important; max-height: none !important; }
+}
+
+/* Панель управления графом */
+.graph-controls {
+display: flex;
+flex-wrap: wrap;
+gap: 6px;
+margin-bottom: 10px;
+align-items: center;
+}
+.graph-controls button { padding: 6px 10px; font-size: 0.85em; }
+
+/* Список персонажей справа */
+.graph-sidebar {
+background: rgba(15, 15, 23, 0.6);
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
+border: 1px solid rgba(255, 255, 255, 0.05);
+border-radius: 12px;
+padding: 16px;
+max-height: 70vh;
+overflow-y: auto;
+font-size: 0.9em;
+box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+.graph-sidebar h3 {
+margin: 0 0 10px 0;
+color: #c9a0ff;
+font-size: 1em;
+text-align: center;
+}
+.graph-sidebar input[type="text"] {
+width: 100%;
+background: #0f0f17;
+color: #e8e8f0;
+border: 1px solid #3a3a4a;
+padding: 8px 10px;
+border-radius: 6px;
+font-size: 0.9em;
+margin-bottom: 10px;
+font-family: inherit;
+}
+.graph-sidebar input[type="text"]:focus { outline: none; border-color: #c9a0ff; }
+
+/* Блок фильтров */
+.filters-block {
+margin-bottom: 12px;
+padding: 10px;
+background: rgba(255, 255, 255, 0.03);
+border: 1px solid rgba(255, 255, 255, 0.05);
+border-radius: 8px;
+}
+.filters-block .filters-title { font-size: 0.8em; color: #888; margin-bottom: 6px; }
+#graph-type-filters {
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+gap: 4px;
+max-height: 180px;
+overflow-y: auto;
+font-size: 0.85em;
+}
+#graph-type-filters label {
+display: flex;
+align-items: center;
+gap: 6px;
+cursor: pointer;
+color: #ccc;
+width: 100%;
+justify-content: flex-start;
+padding: 3px 0;
+}
+#graph-type-filters label:first-child {
+padding-bottom: 6px;
+border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+margin-bottom: 4px;
+}
+.filters-actions { margin-top: 8px; display: flex; gap: 6px; }
+.filters-actions button {
+flex: 1;
+font-size: 0.8em;
+padding: 5px;
+background: #2a2a3a;
+color: #e8e8f0;
+border: 1px solid #3a3a4a;
+border-radius: 5px;
+cursor: pointer;
+font-family: inherit;
+}
+.filters-actions button:hover { background: #3a3a4a; border-color: #c9a0ff; }
+
+/* Список персонажей */
+.graph-char-list { display: flex; flex-direction: column; gap: 3px; }
+.graph-char-item {
+padding: 6px 8px;
+background: rgba(26, 26, 37, 0.7);
+border: 1px solid #2a2a3a;
+border-left: 3px solid #5a5a6a;
+border-radius: 4px;
+font-size: 0.85em;
+cursor: pointer;
+transition: all 0.15s;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.graph-char-item:hover { background: #2a2a3a; border-color: #c9a0ff; }
+.graph-char-item.active { background: #3a2a5a; border-color: #c9a0ff; color: #fff; }
+.graph-char-item .links-count {
+font-size: 0.75em;
+padding: 1px 6px;
+border-radius: 8px;
+background: #2a2a3a;
+color: #888;
+}
+.graph-char-item.active .links-count { background: #5a3a8a; color: #fff; }
+
+/* Легенда цветов */
+.graph-legend {
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+margin-top: 15px;
+padding: 12px;
+background: rgba(18, 18, 28, 0.6);
+backdrop-filter: blur(8px);
+border: 1px solid #2a2a3a;
+border-radius: 8px;
+font-size: 0.85em;
+}
+.graph-legend-item { display: flex; align-items: center; gap: 5px; color: #bbb; }
+.graph-legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+/* Инфо-блок */
 .graph-info {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  background: rgba(26,26,37,0.9);
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.8em;
-  color: #aaa;
+position: absolute;
+bottom: 10px;
+left: 10px;
+background: rgba(26,26,37,0.9);
+padding: 8px 12px;
+border-radius: 6px;
+font-size: 0.8em;
+color: #aaa;
+max-width: calc(100% - 20px);
+pointer-events: none;
+}
+
+/* Мобильная кнопка-переключатель списка */
+.graph-toggle-sidebar { display: none; }
+@media (max-width: 900px) {
+.graph-toggle-sidebar { display: inline-block; }
+.graph-sidebar.collapsed { display: none; }
 }
 
 /* Plot timeline */
@@ -1694,12 +1852,37 @@ body.admin-mode .admin-only { display: inline-block !important; }
 </div>
 
 <div id="tab-graph" class="tab-content hidden">
-  <div id="graph-container">
-    <canvas id="graph-canvas" width="1853" height="598"></canvas>
-    <div class="graph-info">
-      🖱 Колёсико — масштаб · Зажать ЛКМ — перемещение · Перетаскивание узлов
-    </div>
-  </div>
+<div class="graph-controls">
+<button onclick="graphCenter()">🎯 Центрировать</button>
+<button onclick="graphReset()">🔄 Сбросить граф</button>
+<button onclick="graphTogglePhysics()" id="btn-physics">⏸️ Пауза</button>
+<button onclick="toggleGraphSidebar()" class="graph-toggle-sidebar">📋 Список</button>
+<div style="margin-left:auto; color:#888; font-size:0.85em;" id="graph-stats"></div>
+</div>
+
+<div class="graph-layout">
+<div id="graph-container">
+<canvas id="graph-canvas"></canvas>
+<div class="graph-info" id="graph-info">
+🖱 Клик — подсветка · Двойной клик — инфо · Перетаскивание узлов
+</div>
+</div>
+
+<div class="graph-sidebar" id="graph-sidebar">
+<h3>📋 Персонажи</h3>
+<input type="text" id="graph-search" placeholder="🔍 Поиск по имени...">
+<div class="filters-block">
+<div class="filters-title">Фильтр:</div>
+<div id="graph-type-filters"></div>
+<div class="filters-actions">
+<button onclick="graphResetFilters()">🔄 Сброс</button>
+</div>
+</div>
+<div class="graph-char-list" id="graph-char-list"></div>
+</div>
+</div>
+
+<div class="graph-legend" id="graph-legend"></div>
 </div>
 
 <div id="tab-locations" class="tab-content hidden">
@@ -4661,142 +4844,580 @@ const canvas = document.getElementById('graph-canvas');
 const ctx = canvas.getContext('2d');
 let graphNodes = [];
 let graphEdges = [];
-let graphTransform = {x: 0, y: 0, scale: 1};
+let graphTransform = { x: 0, y: 0, scale: 1 };
 let draggingNode = null;
 let panning = false;
-let panStart = {x:0, y:0};
+let panStart = { x: 0, y: 0 };
+let selectedNode = null;
+let physicsEnabled = true;
+let showOrphansOnly = false;
+let graphFilterTypes = new Set();
+let mouseMoved = false;
+let lastClickTime = 0;
+let touchStartDist = 0;
+let touchStartScale = 1;
+let touchPanning = false;
+let touchDragging = null;
 
-function initGraph() {
-  graphNodes = [];
-  graphEdges = [];
-  const nameToIdx = {};
-  data.characters.forEach((c, i) => {
-    nameToIdx[c.name] = i;
-    graphNodes.push({
-      id: i,
-      name: c.name,
-      type: c.type,
-      x: (Math.random() - 0.5) * 800,
-      y: (Math.random() - 0.5) * 600,
-      vx: 0, vy: 0
-    });
-  });
-  // Связи по упоминаниям в описании
-  data.characters.forEach((c, i) => {
-    data.characters.forEach((c2, j) => {
-      if (i !== j && c.full && c.full.toLowerCase().includes(c2.name.toLowerCase())) {
-        graphEdges.push({source: i, target: j});
-      }
-    });
-  });
-}
-
-function renderGraph() {
-  if (!graphNodes.length) initGraph();
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width;
-  canvas.height = rect.height;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.save();
-  ctx.translate(canvas.width/2 + graphTransform.x, canvas.height/2 + graphTransform.y);
-  ctx.scale(graphTransform.scale, graphTransform.scale);
-  
-  // Рёбра
-  ctx.strokeStyle = '#3a3a4a';
-  ctx.lineWidth = 1;
-  graphEdges.forEach(e => {
-    const a = graphNodes[e.source], b = graphNodes[e.target];
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-    ctx.stroke();
-  });
-  
-  // Узлы
-  graphNodes.forEach(n => {
-    const rc = raceClass(n.type);
-    const colorMap = {
-  'Человек': '#4a9eff', 'Существо': '#8a8a9a', 'Бобыль': '#7ac74f',
-  'Синий-ящер': '#3ab8ff', 'Божество': '#ffd700',
+const GRAPH_COLORS = {
+  'Человек': '#4a9eff',
+  'Существо': '#8a8a9a',
+  'Бобыль': '#7ac74f',
+  'Синий ящер': '#1a5fff',
+  'Синий-ящер': '#1a5fff',
+  'Кокша': '#ff6b9d',
+  'Божество': '#ffd700',
+  'Существа': '#8a8a9a',
   'Человек-Существо': '#c9a0ff',
-  'Растение-Существо': '#b88a3a', 'Существа': '#8a8a9a', 'Другое': '#5a5a6a'
-    };
-    ctx.fillStyle = colorMap[rc] || '#5a5a6a';
-    ctx.beginPath();
-    ctx.arc(n.x, n.y, 6, 0, Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle = '#e8e8f0';
-    ctx.font = '10px sans-serif';
-    ctx.fillText(n.name, n.x + 8, n.y + 3);
-  });
-  ctx.restore();
+  'Человек/Существо': '#c9a0ff',
+  'Растение-Существо': '#b88a3a',
+  'Растение/Существо': '#b88a3a',
+  'Организация': '#ff7a7a',
+  'Другое': '#5a5a6a'
+};
+
+function isNodeVisible(n) {
+if (showOrphansOnly && n.links > 0) return false;
+if (graphFilterTypes.size > 0 && !graphFilterTypes.has(n.type)) return false;
+return true;
 }
 
-// Простая физика
+// ============ ФИЗИКА ============
+function applyPhysicsStep() {
+const visibleNodes = graphNodes.filter(isNodeVisible);
+const uniqueTypes = [...new Set(visibleNodes.map(n => n.type))];
+const rect = canvas.getBoundingClientRect();
+const canvasSize = Math.min(rect.width || 800, rect.height || 600);
+const clusterRadius = canvasSize * 0.30;
+
+const bounds = {
+minX: -rect.width / 2 + 80,
+maxX: rect.width / 2 - 80,
+minY: -rect.height / 2 + 80,
+maxY: rect.height / 2 - 80
+};
+
+// Отталкивание (пропускаем "замороженные")
+for (let i = 0; i < graphNodes.length; i++) {
+if (!isNodeVisible(graphNodes[i]) || graphNodes[i].frozen) continue;
+for (let j = i + 1; j < graphNodes.length; j++) {
+if (!isNodeVisible(graphNodes[j]) || graphNodes[j].frozen) continue;
+const a = graphNodes[i], b = graphNodes[j];
+const dx = b.x - a.x, dy = b.y - a.y;
+const d2 = dx * dx + dy * dy + 200;
+const f = 1500 / d2;
+const d = Math.sqrt(d2);
+const fx = f * dx / d, fy = f * dy / d;
+a.vx -= fx; a.vy -= fy;
+b.vx += fx; b.vy += fy;
+}
+}
+
+// Притяжение по рёбрам
+graphEdges.forEach(e => {
+const a = graphNodes[e.source], b = graphNodes[e.target];
+if (!isNodeVisible(a) || !isNodeVisible(b)) return;
+if (a.frozen && b.frozen) return;
+const dx = b.x - a.x, dy = b.y - a.y;
+const d = Math.sqrt(dx * dx + dy * dy) + 0.1;
+const f = (d - 200) * 0.015;
+const fx = f * dx / d, fy = f * dy / d;
+if (!a.frozen) { a.vx += fx; a.vy += fy; }
+if (!b.frozen) { b.vx -= fx; b.vy -= fy; }
+});
+
+// Обновление позиций + кластеризация + стены + заморозка
+const FREEZE_THRESHOLD = 0.15;
+graphNodes.forEach(n => {
+if (n === draggingNode || !isNodeVisible(n)) return;
+const speed = Math.abs(n.vx) + Math.abs(n.vy);
+const isFrozen = n.frozen || speed < FREEZE_THRESHOLD;
+
+if (!isFrozen) {
+const typeIdx = uniqueTypes.indexOf(n.type);
+if (typeIdx !== -1) {
+const angle = (typeIdx / uniqueTypes.length) * Math.PI * 2;
+const tx = Math.cos(angle) * clusterRadius;
+const ty = Math.sin(angle) * clusterRadius;
+n.vx += (tx - n.x) * 0.008;
+n.vy += (ty - n.y) * 0.008;
+}
+}
+
+n.vx *= 0.85;
+n.vy *= 0.85;
+n.x += n.vx;
+n.y += n.vy;
+
+if (speed < FREEZE_THRESHOLD && !n.frozen) {
+n.frozen = true;
+n.vx = 0;
+n.vy = 0;
+}
+});
+}
+
+// ============ ИНИЦИАЛИЗАЦИЯ ============
+function initGraph() {
+graphNodes = [];
+graphEdges = [];
+
+data.characters.forEach((c, i) => {
+const angle = (i / data.characters.length) * Math.PI * 2;
+const radius = 150 + Math.random() * 100;
+graphNodes.push({
+id: i,
+name: c.name,
+type: c.type,
+x: Math.cos(angle) * radius,
+y: Math.sin(angle) * radius,
+vx: 0, vy: 0,
+links: 0
+});
+});
+
+// Подсчёт связей
+data.characters.forEach((c, i) => {
+if (!c.full) return;
+const text = c.full.toLowerCase();
+data.characters.forEach((c2, j) => {
+if (i !== j && text.includes(c2.name.toLowerCase())) {
+graphEdges.push({ source: i, target: j });
+graphNodes[i].links++;
+graphNodes[j].links++;
+}
+});
+});
+
+// Предварительный прогрев физики
+for (let step = 0; step < 80; step++) {
+applyPhysicsStep();
+}
+
+renderGraphSidebar();
+renderGraphLegend();
+renderGraphTypeFilters();
+updateGraphStats();
+}
+
+// ============ ОТРИСОВКА ============
+function renderGraph() {
+if (!graphNodes.length) initGraph();
+const rect = canvas.getBoundingClientRect();
+const dpr = window.devicePixelRatio || 1;
+
+if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+canvas.width = rect.width * dpr;
+canvas.height = rect.height * dpr;
+canvas.style.width = rect.width + 'px';
+canvas.style.height = rect.height + 'px';
+}
+
+ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ctx.clearRect(0, 0, rect.width, rect.height);
+ctx.save();
+ctx.translate(rect.width / 2 + graphTransform.x, rect.height / 2 + graphTransform.y);
+ctx.scale(graphTransform.scale, graphTransform.scale);
+
+// Рёбра
+graphEdges.forEach(e => {
+const a = graphNodes[e.source], b = graphNodes[e.target];
+if (!isNodeVisible(a) || !isNodeVisible(b)) return;
+const isHighlighted = selectedNode && (e.source === selectedNode.id || e.target === selectedNode.id);
+
+if (selectedNode && !isHighlighted) {
+ctx.strokeStyle = 'rgba(58,58,74,0.1)';
+ctx.lineWidth = 0.5;
+} else if (isHighlighted) {
+ctx.strokeStyle = '#c9a0ff';
+ctx.lineWidth = 2.5;
+} else {
+ctx.strokeStyle = '#3a3a4a';
+ctx.lineWidth = 1.2;
+}
+ctx.beginPath();
+ctx.moveTo(a.x, a.y);
+ctx.lineTo(b.x, b.y);
+ctx.stroke();
+});
+
+// Узлы
+graphNodes.forEach(n => {
+if (!isNodeVisible(n)) return;
+const rc = raceClass(n.type);
+const color = GRAPH_COLORS[rc] || GRAPH_COLORS['Другое'];
+const isSelected = selectedNode && selectedNode.id === n.id;
+const isConnected = selectedNode && graphEdges.some(e =>
+(e.source === selectedNode.id && e.target === n.id) ||
+(e.target === selectedNode.id && e.source === n.id)
+);
+const isDimmed = selectedNode && !isSelected && !isConnected;
+const radius = 4 + Math.min(n.links, 12) * 1.2;
+
+ctx.globalAlpha = isDimmed ? 0.15 : 1;
+
+if (isSelected) {
+ctx.shadowColor = color;
+ctx.shadowBlur = 15;
+}
+
+ctx.fillStyle = color;
+ctx.beginPath();
+ctx.arc(n.x, n.y, radius, 0, Math.PI * 2);
+ctx.fill();
+
+ctx.shadowBlur = 0;
+if (isSelected) {
+ctx.strokeStyle = '#fff';
+ctx.lineWidth = 2;
+ctx.stroke();
+}
+
+// Подпись с чёрной обводкой
+ctx.font = `${isSelected ? 'bold ' : ''}12px Inter, sans-serif`;
+ctx.textBaseline = 'middle';
+const textX = n.x + radius + 6;
+const textY = n.y;
+
+ctx.strokeStyle = '#000';
+ctx.lineWidth = 3;
+ctx.lineJoin = 'round';
+ctx.strokeText(n.name, textX, textY);
+
+ctx.fillStyle = isDimmed ? 'rgba(232,232,240,0.3)' : '#fff';
+ctx.fillText(n.name, textX, textY);
+ctx.globalAlpha = 1;
+});
+
+ctx.restore();
+}
+
 function tickGraph() {
-  if (currentTab !== 'graph') { requestAnimationFrame(tickGraph); return; }
-  // Отталкивание
-  for (let i = 0; i < graphNodes.length; i++) {
-    for (let j = i+1; j < graphNodes.length; j++) {
-      const a = graphNodes[i], b = graphNodes[j];
-      const dx = b.x - a.x, dy = b.y - a.y;
-      const d2 = dx*dx + dy*dy + 1;
-      const f = 500 / d2;
-      const d = Math.sqrt(d2);
-      const fx = f * dx / d, fy = f * dy / d;
-      a.vx -= fx; a.vy -= fy;
-      b.vx += fx; b.vy += fy;
+if (currentTab !== 'graph' || !physicsEnabled) {
+requestAnimationFrame(tickGraph);
+return;
+}
+applyPhysicsStep();
+renderGraph();
+requestAnimationFrame(tickGraph);
+}
+
+// ============ УПРАВЛЕНИЕ: МЫШЬ ============
+function getCanvasCoords(e) {
+const rect = canvas.getBoundingClientRect();
+const cx = (e.clientX ?? e.touches?.[0]?.clientX) - rect.left;
+const cy = (e.clientY ?? e.touches?.[0]?.clientY) - rect.top;
+const x = (cx - rect.width / 2 - graphTransform.x) / graphTransform.scale;
+const y = (cy - rect.height / 2 - graphTransform.y) / graphTransform.scale;
+return { x, y, cx, cy };
+}
+
+function findNodeAt(x, y) {
+for (let i = graphNodes.length - 1; i >= 0; i--) {
+const n = graphNodes[i];
+if (!isNodeVisible(n)) continue;
+const r = 5 + Math.min(n.links, 10) * 0.8 + 4;
+if ((n.x - x) ** 2 + (n.y - y) ** 2 < r * r) return n;
+}
+return null;
+}
+
+canvas.addEventListener('mousedown', e => {
+mouseMoved = false;
+const { x, y } = getCanvasCoords(e);
+const node = findNodeAt(x, y);
+if (node) {
+draggingNode = node;
+node.frozen = false;
+} else {
+panning = true;
+panStart = { x: e.clientX - graphTransform.x, y: e.clientY - graphTransform.y };
+}
+});
+
+canvas.addEventListener('mousemove', e => {
+mouseMoved = true;
+if (draggingNode) {
+const { x, y } = getCanvasCoords(e);
+draggingNode.x = x; draggingNode.y = y;
+draggingNode.vx = 0; draggingNode.vy = 0;
+} else if (panning) {
+graphTransform.x = e.clientX - panStart.x;
+graphTransform.y = e.clientY - panStart.y;
+}
+});
+
+canvas.addEventListener('mouseup', () => {
+  if (draggingNode) {
+    draggingNode.vx = 0;
+    draggingNode.vy = 0;
+    // Если не было перетаскивания (чистый клик) — замораживаем обратно
+    if (!mouseMoved) {
+      draggingNode.frozen = true;
     }
   }
-  // Притяжение по рёбрам
-  graphEdges.forEach(e => {
-    const a = graphNodes[e.source], b = graphNodes[e.target];
-    const dx = b.x - a.x, dy = b.y - a.y;
-    const d = Math.sqrt(dx*dx + dy*dy) + 0.1;
-    const f = (d - 80) * 0.01;
-    const fx = f * dx / d, fy = f * dy / d;
-    a.vx += fx; a.vy += fy;
-    b.vx -= fx; b.vy -= fy;
-  });
-  // Обновление позиций
-  graphNodes.forEach(n => {
-    if (n === draggingNode) return;
-    n.vx *= 0.85; n.vy *= 0.85;
-    n.x += n.vx; n.y += n.vy;
-  });
-  renderGraph();
-  requestAnimationFrame(tickGraph);
+  draggingNode = null;
+  panning = false;
+});
+
+canvas.addEventListener('wheel', e => {
+e.preventDefault();
+const delta = e.deltaY > 0 ? 0.9 : 1.1;
+graphTransform.scale = Math.max(0.2, Math.min(4, graphTransform.scale * delta));
+}, { passive: false });
+
+// ============ КЛИК / ДВОЙНОЙ КЛИК ============
+canvas.addEventListener('click', e => {
+if (mouseMoved) return;
+const { x, y } = getCanvasCoords(e);
+const node = findNodeAt(x, y);
+const now = Date.now();
+
+if (node) {
+if (now - lastClickTime < 350) {
+const item = findWikiItem(node.name);
+if (item) {
+openWikiModal(item);
+} else {
+alert(`📖 ${node.name}\n🏷️ ${node.type}\n🔗 Связей: ${node.links}`);
+}
+lastClickTime = 0;
+return;
+}
+selectedNode = (selectedNode && selectedNode.id === node.id) ? null : node;
+highlightSidebarItem(selectedNode);
+updateGraphInfo();
+lastClickTime = now;
+} else {
+selectedNode = null;
+highlightSidebarItem(null);
+updateGraphInfo();
+}
+});
+
+// ============ TOUCH (МОБИЛЬНЫЕ) ============
+canvas.addEventListener('touchstart', e => {
+e.preventDefault();
+if (e.touches.length === 1) {
+const { x, y } = getCanvasCoords(e);
+const node = findNodeAt(x, y);
+if (node) {
+touchDragging = node;
+} else {
+touchPanning = true;
+panStart = {
+x: e.touches[0].clientX - graphTransform.x,
+y: e.touches[0].clientY - graphTransform.y
+};
+}
+} else if (e.touches.length === 2) {
+touchPanning = false;
+touchDragging = null;
+const dx = e.touches[0].clientX - e.touches[1].clientX;
+const dy = e.touches[0].clientY - e.touches[1].clientY;
+touchStartDist = Math.sqrt(dx * dx + dy * dy);
+touchStartScale = graphTransform.scale;
+}
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+e.preventDefault();
+if (e.touches.length === 1) {
+if (touchDragging) {
+const { x, y } = getCanvasCoords(e);
+touchDragging.x = x; touchDragging.y = y;
+touchDragging.vx = 0; touchDragging.vy = 0;
+} else if (touchPanning) {
+graphTransform.x = e.touches[0].clientX - panStart.x;
+graphTransform.y = e.touches[0].clientY - panStart.y;
+}
+} else if (e.touches.length === 2) {
+const dx = e.touches[0].clientX - e.touches[1].clientX;
+const dy = e.touches[0].clientY - e.touches[1].clientY;
+const dist = Math.sqrt(dx * dx + dy * dy);
+const scale = touchStartScale * (dist / touchStartDist);
+graphTransform.scale = Math.max(0.2, Math.min(4, scale));
+}
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+if (e.touches.length === 0) {
+touchPanning = false;
+touchDragging = null;
+}
+});
+
+// ============ КНОПКИ ============
+function graphCenter() {
+graphTransform = { x: 0, y: 0, scale: 1 };
+renderGraph();
 }
 
-// Управление графом
-canvas.addEventListener('mousedown', e => {
-  const rect = canvas.getBoundingClientRect();
-  const mx = (e.clientX - rect.left - canvas.width/2 - graphTransform.x) / graphTransform.scale;
-  const my = (e.clientY - rect.top - canvas.height/2 - graphTransform.y) / graphTransform.scale;
-  for (let n of graphNodes) {
-    if ((n.x-mx)**2 + (n.y-my)**2 < 100) { draggingNode = n; return; }
-  }
-  panning = true;
-  panStart = {x: e.clientX - graphTransform.x, y: e.clientY - graphTransform.y};
+function graphReset() {
+graphNodes.forEach(n => {
+n.x = (Math.random() - 0.5) * 800;
+n.y = (Math.random() - 0.5) * 600;
+n.vx = 0; n.vy = 0;
+n.frozen = false;
 });
-canvas.addEventListener('mousemove', e => {
-  if (draggingNode) {
-    const rect = canvas.getBoundingClientRect();
-    draggingNode.x = (e.clientX - rect.left - canvas.width/2 - graphTransform.x) / graphTransform.scale;
-    draggingNode.y = (e.clientY - rect.top - canvas.height/2 - graphTransform.y) / graphTransform.scale;
-    draggingNode.vx = 0; draggingNode.vy = 0;
-  } else if (panning) {
-    graphTransform.x = e.clientX - panStart.x;
-    graphTransform.y = e.clientY - panStart.y;
-  }
+graphTransform = { x: 0, y: 0, scale: 1 };
+selectedNode = null;
+showOrphansOnly = false;
+graphFilterTypes.clear();
+highlightSidebarItem(null);
+renderGraphSidebar();
+renderGraph();
+}
+
+function graphTogglePhysics() {
+physicsEnabled = !physicsEnabled;
+document.getElementById('btn-physics').textContent =
+physicsEnabled ? '⏸️ Пауза' : '▶️ Старт';
+}
+
+function graphResetFilters() {
+showOrphansOnly = false;
+graphFilterTypes.clear();
+document.getElementById('graph-search').value = '';
+renderGraphTypeFilters();
+renderGraphSidebar();
+renderGraph();
+updateGraphStats();
+}
+
+function toggleGraphSidebar() {
+document.getElementById('graph-sidebar').classList.toggle('collapsed');
+}
+
+function updateGraphInfo() {
+const info = document.getElementById('graph-info');
+if (selectedNode) {
+info.innerHTML = `🎯 <b>${selectedNode.name}</b> · ${selectedNode.type} · связей: ${selectedNode.links}<br>
+<span style="font-size:0.9em">Двойной клик — открыть инфо</span>`;
+} else {
+info.innerHTML = '🖱 Клик — подсветка · Двойной клик — инфо · Перетаскивание узлов';
+}
+}
+
+function updateGraphStats() {
+const visible = graphNodes.filter(isNodeVisible).length;
+const el = document.getElementById('graph-stats');
+if (el) el.textContent = `Узлов: ${visible} / ${graphNodes.length} · Связей: ${graphEdges.length}`;
+}
+
+// ============ ФИЛЬТРЫ ============
+function renderGraphTypeFilters() {
+const container = document.getElementById('graph-type-filters');
+if (!container) return;
+const types = [...new Set(data.characters.map(c => c.type))].sort();
+
+const orphansChecked = showOrphansOnly ? 'checked' : '';
+let html = `<label>
+<input type="checkbox" value="__orphans__" ${orphansChecked} onchange="toggleGraphTypeFilter('__orphans__')">
+<span>👤 Без связей</span>
+</label>`;
+
+html += types.map(type => {
+const isChecked = graphFilterTypes.has(type) ? 'checked' : '';
+return `<label>
+<input type="checkbox" value="${type}" ${isChecked} onchange="toggleGraphTypeFilter('${type.replace(/'/g, "\\'")}')">
+<span>${type}</span>
+</label>`;
+}).join('');
+
+container.innerHTML = html;
+}
+
+function toggleGraphTypeFilter(type) {
+if (type === '__orphans__') {
+showOrphansOnly = !showOrphansOnly;
+} else {
+if (graphFilterTypes.has(type)) {
+graphFilterTypes.delete(type);
+} else {
+graphFilterTypes.add(type);
+}
+}
+renderGraphSidebar();
+renderGraph();
+updateGraphStats();
+}
+
+// ============ САЙДБАР ============
+function renderGraphSidebar() {
+const list = document.getElementById('graph-char-list');
+const search = (document.getElementById('graph-search')?.value || '').toLowerCase();
+if (!list) return;
+
+const visible = graphNodes.filter(n => {
+if (showOrphansOnly && n.links > 0) return false;
+if (graphFilterTypes.size > 0 && !graphFilterTypes.has(n.type)) return false;
+if (search && !n.name.toLowerCase().includes(search)) return false;
+return true;
+}).sort((a, b) => b.links - a.links || a.name.localeCompare(b.name, 'ru'));
+
+list.innerHTML = visible.map(n => {
+const rc = raceClass(n.type);
+const color = GRAPH_COLORS[rc] || GRAPH_COLORS['Другое'];
+const active = selectedNode && selectedNode.id === n.id ? 'active' : '';
+const linksBadge = n.links > 0
+? `<span class="links-count" style="background:${color}33; color:${color};">${n.links}</span>`
+: `<span class="links-count" style="background:#3a3a4a; color:#888;">0</span>`;
+return `<div class="graph-char-item ${active}" data-id="${n.id}" style="border-left-color:${color}">
+<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${n.name}</span>
+${linksBadge}
+</div>`;
+}).join('') || '<div style="color:#666; padding:8px; text-align:center; font-size:0.85em;">Ничего не найдено</div>';
+
+updateGraphStats();
+}
+
+function highlightSidebarItem(node) {
+document.querySelectorAll('.graph-char-item').forEach(el => {
+el.classList.toggle('active', node && el.dataset.id == node.id);
 });
-canvas.addEventListener('mouseup', () => { draggingNode = null; panning = false; });
-canvas.addEventListener('wheel', e => {
-  e.preventDefault();
-  const delta = e.deltaY > 0 ? 0.9 : 1.1;
-  graphTransform.scale *= delta;
-  graphTransform.scale = Math.max(0.2, Math.min(3, graphTransform.scale));
+if (node) {
+const el = document.querySelector(`.graph-char-item[data-id="${node.id}"]`);
+if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+}
+
+// Клик по элементу списка → подсветка узла
+document.addEventListener('click', e => {
+const item = e.target.closest('.graph-char-item');
+if (!item) return;
+const id = parseInt(item.dataset.id, 10);
+const node = graphNodes.find(n => n.id === id);
+if (!node) return;
+selectedNode = (selectedNode && selectedNode.id === id) ? null : node;
+highlightSidebarItem(selectedNode);
+updateGraphInfo();
+if (selectedNode) {
+graphTransform.x = -selectedNode.x * graphTransform.scale;
+graphTransform.y = -selectedNode.y * graphTransform.scale;
+renderGraph();
+}
 });
+
+// Поиск в списке
+document.addEventListener('input', e => {
+if (e.target.id === 'graph-search') renderGraphSidebar();
+});
+
+// ============ ЛЕГЕНДА ============
+function renderGraphLegend() {
+const legend = document.getElementById('graph-legend');
+if (!legend) return;
+const types = [...new Set(graphNodes.map(n => n.type))].sort();
+legend.innerHTML = types.map(t => {
+const rc = raceClass(t);
+const color = GRAPH_COLORS[rc] || GRAPH_COLORS['Другое'];
+return `<div class="graph-legend-item">
+<span class="graph-legend-dot" style="background:${color}"></span>
+<span>${t}</span>
+</div>`;
+}).join('');
+}
 
 // === ЗАГРУЗКА ДАННЫХ ИЗ JSON ===
 async function loadInitialData() {
@@ -5078,7 +5699,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия beta9 · Обновлено: 03.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия beta10 · Обновлено: 04.09.2026.</div>
 </footer>
 
 </body></html>
