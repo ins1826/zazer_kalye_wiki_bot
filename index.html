@@ -378,239 +378,87 @@ overflow-y: auto;
   justify-content: flex-end;
 }
 
-/* ===== ГРАФ: адаптивность ===== */
-#graph-container {
-width: 100%;
-height: 70vh;
-min-height: 400px;
-max-height: 800px;
-background: #0a0a12;
-border: 1px solid #2a2a3a;
-border-radius: 8px;
-position: relative;
-overflow: hidden;
-touch-action: none;
+/* === LAYOUT === */
+.graph-layout{display:grid;grid-template-columns:1fr 280px;height:100%;width:100%}
+@media(max-width:900px){
+.graph-layout{grid-template-columns:1fr}
+.graph-sidebar{position:fixed!important;right:0;top:0;bottom:0;width:280px!important;z-index:100;transform:translateX(100%);transition:transform .3s}
+.graph-sidebar.open{transform:translateX(0)}
+.graph-info-btn{right:12px!important}
+.graph-info-popup{right:12px!important}
 }
-#graph-canvas { width: 100%; height: 100%; display: block; }
-
-/* Контейнер графа: слева граф, справа список (на ПК) */
-.graph-layout {
-display: grid;
-grid-template-columns: 1fr 280px;
-gap: 12px;
-align-items: start;
-}
-@media (max-width: 900px) {
-.graph-layout { grid-template-columns: 1fr; }
-#graph-container { height: 60vh; min-height: 320px; }
-.graph-sidebar { position: static !important; width: 100% !important; max-height: none !important; }
-}
-
-/* Панель управления графом */
-.graph-controls {
-display: flex;
-flex-wrap: wrap;
-gap: 6px;
-margin-bottom: 10px;
-align-items: center;
-}
-.graph-controls button { padding: 6px 10px; font-size: 0.85em; }
-
-/* Список персонажей справа */
-.graph-sidebar {
-background: rgba(15, 15, 23, 0.6);
-backdrop-filter: blur(12px);
--webkit-backdrop-filter: blur(12px);
-border: 1px solid rgba(255, 255, 255, 0.05);
-border-radius: 12px;
-padding: 16px;
-max-height: 70vh;
-overflow-y: auto;
-font-size: 0.9em;
-box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-.graph-sidebar h3 {
-margin: 0 0 10px 0;
-color: #c9a0ff;
-font-size: 1em;
-text-align: center;
-}
-.graph-sidebar input[type="text"] {
-width: 100%;
-background: #0f0f17;
-color: #e8e8f0;
-border: 1px solid #3a3a4a;
-padding: 8px 10px;
-border-radius: 6px;
-font-size: 0.9em;
-margin-bottom: 10px;
-font-family: inherit;
-}
-.graph-sidebar input[type="text"]:focus { outline: none; border-color: #c9a0ff; }
-
-/* Блок фильтров */
-.filters-block {
-margin-bottom: 12px;
-padding: 10px;
-background: rgba(255, 255, 255, 0.03);
-border: 1px solid rgba(255, 255, 255, 0.05);
-border-radius: 8px;
-}
-.filters-block .filters-title { font-size: 0.8em; color: #888; margin-bottom: 6px; }
-#graph-type-filters {
-display: flex;
-flex-direction: column;
-align-items: flex-start;
-gap: 4px;
-max-height: 180px;
-overflow-y: auto;
-font-size: 0.85em;
-}
-#graph-type-filters label {
-display: flex;
-align-items: center;
-gap: 6px;
-cursor: pointer;
-color: #ccc;
-width: 100%;
-justify-content: flex-start;
-padding: 3px 0;
-}
-#graph-type-filters label:first-child {
-padding-bottom: 6px;
-border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-margin-bottom: 4px;
-}
-.filters-actions { margin-top: 8px; display: flex; gap: 6px; }
-.filters-actions button {
-flex: 1;
-font-size: 0.8em;
-padding: 5px;
-background: #2a2a3a;
-color: #e8e8f0;
-border: 1px solid #3a3a4a;
-border-radius: 5px;
-cursor: pointer;
-font-family: inherit;
-}
-.filters-actions button:hover { background: #3a3a4a; border-color: #c9a0ff; }
-
-/* Список персонажей */
-.graph-char-list { display: flex; flex-direction: column; gap: 3px; }
-.graph-char-item {
-padding: 6px 8px;
-background: rgba(26, 26, 37, 0.7);
-border: 1px solid #2a2a3a;
-border-left: 3px solid #5a5a6a;
-border-radius: 4px;
-font-size: 0.85em;
-cursor: pointer;
-transition: all 0.15s;
-display: flex;
-justify-content: space-between;
-align-items: center;
-}
-.graph-char-item:hover { background: #2a2a3a; border-color: #c9a0ff; }
-.graph-char-item.active { background: #3a2a5a; border-color: #c9a0ff; color: #fff; }
-.graph-char-item .links-count {
-font-size: 0.75em;
-padding: 1px 6px;
-border-radius: 8px;
-background: #2a2a3a;
-color: #888;
-}
-.graph-char-item.active .links-count { background: #5a3a8a; color: #fff; }
-
-/* Легенда цветов */
-.graph-legend {
-display: flex;
-flex-wrap: wrap;
-gap: 10px;
-margin-top: 15px;
-padding: 12px;
-background: rgba(18, 18, 28, 0.6);
-backdrop-filter: blur(8px);
-border: 1px solid #2a2a3a;
-border-radius: 8px;
-font-size: 0.85em;
-}
-.graph-legend-item { display: flex; align-items: center; gap: 5px; color: #bbb; }
-.graph-legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-
-/* Инфо-блок */
-.graph-info-btn {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: rgba(26,26,37,0.9);
-    border: 1px solid #3a3a4a;
-    color: #aaa;
-    font-size: 15px;
-    font-style: italic;
-    font-weight: bold;
-    font-family: Georgia, serif;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    transition: all 0.2s;
-    padding: 0;
-    line-height: 1;
-}
-.graph-info-btn:hover, .graph-info-btn.active {
-    background: #3a3a4a;
-    color: #c9a0ff;
-    border-color: #c9a0ff;
-}
-.graph-info-popup {
-    position: absolute;
-    bottom: 48px;
-    left: 10px;
-    background: rgba(20,20,30,0.97);
-    border: 1px solid #3a3a4a;
-    border-radius: 10px;
-    padding: 14px 16px;
-    font-size: 0.85em;
-    color: #ccc;
-    z-index: 10;
-    display: none;
-    min-width: 240px;
-    line-height: 1.7;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    pointer-events: auto;
-}
-.graph-info-popup.active { display: block; }
-.graph-info-popup b { color: #c9a0ff; }
-.graph-info-popup .hint-row { margin: 2px 0; }
-.graph-info-selected {
-    position: absolute;
-    bottom: 10px;
-    left: 50px;
-    background: rgba(26,26,37,0.92);
-    border: 1px solid #c9a0ff;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.85em;
-    color: #e8e8f0;
-    z-index: 10;
-    display: none;
-    max-width: calc(100% - 60px);
-    pointer-events: none;
-}
-.graph-info-selected.active { display: block; }
-.graph-info-selected .sel-name { color: #c9a0ff; font-weight: 600; }
-.graph-info-selected .sel-meta { color: #aaa; font-size: 0.9em; }
-
-/* Мобильная кнопка-переключатель списка */
-.graph-toggle-sidebar { display: none; }
-@media (max-width: 900px) {
-.graph-toggle-sidebar { display: inline-block; }
-.graph-sidebar.collapsed { display: none; }
-}
+/* === CANVAS === */
+#graph-container{position:relative;width:100%;height:70vh;min-height:400px;max-height:800px;overflow:hidden;touch-action:none;background:#0a0a12;border:1px solid #2a2a3a;border-radius:8px}
+#graph-canvas{display:block;width:100%;height:100%}
+/* === КНОПКИ УПРАВЛЕНИЯ === */
+.graph-controls{position:absolute;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:6px;z-index:10}
+.graph-controls button,.graph-toggle-sidebar{
+background:rgba(42,42,58,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+color:#e8e8f0;border:1px solid #3a3a4a;padding:6px 12px;border-radius:6px;
+cursor:pointer;font-size:.85em;transition:all .2s;font-family:inherit}
+.graph-controls button:hover,.graph-toggle-sidebar:hover{background:#3a3a4a;border-color:#c9a0ff}
+.graph-toggle-sidebar{display:none;position:fixed;top:12px;right:12px;z-index:101}
+@media(max-width:900px){.graph-toggle-sidebar{display:inline-block}}
+/* === СТАТИСТИКА === */
+#graph-stats{position:absolute;bottom:12px;left:12px;color:#555;font-size:.8em;z-index:10}
+/* === КНОПКА i === */
+.graph-info-btn{
+position:absolute;top:12px;right:296px;width:32px;height:32px;border-radius:50%;
+background:rgba(42,42,58,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+border:1px solid #3a3a4a;color:#c9a0ff;font-size:1em;font-weight:700;
+cursor:pointer;z-index:10;transition:all .2s}
+.graph-info-btn:hover{border-color:#c9a0ff;background:#3a3a4a}
+.graph-info-popup{
+position:absolute;top:50px;right:296px;
+background:rgba(26,26,37,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+border:1px solid #3a3a4a;border-radius:10px;padding:14px 18px;font-size:.85em;
+color:#ccc;z-index:20;display:none;max-width:260px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.graph-info-popup.show{display:block}
+.hint-row{margin:3px 0}
+/* === ВЫДЕЛЕННЫЙ УЗЕЛ (нижняя плашка) === */
+.graph-info-selected{
+position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+background:rgba(26,26,37,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+border:1px solid #3a3a4a;border-radius:10px;padding:8px 18px;font-size:.85em;
+color:#e8e8f0;z-index:10;display:none;white-space:nowrap}
+.graph-info-selected.active{display:block}
+.sel-name{color:#c9a0ff;font-weight:600}
+.sel-meta{color:#aaa;font-size:.9em}
+/* === САЙДБАР (прозрачный фон) === */
+.graph-sidebar{
+background:rgba(15,15,23,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+border-left:1px solid rgba(255,255,255,.05);padding:16px;overflow-y:auto;font-size:.9em;max-height:70vh}
+.graph-sidebar h3{margin:0 0 10px;color:#c9a0ff;font-size:1em}
+.graph-sidebar input[type="text"]{
+width:100%;padding:8px 10px;background:rgba(26,26,37,.7);border:1px solid #2a2a3a;
+border-radius:6px;color:#e8e8f0;font-size:.9em;margin-bottom:10px;font-family:inherit}
+.graph-sidebar input[type="text"]:focus{outline:none;border-color:#c9a0ff}
+/* === ФИЛЬТРЫ === */
+.filters-block{margin-bottom:12px}
+.filters-title{color:#888;font-size:.85em;margin-bottom:6px}
+#graph-type-filters{display:flex;flex-direction:column;gap:3px;max-height:160px;overflow-y:auto}
+#graph-type-filters label{display:flex;align-items:center;gap:6px;font-size:.85em;color:#bbb;cursor:pointer;padding:2px 0}
+#graph-type-filters input[type="checkbox"]{accent-color:#c9a0ff}
+.filters-actions{margin-top:6px}
+.filters-actions button{
+background:#2a2a3a;color:#e8e8f0;border:1px solid #3a3a4a;padding:4px 10px;
+border-radius:4px;cursor:pointer;font-size:.8em;font-family:inherit}
+.filters-actions button:hover{border-color:#c9a0ff}
+/* === СПИСОК ПЕРСОНАЖЕЙ === */
+.graph-char-list{display:flex;flex-direction:column;gap:3px}
+.graph-char-item{
+padding:6px 8px;background:rgba(26,26,37,.6);border:1px solid #2a2a3a;
+border-left:3px solid #5a5a6a;border-radius:4px;font-size:.85em;cursor:pointer;
+transition:all .15s;display:flex;justify-content:space-between;align-items:center}
+.graph-char-item:hover{background:rgba(42,42,58,.8);border-color:#c9a0ff}
+.graph-char-item.active{background:rgba(58,42,90,.7);border-color:#c9a0ff;color:#fff}
+.links-count{font-size:.75em;padding:1px 6px;border-radius:8px;background:#2a2a3a;color:#888}
+/* === ЛЕГЕНДА === */
+.graph-legend{
+display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding:10px;
+background:rgba(18,18,28,.5);border:1px solid #2a2a3a;border-radius:8px;font-size:.8em}
+.graph-legend-item{display:flex;align-items:center;gap:5px;color:#bbb}
+.graph-legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
 
 /* Plot timeline */
 .plot-card {
@@ -1906,48 +1754,42 @@ body.admin-mode .admin-only { display: inline-block !important; }
 </div>
 
 <div id="tab-graph" class="tab-content hidden">
-<div class="graph-controls">
-<button onclick="graphCenter()">🎯 Центрировать</button>
-<button onclick="graphReset()">🔄 Сбросить граф</button>
-<button onclick="graphTogglePhysics()" id="btn-physics">⏸️ Пауза</button>
-<button onclick="toggleGraphSidebar()" class="graph-toggle-sidebar">📋 Список</button>
-<div style="margin-left:auto; color:#888; font-size:0.85em;" id="graph-stats"></div>
-</div>
-
 <div class="graph-layout">
 <div id="graph-container">
 <canvas id="graph-canvas"></canvas>
-<button class="graph-info-btn" id="graph-info-btn" aria-label="Подсказка">i</button>
-<div class="graph-info-popup" id="graph-info-popup">
-    <div class="hint-row"><b>💻 ПК:</b></div>
-    <div class="hint-row">• Клик — подсветка связей</div>
-    <div class="hint-row">• Двойной клик — открыть карточку</div>
-    <div class="hint-row">• Перетаскивание — двигать узлы</div>
-    <div class="hint-row">• Колёсико — масштаб</div>
-    <div class="hint-row" style="margin-top:8px"><b>📱 Смартфон:</b></div>
-    <div class="hint-row">• Тап — подсветка связей</div>
-    <div class="hint-row">• Двойной тап — открыть карточку</div>
-    <div class="hint-row">• Перетаскивание — двигать узлы/фон</div>
-    <div class="hint-row">• Щипок двумя пальцами — масштаб</div>
+<div class="graph-controls">
+<button onclick="graphCenter()">🎯 Центр</button>
+<button onclick="graphReset()">🔄 Сброс</button>
+</div>
+<button class="graph-toggle-sidebar" onclick="toggleSidebarMobile()">📋 Список</button>
+<button class="graph-info-btn" onclick="toggleInfoPopup()">i</button>
+<div class="graph-info-popup" id="info-popup">
+<div class="hint-row"><b>💻 ПК:</b></div>
+<div class="hint-row">• Клик — подсветка связей</div>
+<div class="hint-row">• Двойной клик — карточка</div>
+<div class="hint-row">• Перетаскивание — двигать узлы</div>
+<div class="hint-row">• Колёсико — масштаб</div>
+<div class="hint-row" style="margin-top:8px"><b>📱 Смартфон:</b></div>
+<div class="hint-row">• Тап — подсветка связей</div>
+<div class="hint-row">• Двойной тап — карточка</div>
+<div class="hint-row">• Перетаскивание — двигать узлы/фон</div>
+<div class="hint-row">• Щипок двумя пальцами — масштаб</div>
 </div>
 <div class="graph-info-selected" id="graph-info-selected"></div>
+<div id="graph-stats"></div>
 </div>
-
 <div class="graph-sidebar" id="graph-sidebar">
 <h3>📋 Персонажи</h3>
-<input type="text" id="graph-search" placeholder="🔍 Поиск по имени...">
+<input type="text" id="graph-search" placeholder="🔍 Поиск по имени…">
 <div class="filters-block">
 <div class="filters-title">Фильтр:</div>
 <div id="graph-type-filters"></div>
-<div class="filters-actions">
-<button onclick="graphResetFilters()">🔄 Сброс</button>
-</div>
+<div class="filters-actions"><button onclick="resetFilters()">🔄 Сброс</button></div>
 </div>
 <div class="graph-char-list" id="graph-char-list"></div>
-</div>
-</div>
-
 <div class="graph-legend" id="graph-legend"></div>
+</div>
+</div>
 </div>
 
 <div id="tab-locations" class="tab-content hidden">
@@ -4709,22 +4551,29 @@ ${IS_ADMIN ? `<div style="float:right">
 
 // ============ ВКЛАДКИ + СБРОС ПОИСКА ============
 document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const tab = btn.dataset.tab;
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-    document.getElementById('tab-' + tab).classList.remove('hidden');
-    // Сброс поиска и сортировки
+btn.addEventListener('click', () => {
+document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+const tab = btn.dataset.tab;
+document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+document.getElementById('tab-' + tab).classList.remove('hidden');
+// Сброс поиска и сортировки
 const input = document.getElementById('search-' + tab);
 if (input) input.value = '';
 const filter = document.getElementById('filter-type');
 if (filter) filter.value = '';
 const sortSel = document.getElementById('sort-' + tab);
 if (sortSel) sortSel.value = 'name-asc';
-    currentTab = tab;
-    renderCurrentTab();
-  });
+currentTab = tab;
+renderCurrentTab();
+// Автоцентрирование графа при открытии вкладки
+if (tab === 'graph') {
+setTimeout(() => {
+resizeCanvas();
+graphCenter();
+}, 50);
+}
+});
 });
 
 function renderCurrentTab() {
@@ -4904,664 +4753,374 @@ function resetData() {
   renderCurrentTab();
 }
 
-// ============ ГРАФ СВЯЗЕЙ ============
-const canvas = document.getElementById('graph-canvas');
-const ctx = canvas.getContext('2d');
+// ============ ГРАФ СВЯЗЕЙ (НОВАЯ ВЕРСИЯ) ============
 let graphNodes = [];
 let graphEdges = [];
-let graphTransform = { x: 0, y: 0, scale: 1 };
-let draggingNode = null;
-let panning = false;
-let panStart = { x: 0, y: 0 };
 let selectedNode = null;
-let physicsEnabled = true;
 let showOrphansOnly = false;
 let graphFilterTypes = new Set();
-let mouseMoved = false;
-let lastClickTime = 0;
-let touchStartDist = 0;
-let touchStartScale = 1;
-let touchPanning = false;
-let touchDragging = null;
-let touchStartTime = 0;
-let touchStartPos = { x: 0, y: 0 };
-let touchMoved = false;
-let lastTapTime = 0;
+
+// Алиас для функции экранирования (используется в коде графа)
+const esc = escapeHtml;
 
 const GRAPH_COLORS = {
-  'Человек': '#4a9eff',
-  'Существо': '#8a8a9a',
-  'Бобыль': '#7ac74f',
-  'Синий ящер': '#1a5fff',
-  'Синий-ящер': '#1a5fff',
-  'Кокша': '#ff6b9d',
-  'Божество': '#ffd700',
-  'Существа': '#8a8a9a',
-  'Человек-Существо': '#c9a0ff',
-  'Человек/Существо': '#c9a0ff',
-  'Растение-Существо': '#b88a3a',
-  'Растение/Существо': '#b88a3a',
-  'Организация': '#ff7a7a',
-  'Другое': '#5a5a6a'
+'Человек':'#4a9eff','Существо':'#8a8a9a','Бобыль':'#7ac74f',
+'Синий ящер':'#1a5fff','Синий-ящер':'#1a5fff','Кокша':'#ff6b9d',
+'Божество':'#ffd700','Существа':'#8a8a9a',
+'Человек-Существо':'#c9a0ff','Человек/Существо':'#c9a0ff',
+'Растение-Существо':'#b88a3a','Растение/Существо':'#b88a3a',
+'Организация':'#ff7a7a','Другое':'#5a5a6a'
 };
 
-function isNodeVisible(n) {
-if (showOrphansOnly && n.links > 0) return false;
-if (graphFilterTypes.size > 0 && !graphFilterTypes.has(n.type)) return false;
+function raceClassGraph(t){
+if(!t) return 'Другое';
+if(GRAPH_COLORS[t]) return t;
+for(const k of Object.keys(GRAPH_COLORS)) if(t.includes(k)||k.includes(t)) return k;
+return 'Другое';
+}
+
+function getColor(t){ return GRAPH_COLORS[raceClassGraph(t)]||GRAPH_COLORS['Другое']; }
+
+function buildGraph(){
+const chars=data.characters||[];
+graphNodes=[]; graphEdges=[];
+chars.forEach((c,i)=>{
+graphNodes.push({
+id:i, name:c.name, type:c.type||'Другое',
+full:c.full||'', short:c.short||'', image:c.image||'',
+episodes:c.episodes||[], x:0, y:0, links:0
+});
+});
+// Рёбра: упоминание имени B в full у A
+for(let i=0;i<chars.length;i++){
+if(!chars[i].full) continue;
+const txt=chars[i].full.toLowerCase();
+for(let j=0;j<chars.length;j++){
+if(i===j) continue;
+if(txt.includes(chars[j].name.toLowerCase())){
+if(!graphEdges.some(e=>(e.source===i&&e.target===j)||(e.source===j&&e.target===i))){
+graphEdges.push({source:i,target:j});
+graphNodes[i].links++; graphNodes[j].links++;
+}
+}
+}
+}
+layoutNodes();
+renderFilters();
+renderSidebar();
+renderLegend();
+updateStats();
+resizeCanvas();
+graphCenter();
+}
+
+function layoutNodes(){
+const groups={};
+graphNodes.forEach(n=>{ (groups[n.type]||(groups[n.type]=[])).push(n); });
+const keys=Object.keys(groups).sort();
+const COL_STEP = 150;
+const GY = 80, OX = 40, OY = 25;
+keys.forEach(type=>{
+groups[type].sort((a,b)=>b.links-a.links||a.name.localeCompare(b.name,'ru'));
+});
+let globalColIndex = 0;
+keys.forEach(type=>{
+const nodes=groups[type];
+let cols=1;
+if(type==='Существа') cols=3;
+if(type==='Существо') cols=5;
+const perCol=Math.ceil(nodes.length/cols);
+const colArrays=[];
+for(let c=0;c<cols;c++){
+colArrays.push(nodes.slice(c*perCol,(c+1)*perCol));
+}
+colArrays.forEach((colNodes, colIdx)=>{
+const currentColX = (globalColIndex + colIdx) * COL_STEP;
+colNodes.forEach((n,ni)=>{
+const odd=ni%2===1;
+n.x=currentColX+(odd?OX:0);
+n.y=ni*GY+(odd?OY:0);
+});
+});
+globalColIndex += cols;
+});
+}
+
+const canvas=document.getElementById('graph-canvas');
+const ctx=canvas.getContext('2d');
+let tf={x:0,y:0,s:1};
+const R=18;
+
+function resizeCanvas(){
+const p=canvas.parentElement.getBoundingClientRect();
+const d=devicePixelRatio||1;
+canvas.width=p.width*d; canvas.height=p.height*d;
+canvas.style.width=p.width+'px'; canvas.style.height=p.height+'px';
+ctx.setTransform(d,0,0,d,0,0);
+renderGraph();
+}
+
+window.addEventListener('resize',resizeCanvas);
+
+function s2w(sx,sy){
+const r=canvas.parentElement.getBoundingClientRect();
+return{x:(sx-r.width/2-tf.x)/tf.s, y:(sy-r.height/2-tf.y)/tf.s};
+}
+
+function isVisible(n){
+if(showOrphansOnly&&n.links>0) return false;
+if(graphFilterTypes.size>0&&!graphFilterTypes.has(n.type)) return false;
 return true;
 }
 
-// ============ ФИЗИКА ============
-function applyPhysicsStep() {
-const visibleNodes = graphNodes.filter(isNodeVisible);
-const uniqueTypes = [...new Set(visibleNodes.map(n => n.type))];
-const rect = canvas.getBoundingClientRect();
-const canvasSize = Math.min(rect.width || 800, rect.height || 600);
-const clusterRadius = canvasSize * 0.30;
-
-const bounds = {
-minX: -rect.width / 2 + 80,
-maxX: rect.width / 2 - 80,
-minY: -rect.height / 2 + 80,
-maxY: rect.height / 2 - 80
-};
-
-// Отталкивание (пропускаем "замороженные")
-for (let i = 0; i < graphNodes.length; i++) {
-if (!isNodeVisible(graphNodes[i]) || graphNodes[i].frozen) continue;
-for (let j = i + 1; j < graphNodes.length; j++) {
-if (!isNodeVisible(graphNodes[j]) || graphNodes[j].frozen) continue;
-const a = graphNodes[i], b = graphNodes[j];
-const dx = b.x - a.x, dy = b.y - a.y;
-const d2 = dx * dx + dy * dy + 200;
-const f = 1500 / d2;
-const d = Math.sqrt(d2);
-const fx = f * dx / d, fy = f * dy / d;
-a.vx -= fx; a.vy -= fy;
-b.vx += fx; b.vy += fy;
+function renderGraph(){
+if(!graphNodes.length) return;
+const p=canvas.parentElement.getBoundingClientRect();
+const d=devicePixelRatio||1;
+if(canvas.width!==p.width*d||canvas.height!==p.height*d){
+canvas.width=p.width*d; canvas.height=p.height*d;
+canvas.style.width=p.width+'px'; canvas.style.height=p.height+'px';
 }
-}
-
-// Притяжение по рёбрам
-graphEdges.forEach(e => {
-const a = graphNodes[e.source], b = graphNodes[e.target];
-if (!isNodeVisible(a) || !isNodeVisible(b)) return;
-if (a.frozen && b.frozen) return;
-const dx = b.x - a.x, dy = b.y - a.y;
-const d = Math.sqrt(dx * dx + dy * dy) + 0.1;
-const f = (d - 200) * 0.015;
-const fx = f * dx / d, fy = f * dy / d;
-if (!a.frozen) { a.vx += fx; a.vy += fy; }
-if (!b.frozen) { b.vx -= fx; b.vy -= fy; }
-});
-
-// Обновление позиций + кластеризация + стены + заморозка
-const FREEZE_THRESHOLD = 0.15;
-graphNodes.forEach(n => {
-if (n === draggingNode || !isNodeVisible(n)) return;
-const speed = Math.abs(n.vx) + Math.abs(n.vy);
-const isFrozen = n.frozen || speed < FREEZE_THRESHOLD;
-
-if (!isFrozen) {
-const typeIdx = uniqueTypes.indexOf(n.type);
-if (typeIdx !== -1) {
-const angle = (typeIdx / uniqueTypes.length) * Math.PI * 2;
-const tx = Math.cos(angle) * clusterRadius;
-const ty = Math.sin(angle) * clusterRadius;
-n.vx += (tx - n.x) * 0.008;
-n.vy += (ty - n.y) * 0.008;
-}
-}
-
-n.vx *= 0.85;
-n.vy *= 0.85;
-n.x += n.vx;
-n.y += n.vy;
-
-if (speed < FREEZE_THRESHOLD && !n.frozen) {
-n.frozen = true;
-n.vx = 0;
-n.vy = 0;
-}
-});
-}
-
-// ============ ИНИЦИАЛИЗАЦИЯ ============
-function initGraph() {
-graphNodes = [];
-graphEdges = [];
-
-data.characters.forEach((c, i) => {
-const angle = (i / data.characters.length) * Math.PI * 2;
-const radius = 150 + Math.random() * 100;
-graphNodes.push({
-id: i,
-name: c.name,
-type: c.type,
-x: Math.cos(angle) * radius,
-y: Math.sin(angle) * radius,
-vx: 0, vy: 0,
-links: 0
-});
-});
-
-// Подсчёт связей
-data.characters.forEach((c, i) => {
-if (!c.full) return;
-const text = c.full.toLowerCase();
-data.characters.forEach((c2, j) => {
-if (i !== j && text.includes(c2.name.toLowerCase())) {
-graphEdges.push({ source: i, target: j });
-graphNodes[i].links++;
-graphNodes[j].links++;
-}
-});
-});
-
-// Предварительный прогрев физики
-for (let step = 0; step < 80; step++) {
-applyPhysicsStep();
-}
-
-renderGraphSidebar();
-renderGraphLegend();
-renderGraphTypeFilters();
-updateGraphStats();
-}
-
-// ============ ОТРИСОВКА ============
-function renderGraph() {
-if (!graphNodes.length) initGraph();
-const rect = canvas.getBoundingClientRect();
-const dpr = window.devicePixelRatio || 1;
-
-if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
-canvas.width = rect.width * dpr;
-canvas.height = rect.height * dpr;
-canvas.style.width = rect.width + 'px';
-canvas.style.height = rect.height + 'px';
-}
-
-ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-ctx.clearRect(0, 0, rect.width, rect.height);
+ctx.setTransform(d,0,0,d,0,0);
+ctx.clearRect(0,0,p.width,p.height);
 ctx.save();
-ctx.translate(rect.width / 2 + graphTransform.x, rect.height / 2 + graphTransform.y);
-ctx.scale(graphTransform.scale, graphTransform.scale);
-
-// Рёбра
-graphEdges.forEach(e => {
-const a = graphNodes[e.source], b = graphNodes[e.target];
-if (!isNodeVisible(a) || !isNodeVisible(b)) return;
-const isHighlighted = selectedNode && (e.source === selectedNode.id || e.target === selectedNode.id);
-
-if (selectedNode && !isHighlighted) {
-ctx.strokeStyle = 'rgba(58,58,74,0.1)';
-ctx.lineWidth = 0.5;
-} else if (isHighlighted) {
-ctx.strokeStyle = '#c9a0ff';
-ctx.lineWidth = 2.5;
-} else {
-ctx.strokeStyle = '#3a3a4a';
-ctx.lineWidth = 1.2;
-}
-ctx.beginPath();
-ctx.moveTo(a.x, a.y);
-ctx.lineTo(b.x, b.y);
-ctx.stroke();
+ctx.translate(p.width/2+tf.x, p.height/2+tf.y);
+ctx.scale(tf.s,tf.s);
+graphEdges.forEach(e=>{
+const a=graphNodes[e.source], b=graphNodes[e.target];
+if(!isVisible(a)||!isVisible(b)) return;
+const hl=selectedNode&&(e.source===selectedNode.id||e.target===selectedNode.id);
+ctx.strokeStyle=selectedNode?(hl?'#c9a0ff':'rgba(80,80,100,.18)'):'rgba(110,110,135,.55)';
+ctx.lineWidth=hl?3:(selectedNode?.8:1.4);
+ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
 });
-
-// Узлы
-graphNodes.forEach(n => {
-if (!isNodeVisible(n)) return;
-const rc = raceClass(n.type);
-const color = GRAPH_COLORS[rc] || GRAPH_COLORS['Другое'];
-const isSelected = selectedNode && selectedNode.id === n.id;
-const isConnected = selectedNode && graphEdges.some(e =>
-(e.source === selectedNode.id && e.target === n.id) ||
-(e.target === selectedNode.id && e.source === n.id)
-);
-const isDimmed = selectedNode && !isSelected && !isConnected;
-const radius = 4 + Math.min(n.links, 12) * 1.2;
-
-ctx.globalAlpha = isDimmed ? 0.15 : 1;
-
-if (isSelected) {
-ctx.shadowColor = color;
-ctx.shadowBlur = 15;
-}
-
-ctx.fillStyle = color;
-ctx.beginPath();
-ctx.arc(n.x, n.y, radius, 0, Math.PI * 2);
-ctx.fill();
-
-ctx.shadowBlur = 0;
-if (isSelected) {
-ctx.strokeStyle = '#fff';
-ctx.lineWidth = 2;
-ctx.stroke();
-}
-
-// Подпись с чёрной обводкой
-ctx.font = `${isSelected ? 'bold ' : ''}12px Inter, sans-serif`;
-ctx.textBaseline = 'middle';
-const textX = n.x + radius + 6;
-const textY = n.y;
-
-ctx.strokeStyle = '#000';
-ctx.lineWidth = 3;
-ctx.lineJoin = 'round';
-ctx.strokeText(n.name, textX, textY);
-
-ctx.fillStyle = isDimmed ? 'rgba(232,232,240,0.3)' : '#fff';
-ctx.fillText(n.name, textX, textY);
-ctx.globalAlpha = 1;
+graphNodes.forEach(n=>{
+if(!isVisible(n)) return;
+const c=getColor(n.type);
+const isSel=selectedNode&&selectedNode.id===n.id;
+const isCon=selectedNode&&graphEdges.some(e=>
+(e.source===selectedNode.id&&e.target===n.id)||(e.target===selectedNode.id&&e.source===n.id));
+const dim=selectedNode&&!isSel&&!isCon;
+ctx.beginPath(); ctx.arc(n.x,n.y,R,0,Math.PI*2);
+ctx.fillStyle=dim?'rgba(26,26,37,.25)':'#1a1a25'; ctx.fill();
+ctx.strokeStyle=dim?'rgba(58,58,74,.15)':(isSel?'#fff':c);
+ctx.lineWidth=isSel?3:1.5; ctx.stroke();
+ctx.fillStyle=dim?'rgba(200,200,200,.12)':c;
+ctx.font='bold 13px "Segoe UI",system-ui,sans-serif';
+ctx.textAlign='center'; ctx.textBaseline='middle';
+ctx.fillText(n.name.charAt(0).toUpperCase(),n.x,n.y);
+ctx.fillStyle=dim?'rgba(200,200,200,.12)':'#ddd';
+ctx.font='11px "Segoe UI",system-ui,sans-serif';
+ctx.textBaseline='top';
+let nm=n.name; if(nm.length>14) nm=nm.slice(0,13)+'…';
+ctx.fillText(nm,n.x,n.y+R+4);
 });
-
 ctx.restore();
 }
 
-function tickGraph() {
-if (currentTab !== 'graph' || !physicsEnabled) {
-requestAnimationFrame(tickGraph);
-return;
-}
-applyPhysicsStep();
-renderGraph();
-requestAnimationFrame(tickGraph);
-}
-
-// ============ УПРАВЛЕНИЕ: МЫШЬ ============
-function getCanvasCoords(e) {
-const rect = canvas.getBoundingClientRect();
-const cx = (e.clientX ?? e.touches?.[0]?.clientX) - rect.left;
-const cy = (e.clientY ?? e.touches?.[0]?.clientY) - rect.top;
-const x = (cx - rect.width / 2 - graphTransform.x) / graphTransform.scale;
-const y = (cy - rect.height / 2 - graphTransform.y) / graphTransform.scale;
-return { x, y, cx, cy };
-}
-
-function findNodeAt(x, y) {
-for (let i = graphNodes.length - 1; i >= 0; i--) {
-const n = graphNodes[i];
-if (!isNodeVisible(n)) continue;
-const r = 5 + Math.min(n.links, 10) * 0.8 + 4;
-if ((n.x - x) ** 2 + (n.y - y) ** 2 < r * r) return n;
+function nodeAt(wx,wy){
+for(let i=graphNodes.length-1;i>=0;i--){
+const n=graphNodes[i]; if(!isVisible(n)) continue;
+const dx=wx-n.x,dy=wy-n.y;
+if(dx*dx+dy*dy<=(R+6)*(R+6)) return n;
 }
 return null;
 }
 
-canvas.addEventListener('mousedown', e => {
-mouseMoved = false;
-const { x, y } = getCanvasCoords(e);
-const node = findNodeAt(x, y);
-if (node) {
-draggingNode = node;
-node.frozen = false;
-} else {
-panning = true;
-panStart = { x: e.clientX - graphTransform.x, y: e.clientY - graphTransform.y };
-}
+let dragN=null, panning=false, panS={x:0,y:0}, mdPos={x:0,y:0}, moved=false, lastClick=0;
+canvas.addEventListener('mousedown',e=>{
+const r=canvas.getBoundingClientRect();
+const w=s2w(e.clientX-r.left,e.clientY-r.top);
+mdPos={x:e.clientX,y:e.clientY}; moved=false;
+const n=nodeAt(w.x,w.y);
+if(n){dragN=n;}else{panning=true;panS={x:e.clientX-tf.x,y:e.clientY-tf.y};}
 });
-
-canvas.addEventListener('mousemove', e => {
-mouseMoved = true;
-if (draggingNode) {
-const { x, y } = getCanvasCoords(e);
-draggingNode.x = x; draggingNode.y = y;
-draggingNode.vx = 0; draggingNode.vy = 0;
-} else if (panning) {
-graphTransform.x = e.clientX - panStart.x;
-graphTransform.y = e.clientY - panStart.y;
-}
+canvas.addEventListener('mousemove',e=>{
+if(Math.abs(e.clientX-mdPos.x)>3||Math.abs(e.clientY-mdPos.y)>3) moved=true;
+if(dragN){
+const r=canvas.getBoundingClientRect();const w=s2w(e.clientX-r.left,e.clientY-r.top);
+dragN.x=w.x;dragN.y=w.y;renderGraph();
+}else if(panning){tf.x=e.clientX-panS.x;tf.y=e.clientY-panS.y;renderGraph();}
 });
-
-canvas.addEventListener('mouseup', () => {
-  if (draggingNode) {
-    draggingNode.vx = 0;
-    draggingNode.vy = 0;
-    // Если не было перетаскивания (чистый клик) — замораживаем обратно
-    if (!mouseMoved) {
-      draggingNode.frozen = true;
-    }
-  }
-  draggingNode = null;
-  panning = false;
+canvas.addEventListener('mouseup',()=>{
+if(dragN){if(!moved){const now=Date.now();if(now-lastClick<350){openModal(dragN);lastClick=0;}else{selectNode(dragN);lastClick=now;}}dragN=null;}
+else if(panning){if(!moved)selectNode(null);panning=false;}
 });
-
-canvas.addEventListener('wheel', e => {
+canvas.addEventListener('wheel',e=>{
 e.preventDefault();
-const delta = e.deltaY > 0 ? 0.9 : 1.1;
-graphTransform.scale = Math.max(0.2, Math.min(4, graphTransform.scale * delta));
-}, { passive: false });
+const f=e.deltaY>0?.9:1.1;
+const ns=Math.max(.1,Math.min(5,tf.s*f));
+const r=canvas.getBoundingClientRect();
+const mx=e.clientX-r.left-r.width/2, my=e.clientY-r.top-r.height/2;
+tf.x=mx-(mx-tf.x)*(ns/tf.s); tf.y=my-(my-tf.y)*(ns/tf.s); tf.s=ns;
+renderGraph();
+},{passive:false});
 
-// ============ КЛИК / ДВОЙНОЙ КЛИК ============
-canvas.addEventListener('click', e => {
-if (mouseMoved) return;
-const { x, y } = getCanvasCoords(e);
-const node = findNodeAt(x, y);
-const now = Date.now();
+let tDrag=null,tPan=false,tDist0=0,tScale0=1,tPos0={x:0,y:0},tMoved=false,lastTap=0;
+canvas.addEventListener('touchstart',e=>{
+e.preventDefault();
+if(e.touches.length===1){
+const t=e.touches[0],r=canvas.getBoundingClientRect();
+const w=s2w(t.clientX-r.left,t.clientY-r.top);
+tPos0={x:t.clientX,y:t.clientY};tMoved=false;
+const n=nodeAt(w.x,w.y);
+if(n)tDrag=n;else{tPan=true;panS={x:t.clientX-tf.x,y:t.clientY-tf.y};}
+}else if(e.touches.length===2){
+tDrag=null;tPan=false;
+const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;
+tDist0=Math.sqrt(dx*dx+dy*dy);tScale0=tf.s;
+}
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+e.preventDefault();
+if(e.touches.length===1){
+const t=e.touches[0];
+if(Math.abs(t.clientX-tPos0.x)>5||Math.abs(t.clientY-tPos0.y)>5)tMoved=true;
+if(tDrag){const r=canvas.getBoundingClientRect();const w=s2w(t.clientX-r.left,t.clientY-r.top);tDrag.x=w.x;tDrag.y=w.y;renderGraph();}
+else if(tPan){tf.x=t.clientX-panS.x;tf.y=t.clientY-panS.y;renderGraph();}
+}else if(e.touches.length===2){
+const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;
+tf.s=Math.max(.1,Math.min(5,tScale0*(Math.sqrt(dx*dx+dy*dy)/tDist0)));renderGraph();
+}
+},{passive:false});
+canvas.addEventListener('touchend',e=>{
+if(!e.touches.length){
+if(tDrag&&!tMoved){const now=Date.now();if(now-lastTap<350){openModal(tDrag);lastTap=0;}else{selectNode(tDrag);lastTap=now;}}
+else if(tPan&&!tMoved)selectNode(null);
+tDrag=null;tPan=false;
+}
+});
 
-if (node) {
-if (now - lastClickTime < 350) {
-const item = findWikiItem(node.name);
-if (item) {
+function selectNode(n){
+selectedNode=(selectedNode===n)?null:n;
+updateSelInfo(); highlightSidebar(); renderGraph();
+}
+
+function updateSelInfo(){
+const el=document.getElementById('graph-info-selected');
+if(selectedNode){
+el.innerHTML='🎯 <span class="sel-name">'+esc(selectedNode.name)+'</span> · <span class="sel-meta">'+esc(selectedNode.type)+' · связей: '+selectedNode.links+'</span>';
+el.classList.add('active');
+}else{el.classList.remove('active');el.innerHTML='';}
+}
+
+function openModal(n){
+const c = data.characters[n.id];
+const item = {
+...c,
+_kind: c.type || 'characters'
+};
+if(typeof openWikiModal === 'function') {
 openWikiModal(item);
-} else {
-alert(`📖 ${node.name}\n🏷️ ${node.type}\n🔗 Связей: ${node.links}`);
-}
-lastClickTime = 0;
-return;
-}
-selectedNode = (selectedNode && selectedNode.id === node.id) ? null : node;
-highlightSidebarItem(selectedNode);
-updateGraphInfo();
-lastClickTime = now;
-} else {
-selectedNode = null;
-highlightSidebarItem(null);
-updateGraphInfo();
-}
-});
-
-// ============ TOUCH (МОБИЛЬНЫЕ) ============
-canvas.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if (e.touches.length === 1) {
-        touchStartTime = Date.now();
-        touchMoved = false;
-        touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        const { x, y } = getCanvasCoords(e);
-        const node = findNodeAt(x, y);
-        if (node) {
-            touchDragging = node;
-            node.frozen = false;
-        } else {
-            touchPanning = true;
-            panStart = {
-                x: e.touches[0].clientX - graphTransform.x,
-                y: e.touches[0].clientY - graphTransform.y
-            };
-        }
-    } else if (e.touches.length === 2) {
-        touchPanning = false;
-        touchDragging = null;
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
-        touchStartDist = Math.sqrt(dx * dx + dy * dy);
-        touchStartScale = graphTransform.scale;
-    }
-}, { passive: false });
-
-canvas.addEventListener('touchmove', e => {
-    e.preventDefault();
-    if (e.touches.length === 1) {
-        const dx = e.touches[0].clientX - touchStartPos.x;
-        const dy = e.touches[0].clientY - touchStartPos.y;
-        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) touchMoved = true;
-        if (touchDragging) {
-            const { x, y } = getCanvasCoords(e);
-            touchDragging.x = x; touchDragging.y = y;
-            touchDragging.vx = 0; touchDragging.vy = 0;
-        } else if (touchPanning) {
-            graphTransform.x = e.touches[0].clientX - panStart.x;
-            graphTransform.y = e.touches[0].clientY - panStart.y;
-        }
-    } else if (e.touches.length === 2) {
-        touchMoved = true;
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const scale = touchStartScale * (dist / touchStartDist);
-        graphTransform.scale = Math.max(0.2, Math.min(4, scale));
-    }
-}, { passive: false });
-
-canvas.addEventListener('touchend', e => {
-    if (e.touches.length === 0) {
-        const duration = Date.now() - touchStartTime;
-        if (touchDragging) {
-            touchDragging.vx = 0;
-            touchDragging.vy = 0;
-            if (!touchMoved && duration < 400) {
-                // Короткий тап по узлу
-                const now = Date.now();
-                if (now - lastTapTime < 350) {
-                    // Двойной тап → открыть карточку
-                    const item = findWikiItem(touchDragging.name);
-                    if (item) openWikiModal(item);
-                    lastTapTime = 0;
-                } else {
-                    // Одиночный тап → подсветка
-                    selectedNode = (selectedNode && selectedNode.id === touchDragging.id) ? null : touchDragging;
-                    highlightSidebarItem(selectedNode);
-                    updateGraphInfo();
-                    lastTapTime = now;
-                }
-                touchDragging.frozen = true;
-            }
-        } else if (touchPanning && !touchMoved && duration < 400) {
-            // Тап по пустому месту → снять выделение
-            selectedNode = null;
-            highlightSidebarItem(null);
-            updateGraphInfo();
-        }
-        touchPanning = false;
-        touchDragging = null;
-    }
-});
-
-// ============ КНОПКИ ============
-function graphCenter() {
-graphTransform = { x: 0, y: 0, scale: 1 };
-renderGraph();
-}
-
-function graphReset() {
-graphNodes.forEach(n => {
-n.x = (Math.random() - 0.5) * 800;
-n.y = (Math.random() - 0.5) * 600;
-n.vx = 0; n.vy = 0;
-n.frozen = false;
-});
-graphTransform = { x: 0, y: 0, scale: 1 };
-selectedNode = null;
-showOrphansOnly = false;
-graphFilterTypes.clear();
-highlightSidebarItem(null);
-renderGraphSidebar();
-renderGraph();
-}
-
-function graphTogglePhysics() {
-physicsEnabled = !physicsEnabled;
-document.getElementById('btn-physics').textContent =
-physicsEnabled ? '⏸️ Пауза' : '▶️ Старт';
-}
-
-function graphResetFilters() {
-showOrphansOnly = false;
-graphFilterTypes.clear();
-document.getElementById('graph-search').value = '';
-renderGraphTypeFilters();
-renderGraphSidebar();
-renderGraph();
-updateGraphStats();
-}
-
-function toggleGraphSidebar() {
-document.getElementById('graph-sidebar').classList.toggle('collapsed');
-}
-
-function updateGraphInfo() {
-    const info = document.getElementById('graph-info-selected');
-    if (!info) return;
-    if (selectedNode) {
-        info.innerHTML = `🎯 <span class="sel-name">${escapeHtml(selectedNode.name)}</span> · <span class="sel-meta">${escapeHtml(selectedNode.type)} · связей: ${selectedNode.links}</span>`;
-        info.classList.add('active');
-    } else {
-        info.classList.remove('active');
-        info.innerHTML = '';
-    }
-}
-
-function updateGraphStats() {
-const visible = graphNodes.filter(isNodeVisible).length;
-const el = document.getElementById('graph-stats');
-if (el) el.textContent = `Узлов: ${visible} / ${graphNodes.length} · Связей: ${graphEdges.length}`;
-}
-
-// ============ ФИЛЬТРЫ ============
-function renderGraphTypeFilters() {
-const container = document.getElementById('graph-type-filters');
-if (!container) return;
-const types = [...new Set(data.characters.map(c => c.type))].sort();
-
-const orphansChecked = showOrphansOnly ? 'checked' : '';
-let html = `<label>
-<input type="checkbox" value="__orphans__" ${orphansChecked} onchange="toggleGraphTypeFilter('__orphans__')">
-<span>👤 Без связей</span>
-</label>`;
-
-html += types.map(type => {
-const isChecked = graphFilterTypes.has(type) ? 'checked' : '';
-return `<label>
-<input type="checkbox" value="${type}" ${isChecked} onchange="toggleGraphTypeFilter('${type.replace(/'/g, "\\'")}')">
-<span>${type}</span>
-</label>`;
-}).join('');
-
-container.innerHTML = html;
-}
-
-function toggleGraphTypeFilter(type) {
-if (type === '__orphans__') {
-showOrphansOnly = !showOrphansOnly;
-} else {
-if (graphFilterTypes.has(type)) {
-graphFilterTypes.delete(type);
-} else {
-graphFilterTypes.add(type);
 }
 }
-renderGraphSidebar();
-renderGraph();
-updateGraphStats();
-}
 
-// ============ САЙДБАР ============
-function renderGraphSidebar() {
-const list = document.getElementById('graph-char-list');
-const search = (document.getElementById('graph-search')?.value || '').toLowerCase();
-if (!list) return;
-
-const visible = graphNodes.filter(n => {
-if (showOrphansOnly && n.links > 0) return false;
-if (graphFilterTypes.size > 0 && !graphFilterTypes.has(n.type)) return false;
-if (search && !n.name.toLowerCase().includes(search)) return false;
+function renderSidebar(){
+const list=document.getElementById('graph-char-list');
+const q=(document.getElementById('graph-search')?.value||'').toLowerCase();
+const vis=graphNodes.filter(n=>{
+if(showOrphansOnly&&n.links>0)return false;
+if(graphFilterTypes.size>0&&!graphFilterTypes.has(n.type))return false;
+if(q&&!n.name.toLowerCase().includes(q))return false;
 return true;
-}).sort((a, b) => b.links - a.links || a.name.localeCompare(b.name, 'ru'));
-
-list.innerHTML = visible.map(n => {
-const rc = raceClass(n.type);
-const color = GRAPH_COLORS[rc] || GRAPH_COLORS['Другое'];
-const active = selectedNode && selectedNode.id === n.id ? 'active' : '';
-const linksBadge = n.links > 0
-? `<span class="links-count" style="background:${color}33; color:${color};">${n.links}</span>`
-: `<span class="links-count" style="background:#3a3a4a; color:#888;">0</span>`;
-return `<div class="graph-char-item ${active}" data-id="${n.id}" style="border-left-color:${color}">
-<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${n.name}</span>
-${linksBadge}
-</div>`;
-}).join('') || '<div style="color:#666; padding:8px; text-align:center; font-size:0.85em;">Ничего не найдено</div>';
-
-updateGraphStats();
-}
-
-function highlightSidebarItem(node) {
-document.querySelectorAll('.graph-char-item').forEach(el => {
-el.classList.toggle('active', node && el.dataset.id == node.id);
-});
-if (node) {
-const el = document.querySelector(`.graph-char-item[data-id="${node.id}"]`);
-if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-}
-
-// Клик по элементу списка → подсветка узла
-document.addEventListener('click', e => {
-const item = e.target.closest('.graph-char-item');
-if (!item) return;
-const id = parseInt(item.dataset.id, 10);
-const node = graphNodes.find(n => n.id === id);
-if (!node) return;
-selectedNode = (selectedNode && selectedNode.id === id) ? null : node;
-highlightSidebarItem(selectedNode);
-updateGraphInfo();
-if (selectedNode) {
-graphTransform.x = -selectedNode.x * graphTransform.scale;
-graphTransform.y = -selectedNode.y * graphTransform.scale;
-renderGraph();
-}
-});
-
-// Поиск в списке
-document.addEventListener('input', e => {
-if (e.target.id === 'graph-search') renderGraphSidebar();
-});
-
-// ============ ЛЕГЕНДА ============
-// ============ КНОПКА-ПОДСКАЗКА ============
-const infoBtn = document.getElementById('graph-info-btn');
-const infoPopup = document.getElementById('graph-info-popup');
-if (infoBtn && infoPopup) {
-    infoBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        infoPopup.classList.toggle('active');
-        infoBtn.classList.toggle('active');
-    });
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#graph-info-popup') && !e.target.closest('#graph-info-btn')) {
-            infoPopup.classList.remove('active');
-            infoBtn.classList.remove('active');
-        }
-    });
-}
-function renderGraphLegend() {
-const legend = document.getElementById('graph-legend');
-if (!legend) return;
-const types = [...new Set(graphNodes.map(n => n.type))].sort();
-legend.innerHTML = types.map(t => {
-const rc = raceClass(t);
-const color = GRAPH_COLORS[rc] || GRAPH_COLORS['Другое'];
-return `<div class="graph-legend-item">
-<span class="graph-legend-dot" style="background:${color}"></span>
-<span>${t}</span>
-</div>`;
+}).sort((a,b)=>b.links-a.links||a.name.localeCompare(b.name,'ru'));
+list.innerHTML=vis.map(n=>{
+const c=getColor(n.type);
+const act=selectedNode&&selectedNode.id===n.id?'active':'';
+const badge=n.links>0
+?'<span class="links-count" style="background:'+c+'33;color:'+c+'">'+n.links+'</span>'
+:'<span class="links-count">0</span>';
+return '<div class="graph-char-item '+act+'" data-id="'+n.id+'" style="border-left-color:'+c+'" onclick="sbClick('+n.id+')" ondblclick="sbDbl('+n.id+')">'
++'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(n.name)+'</span>'+badge+'</div>';
 }).join('');
 }
+
+function sbClick(id){const n=graphNodes[id];if(n){selectNode(n);panTo(n);}}
+function sbDbl(id){const n=graphNodes[id];if(n)openModal(n);}
+function panTo(n){tf.x=-n.x*tf.s;tf.y=-n.y*tf.s;renderGraph();}
+
+function highlightSidebar(){
+document.querySelectorAll('.graph-char-item').forEach(el=>{
+el.classList.toggle('active',selectedNode&&el.dataset.id==selectedNode.id);
+});
+}
+
+document.getElementById('graph-search').addEventListener('input',renderSidebar);
+
+function renderFilters(){
+const c=document.getElementById('graph-type-filters');
+const types=[...new Set(graphNodes.map(n=>n.type))].sort();
+let h='<label><input type="checkbox" value="__orphans__" '+(showOrphansOnly?'checked':'')+
+' onchange="toggleF(\'__orphans__\')"><span>👤 Без связей</span></label>';
+h+=types.map(t=>'<label><input type="checkbox" value="'+t+'" '+(graphFilterTypes.has(t)?'checked':'')+
+' onchange="toggleF(\''+t.replace(/'/g,"\\'")+'\')"><span>'+t+'</span></label>').join('');
+c.innerHTML=h;
+}
+
+function toggleF(t){
+if(t==='__orphans__')showOrphansOnly=!showOrphansOnly;
+else{if(graphFilterTypes.has(t))graphFilterTypes.delete(t);else graphFilterTypes.add(t);}
+renderSidebar();renderGraph();updateStats();
+}
+
+function resetFilters(){
+showOrphansOnly=false;graphFilterTypes.clear();
+document.getElementById('graph-search').value='';
+renderFilters();renderSidebar();renderGraph();updateStats();
+}
+
+function renderLegend(){
+document.getElementById('graph-legend').innerHTML=[...new Set(graphNodes.map(n=>n.type))].sort().map(t=>
+'<div class="graph-legend-item"><span class="graph-legend-dot" style="background:'+getColor(t)+'"></span><span>'+t+'</span></div>'
+).join('');
+}
+
+function updateStats(){
+const v=graphNodes.filter(isVisible).length;
+document.getElementById('graph-stats').textContent='Узлов: '+v+' / '+graphNodes.length+' · Связей: '+graphEdges.length;
+}
+
+function graphCenter(){
+const vis=graphNodes.filter(isVisible);if(!vis.length)return;
+let x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;
+vis.forEach(n=>{if(n.x<x0)x0=n.x;if(n.x>x1)x1=n.x;if(n.y<y0)y0=n.y;if(n.y>y1)y1=n.y;});
+const r=canvas.parentElement.getBoundingClientRect();
+const cx=(x0+x1)/2,cy=(y0+y1)/2,w=x1-x0+120,h=y1-y0+120;
+tf.s=Math.max(.15,Math.min(Math.min(r.width/w,r.height/h),1.5));
+tf.x=-cx*tf.s;tf.y=-cy*tf.s;renderGraph();
+}
+
+function graphReset(){
+layoutNodes();selectedNode=null;showOrphansOnly=false;graphFilterTypes.clear();
+document.getElementById('graph-search').value='';
+renderFilters();renderSidebar();updateSelInfo();updateStats();graphCenter();
+}
+
+function toggleInfoPopup(){document.getElementById('info-popup').classList.toggle('show');}
+function toggleSidebarMobile(){document.getElementById('graph-sidebar').classList.toggle('open');}
 
 // === ЗАГРУЗКА ДАННЫХ ИЗ JSON ===
 async function loadInitialData() {
-  try {
-    const response = await fetch('data.json');
-    if (response.ok) {
-      data = await response.json();
-      console.log("✅ Данные успешно загружены из data.json");
-    } else {
-      console.log("⚠️ data.json не найден, используем встроенные данные");
-    }
-  } catch (e) {
-    console.log("⚠️ Не удалось загрузить data.json, используем встроенные данные");
-  }
-  updateStats();
-  renderCurrentTab();
+try {
+const response = await fetch('data.json');
+if (response.ok) {
+data = await response.json();
+console.log("✅ Данные успешно загружены из data.json");
+} else {
+console.log("⚠️ data.json не найден, используем встроенные данные");
+}
+} catch (e) {
+console.log("⚠️ Не удалось загрузить data.json, используем встроенные данные");
+}
+updateStats();
+buildGraph();
+renderCurrentTab();
 }
 
 
 // ============ СТАРТ ============
 loadInitialData();
-tickGraph();
+
 // ============ ГЛОБАЛЬНЫЙ ПОИСК ============
 const globalSearchInput = document.getElementById('global-search');
 const globalResults = document.getElementById('global-results');
@@ -5821,7 +5380,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия beta10 · Обновлено: 04.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия beta15 · Обновлено: 05.09.2026.</div>
 </footer>
 
 </body></html>
