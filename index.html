@@ -538,18 +538,72 @@ font-size: 0.85em;
 .graph-legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
 /* Инфо-блок */
-.graph-info {
-position: absolute;
-bottom: 10px;
-left: 10px;
-background: rgba(26,26,37,0.9);
-padding: 8px 12px;
-border-radius: 6px;
-font-size: 0.8em;
-color: #aaa;
-max-width: calc(100% - 20px);
-pointer-events: none;
+.graph-info-btn {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(26,26,37,0.9);
+    border: 1px solid #3a3a4a;
+    color: #aaa;
+    font-size: 15px;
+    font-style: italic;
+    font-weight: bold;
+    font-family: Georgia, serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.2s;
+    padding: 0;
+    line-height: 1;
 }
+.graph-info-btn:hover, .graph-info-btn.active {
+    background: #3a3a4a;
+    color: #c9a0ff;
+    border-color: #c9a0ff;
+}
+.graph-info-popup {
+    position: absolute;
+    bottom: 48px;
+    left: 10px;
+    background: rgba(20,20,30,0.97);
+    border: 1px solid #3a3a4a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.85em;
+    color: #ccc;
+    z-index: 10;
+    display: none;
+    min-width: 240px;
+    line-height: 1.7;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    pointer-events: auto;
+}
+.graph-info-popup.active { display: block; }
+.graph-info-popup b { color: #c9a0ff; }
+.graph-info-popup .hint-row { margin: 2px 0; }
+.graph-info-selected {
+    position: absolute;
+    bottom: 10px;
+    left: 50px;
+    background: rgba(26,26,37,0.92);
+    border: 1px solid #c9a0ff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    color: #e8e8f0;
+    z-index: 10;
+    display: none;
+    max-width: calc(100% - 60px);
+    pointer-events: none;
+}
+.graph-info-selected.active { display: block; }
+.graph-info-selected .sel-name { color: #c9a0ff; font-weight: 600; }
+.graph-info-selected .sel-meta { color: #aaa; font-size: 0.9em; }
 
 /* Мобильная кнопка-переключатель списка */
 .graph-toggle-sidebar { display: none; }
@@ -1863,9 +1917,20 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div class="graph-layout">
 <div id="graph-container">
 <canvas id="graph-canvas"></canvas>
-<div class="graph-info" id="graph-info">
-🖱 Клик — подсветка · Двойной клик — инфо · Перетаскивание узлов
+<button class="graph-info-btn" id="graph-info-btn" aria-label="Подсказка">i</button>
+<div class="graph-info-popup" id="graph-info-popup">
+    <div class="hint-row"><b>💻 ПК:</b></div>
+    <div class="hint-row">• Клик — подсветка связей</div>
+    <div class="hint-row">• Двойной клик — открыть карточку</div>
+    <div class="hint-row">• Перетаскивание — двигать узлы</div>
+    <div class="hint-row">• Колёсико — масштаб</div>
+    <div class="hint-row" style="margin-top:8px"><b>📱 Смартфон:</b></div>
+    <div class="hint-row">• Тап — подсветка связей</div>
+    <div class="hint-row">• Двойной тап — открыть карточку</div>
+    <div class="hint-row">• Перетаскивание — двигать узлы/фон</div>
+    <div class="hint-row">• Щипок двумя пальцами — масштаб</div>
 </div>
+<div class="graph-info-selected" id="graph-info-selected"></div>
 </div>
 
 <div class="graph-sidebar" id="graph-sidebar">
@@ -4858,6 +4923,10 @@ let touchStartDist = 0;
 let touchStartScale = 1;
 let touchPanning = false;
 let touchDragging = null;
+let touchStartTime = 0;
+let touchStartPos = { x: 0, y: 0 };
+let touchMoved = false;
+let lastTapTime = 0;
 
 const GRAPH_COLORS = {
   'Человек': '#4a9eff',
@@ -5197,54 +5266,89 @@ updateGraphInfo();
 
 // ============ TOUCH (МОБИЛЬНЫЕ) ============
 canvas.addEventListener('touchstart', e => {
-e.preventDefault();
-if (e.touches.length === 1) {
-const { x, y } = getCanvasCoords(e);
-const node = findNodeAt(x, y);
-if (node) {
-touchDragging = node;
-} else {
-touchPanning = true;
-panStart = {
-x: e.touches[0].clientX - graphTransform.x,
-y: e.touches[0].clientY - graphTransform.y
-};
-}
-} else if (e.touches.length === 2) {
-touchPanning = false;
-touchDragging = null;
-const dx = e.touches[0].clientX - e.touches[1].clientX;
-const dy = e.touches[0].clientY - e.touches[1].clientY;
-touchStartDist = Math.sqrt(dx * dx + dy * dy);
-touchStartScale = graphTransform.scale;
-}
+    e.preventDefault();
+    if (e.touches.length === 1) {
+        touchStartTime = Date.now();
+        touchMoved = false;
+        touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        const { x, y } = getCanvasCoords(e);
+        const node = findNodeAt(x, y);
+        if (node) {
+            touchDragging = node;
+            node.frozen = false;
+        } else {
+            touchPanning = true;
+            panStart = {
+                x: e.touches[0].clientX - graphTransform.x,
+                y: e.touches[0].clientY - graphTransform.y
+            };
+        }
+    } else if (e.touches.length === 2) {
+        touchPanning = false;
+        touchDragging = null;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        touchStartDist = Math.sqrt(dx * dx + dy * dy);
+        touchStartScale = graphTransform.scale;
+    }
 }, { passive: false });
 
 canvas.addEventListener('touchmove', e => {
-e.preventDefault();
-if (e.touches.length === 1) {
-if (touchDragging) {
-const { x, y } = getCanvasCoords(e);
-touchDragging.x = x; touchDragging.y = y;
-touchDragging.vx = 0; touchDragging.vy = 0;
-} else if (touchPanning) {
-graphTransform.x = e.touches[0].clientX - panStart.x;
-graphTransform.y = e.touches[0].clientY - panStart.y;
-}
-} else if (e.touches.length === 2) {
-const dx = e.touches[0].clientX - e.touches[1].clientX;
-const dy = e.touches[0].clientY - e.touches[1].clientY;
-const dist = Math.sqrt(dx * dx + dy * dy);
-const scale = touchStartScale * (dist / touchStartDist);
-graphTransform.scale = Math.max(0.2, Math.min(4, scale));
-}
+    e.preventDefault();
+    if (e.touches.length === 1) {
+        const dx = e.touches[0].clientX - touchStartPos.x;
+        const dy = e.touches[0].clientY - touchStartPos.y;
+        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) touchMoved = true;
+        if (touchDragging) {
+            const { x, y } = getCanvasCoords(e);
+            touchDragging.x = x; touchDragging.y = y;
+            touchDragging.vx = 0; touchDragging.vy = 0;
+        } else if (touchPanning) {
+            graphTransform.x = e.touches[0].clientX - panStart.x;
+            graphTransform.y = e.touches[0].clientY - panStart.y;
+        }
+    } else if (e.touches.length === 2) {
+        touchMoved = true;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const scale = touchStartScale * (dist / touchStartDist);
+        graphTransform.scale = Math.max(0.2, Math.min(4, scale));
+    }
 }, { passive: false });
 
 canvas.addEventListener('touchend', e => {
-if (e.touches.length === 0) {
-touchPanning = false;
-touchDragging = null;
-}
+    if (e.touches.length === 0) {
+        const duration = Date.now() - touchStartTime;
+        if (touchDragging) {
+            touchDragging.vx = 0;
+            touchDragging.vy = 0;
+            if (!touchMoved && duration < 400) {
+                // Короткий тап по узлу
+                const now = Date.now();
+                if (now - lastTapTime < 350) {
+                    // Двойной тап → открыть карточку
+                    const item = findWikiItem(touchDragging.name);
+                    if (item) openWikiModal(item);
+                    lastTapTime = 0;
+                } else {
+                    // Одиночный тап → подсветка
+                    selectedNode = (selectedNode && selectedNode.id === touchDragging.id) ? null : touchDragging;
+                    highlightSidebarItem(selectedNode);
+                    updateGraphInfo();
+                    lastTapTime = now;
+                }
+                touchDragging.frozen = true;
+            }
+        } else if (touchPanning && !touchMoved && duration < 400) {
+            // Тап по пустому месту → снять выделение
+            selectedNode = null;
+            highlightSidebarItem(null);
+            updateGraphInfo();
+        }
+        touchPanning = false;
+        touchDragging = null;
+    }
 });
 
 // ============ КНОПКИ ============
@@ -5290,13 +5394,15 @@ document.getElementById('graph-sidebar').classList.toggle('collapsed');
 }
 
 function updateGraphInfo() {
-const info = document.getElementById('graph-info');
-if (selectedNode) {
-info.innerHTML = `🎯 <b>${selectedNode.name}</b> · ${selectedNode.type} · связей: ${selectedNode.links}<br>
-<span style="font-size:0.9em">Двойной клик — открыть инфо</span>`;
-} else {
-info.innerHTML = '🖱 Клик — подсветка · Двойной клик — инфо · Перетаскивание узлов';
-}
+    const info = document.getElementById('graph-info-selected');
+    if (!info) return;
+    if (selectedNode) {
+        info.innerHTML = `🎯 <span class="sel-name">${escapeHtml(selectedNode.name)}</span> · <span class="sel-meta">${escapeHtml(selectedNode.type)} · связей: ${selectedNode.links}</span>`;
+        info.classList.add('active');
+    } else {
+        info.classList.remove('active');
+        info.innerHTML = '';
+    }
 }
 
 function updateGraphStats() {
@@ -5405,6 +5511,22 @@ if (e.target.id === 'graph-search') renderGraphSidebar();
 });
 
 // ============ ЛЕГЕНДА ============
+// ============ КНОПКА-ПОДСКАЗКА ============
+const infoBtn = document.getElementById('graph-info-btn');
+const infoPopup = document.getElementById('graph-info-popup');
+if (infoBtn && infoPopup) {
+    infoBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        infoPopup.classList.toggle('active');
+        infoBtn.classList.toggle('active');
+    });
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#graph-info-popup') && !e.target.closest('#graph-info-btn')) {
+            infoPopup.classList.remove('active');
+            infoBtn.classList.remove('active');
+        }
+    });
+}
 function renderGraphLegend() {
 const legend = document.getElementById('graph-legend');
 if (!legend) return;
