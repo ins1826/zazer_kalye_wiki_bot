@@ -397,8 +397,10 @@ background:rgba(42,42,58,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:
 color:#e8e8f0;border:1px solid #3a3a4a;padding:6px 12px;border-radius:6px;
 cursor:pointer;font-size:.85em;transition:all .2s;font-family:inherit}
 .graph-controls button:hover,.graph-toggle-sidebar:hover{background:#3a3a4a;border-color:#c9a0ff}
-.graph-toggle-sidebar{display:none;position:fixed;top:12px;right:12px;z-index:101}
-@media(max-width:900px){.graph-toggle-sidebar{display:inline-block}}
+.graph-toggle-sidebar{display:none;z-index:101}
+@media(max-width:900px){
+.graph-toggle-sidebar{display:block;margin:10px auto 0;width:fit-content}
+}
 /* === СТАТИСТИКА === */
 #graph-stats{position:absolute;bottom:12px;left:12px;color:#555;font-size:.8em;z-index:10}
 /* === КНОПКА i === */
@@ -1761,7 +1763,6 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <button onclick="graphCenter()">🎯 Центр</button>
 <button onclick="graphReset()">🔄 Сброс</button>
 </div>
-<button class="graph-toggle-sidebar" onclick="toggleSidebarMobile()">📋 Список</button>
 <button class="graph-info-btn" onclick="toggleInfoPopup()">i</button>
 <div class="graph-info-popup" id="info-popup">
 <div class="hint-row"><b>💻 ПК:</b></div>
@@ -1778,6 +1779,7 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div class="graph-info-selected" id="graph-info-selected"></div>
 <div id="graph-stats"></div>
 </div>
+<button class="graph-toggle-sidebar" onclick="toggleSidebarMobile()">📋 Список</button>
 <div class="graph-sidebar" id="graph-sidebar">
 <h3>📋 Персонажи</h3>
 <input type="text" id="graph-search" placeholder="🔍 Поиск по имени…">
@@ -4809,7 +4811,7 @@ layoutNodes();
 renderFilters();
 renderSidebar();
 renderLegend();
-updateStats();
+updateGraphStats();
 resizeCanvas();
 graphCenter();
 }
@@ -4980,7 +4982,18 @@ if(tDrag){const r=canvas.getBoundingClientRect();const w=s2w(t.clientX-r.left,t.
 else if(tPan){tf.x=t.clientX-panS.x;tf.y=t.clientY-panS.y;renderGraph();}
 }else if(e.touches.length===2){
 const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;
-tf.s=Math.max(.1,Math.min(5,tScale0*(Math.sqrt(dx*dx+dy*dy)/tDist0)));renderGraph();
+const dist=Math.sqrt(dx*dx+dy*dy);
+const newS=Math.max(.1,Math.min(5,tScale0*(dist/tDist0)));
+// Центр щипка в координатах canvas
+const cx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+const cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
+const r=canvas.getBoundingClientRect();
+const mx=cx-r.left-r.width/2, my=cy-r.top-r.height/2;
+// Смещение, чтобы точка под пальцами оставалась на месте
+tf.x=mx-(mx-tf.x)*(newS/tf.s);
+tf.y=my-(my-tf.y)*(newS/tf.s);
+tf.s=newS;
+renderGraph();
 }
 },{passive:false});
 canvas.addEventListener('touchend',e=>{
@@ -5060,13 +5073,13 @@ c.innerHTML=h;
 function toggleF(t){
 if(t==='__orphans__')showOrphansOnly=!showOrphansOnly;
 else{if(graphFilterTypes.has(t))graphFilterTypes.delete(t);else graphFilterTypes.add(t);}
-renderSidebar();renderGraph();updateStats();
+renderSidebar();renderGraph();updateGraphStats();
 }
 
 function resetFilters(){
 showOrphansOnly=false;graphFilterTypes.clear();
 document.getElementById('graph-search').value='';
-renderFilters();renderSidebar();renderGraph();updateStats();
+renderFilters();renderSidebar();renderGraph();updateGraphStats();
 }
 
 function renderLegend(){
@@ -5075,7 +5088,7 @@ document.getElementById('graph-legend').innerHTML=[...new Set(graphNodes.map(n=>
 ).join('');
 }
 
-function updateStats(){
+function updateGraphStats(){
 const v=graphNodes.filter(isVisible).length;
 document.getElementById('graph-stats').textContent='Узлов: '+v+' / '+graphNodes.length+' · Связей: '+graphEdges.length;
 }
@@ -5093,7 +5106,7 @@ tf.x=-cx*tf.s;tf.y=-cy*tf.s;renderGraph();
 function graphReset(){
 layoutNodes();selectedNode=null;showOrphansOnly=false;graphFilterTypes.clear();
 document.getElementById('graph-search').value='';
-renderFilters();renderSidebar();updateSelInfo();updateStats();graphCenter();
+renderFilters();renderSidebar();updateSelInfo();updateGraphStats();graphCenter();
 }
 
 function toggleInfoPopup(){document.getElementById('info-popup').classList.toggle('show');}
@@ -5380,7 +5393,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия beta15 · Обновлено: 05.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия beta16 · Обновлено: 05.09.2026.</div>
 </footer>
 
 </body></html>
