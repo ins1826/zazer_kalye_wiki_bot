@@ -4796,10 +4796,15 @@ episodes:c.episodes||[], x:0, y:0, links:0
 // Рёбра: упоминание имени B в full у A
 for(let i=0;i<chars.length;i++){
 if(!chars[i].full) continue;
-const txt=chars[i].full.toLowerCase();
+const txtLower=chars[i].full.toLowerCase();
 for(let j=0;j<chars.length;j++){
 if(i===j) continue;
-if(txt.includes(chars[j].name.toLowerCase())){
+const name=chars[j].name;
+const isAllUpper = name.length>=2 && name===name.toUpperCase() && name!==name.toLowerCase();
+const found = isAllUpper
+? chars[i].full.includes(name)
+: txtLower.includes(name.toLowerCase());
+if(found){
 if(!graphEdges.some(e=>(e.source===i&&e.target===j)||(e.source===j&&e.target===i))){
 graphEdges.push({source:i,target:j});
 graphNodes[i].links++; graphNodes[j].links++;
@@ -5393,7 +5398,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия beta16 · Обновлено: 05.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия beta17 · Обновлено: 06.09.2026.</div>
 </footer>
 
 </body></html>
