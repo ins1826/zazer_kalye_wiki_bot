@@ -85,6 +85,8 @@ def get_main_keyboard():
 # === СЛОВАРЬ СТИКЕРОВ ===
 STICKERS = {
     "Коленыч": ["CAACAgIAAxkBAAFTCuVqk1Gsjo9H5j009LQ1ZAuFGdj5OAACzLIAAsem0UsmUDzySoinAT0E"],
+    "Брунявая Чуня": ["CAACAgIAAxkBAAFTlklqnTHf4nDUFovhPvD5tvmWZAWx4gACyaoAAkOZsUio7JEAAY7kciE9BA", "CAACAgIAAxkBAAFTllVqnTJmJEH3y5ZWpRdlPSsvJx3ZaAACyacAAigPsEgSWPZ-IU_EDT0E"],
+    "Чунявая Бруня": ["CAACAgIAAxkBAAFTllFqnTIxaLxuzniRPTQkaGZVLG7MgAACdrUAAvRxsEifbFEQTwMChz0E", "CAACAgIAAxkBAAFTllVqnTJmJEH3y5ZWpRdlPSsvJx3ZaAACyacAAigPsEgSWPZ-IU_EDT0E"],
     "Акакий Куролесов": [
         "CAACAgIAAxkBAAFTCulqk1GyFTtCxtb7Za0F3Cy3evGMlgAClKQAAvjJ0UsRpht3yVpbgT0E",
         "CAACAgIAAxkBAAFTCutqk1G2rdNWLfg5OcPX-V8jMKNOxwACHasAAshRgEgwiGMJ1hm9tD0E",
@@ -159,7 +161,8 @@ STICKERS = {
     "Мопсосвины": ["CAACAgIAAxkBAAFTC0pqk1JefY-ZnPr6mjjz6jX2d0rQFAACMKAAAp12UUju8ZPhuUtGZj0E"],
     "Грязуны": ["CAACAgIAAxkBAAFTC0xqk1Jh1Qp1sVC45EzzDEhlXOzGBwACJZ8AArUwmUh2Nee5Ad9Rej0E"],
     "Григорий": ["CAACAgIAAxkBAAFTC05qk1JkG6GWxuGwXNmGhUSneydCaQAC2KEAAmxvCUhxZIooEbnJnT0E"],
-    "Кокша": ["CAACAgIAAxkBAAFTC1Bqk1JoY41z09x0V9yf97aWMxc7tAACLaUAAg9MQUiZ4I0FnDp5ij0E"],
+    "Кокша": ["CAACAgIAAxkBAAFTC1Bqk1JoY41z09x0V9yf97aWMxc7tAACLaUAAg9MQUiZ4I0FnDp5ij0E", "CAACAgIAAxkBAAFTloVqnTNk-r0sRvY87qu9plU_M-pPYgACGaQAAtGDwEjZ3Oo4J4KOqz0E"],
+    "Гычеедка": ["CAACAgIAAxkBAAFTloVqnTNk-r0sRvY87qu9plU_M-pPYgACGaQAAtGDwEjZ3Oo4J4KOqz0E"],
     "Маня Понич": ["CAACAgIAAxkBAAFTC1Bqk1JoY41z09x0V9yf97aWMxc7tAACLaUAAg9MQUiZ4I0FnDp5ij0E"],
     "Мальчик-Педаль": ["CAACAgIAAxkBAAFTC1Jqk1JtLtCCSHO0MfRKlgHm-dJ1iAACcK0AAq_QMEjyIUpi8K57PT0E"],
     "Пальчик-Медаль": ["CAACAgIAAxkBAAFTC1Rqk1JwQ7KlP2UanvoKC8IDf85f4QADowACVqhZSAsCi9BjpQPYPQQ"],
@@ -174,11 +177,14 @@ STICKERS = {
     "Луп Лупыч": ["CAACAgIAAxkBAAFTC2hqk1KOK3rdNSWSTF-2cOKBbCbQBQACCa4AAi0n6EuSfn-EZc_QkT0E"],
     "Улитолий": ["CAACAgIAAxkBAAFTC2pqk1KRWEij6Y2OKKI9GQPg9KdVgwACQ9cAAv0BOEglR1smInc4FT0E"],
     "Грочилы": ["CAACAgIAAxkBAAFTC2xqk1KUurvNwbjRkiY9uIr01uFOGAACB6gAAuNPUEhJ6qiSKhj1dT0E"],
+    "Кловунец": ["CAACAgIAAxkBAAFTlxBqnTaOPa4VCr9Q70WA0sTZu7meOAACtJoAAsK1oUgv114Yyvhtnj0E"],
     "Шапец": ["CAACAgIAAxkBAAFTC3Bqk1KXeJU4gesxYrDpkVi3sf_qigACYp8AAlfoaUjxErIad-LXMj0E"],
     "Доктор Лист": ["CAACAgIAAxkBAAFTC3Jqk1Kak4vOBV-VeFbZ8o2XhkeZ5QAC1a8AAhTVWEiSRMQhECPgKD0E"],
     "Пакет": ["CAACAgIAAxkBAAFTC3Rqk1KewCyo_u3wzCqUnBMXH7BbBAACBZoAAhn3mEgure_syXenCT0E"],
     "Дырки от дверей": ["CAACAgIAAxkBAAFTC3Zqk1Kh3r5gfvPqfHKQz3TJRq6wJAACGbAAAphnWEgE8dLJRGnIeD0E"],
     "Магога": ["CAACAgIAAxkBAAFTC3hqk1Klc14pBpwT2O7PGY1-mjhQhwACqaoAAu5ZSEiXRnB-6LFp9j0E"],
+    "Пчелисей": ["CAACAgIAAxkBAAFTlypqnTcOp7smPhhPkOhYB23iLXGlHQACNaEAApXMwUgDLNOvqaRjGT0E"],
+    "Корпораты": ["CAACAgIAAxkBAAFTlyJqnTbgZTLkE9R8F4bmfa308zCWLgACWqsAAhmUmUgkDojNQ1fB5D0E"],
 }
 
 def send_item_card(chat_id, item, label, send_photo=True):
