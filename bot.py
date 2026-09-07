@@ -75,7 +75,7 @@ def get_main_keyboard():
     keyboard = telebot.types.InlineKeyboardMarkup()
     keyboard.row(
         telebot.types.InlineKeyboardButton("🎲 Ещё персонажа", callback_data='random_char'),
-        telebot.types.InlineKeyboardButton("✉️ Написать автору", callback_data='feedback_mode')
+        telebot.types.InlineKeyboardButton("✉️ Написать автору вики", callback_data='feedback_mode')
     )
     keyboard.row(
         telebot.types.InlineKeyboardButton("📖 Открыть Энциклопедию", web_app=telebot.types.WebAppInfo(url=WIKI_URL))
@@ -187,6 +187,38 @@ STICKERS = {
     "Корпораты": ["CAACAgIAAxkBAAFTlyJqnTbgZTLkE9R8F4bmfa308zCWLgACWqsAAhmUmUgkDojNQ1fB5D0E"],
 }
 
+def send_long_message(chat_id, text, parse_mode="HTML", reply_markup=None):
+    """Разбивает длинный текст на части и отправляет по очереди"""
+    MAX_LENGTH = 4000  # С запасом от лимита 4096
+    
+    if len(text.encode('utf-8')) <= MAX_LENGTH:
+        # Если текст короткий — отправляем как обычно
+        bot.send_message(chat_id, text, parse_mode=parse_mode, reply_markup=reply_markup)
+        return
+    
+    # Если текст длинный — разбиваем на части
+    parts = []
+    while len(text.encode('utf-8')) > MAX_LENGTH:
+        # Ищем место для разрыва (конец строки или пробел)
+        split_at = text.rfind('\n', 0, MAX_LENGTH)
+        if split_at == -1:
+            split_at = text.rfind(' ', 0, MAX_LENGTH)
+        if split_at == -1:
+            split_at = MAX_LENGTH
+        
+        parts.append(text[:split_at])
+        text = text[split_at:].lstrip()
+    
+    # Добавляем последнюю часть
+    if text:
+        parts.append(text)
+    
+    # Отправляем все части
+    for i, part in enumerate(parts):
+        # Клавиатуру добавляем только к последнему сообщению
+        markup = reply_markup if i == len(parts) - 1 else None
+        bot.send_message(chat_id, part, parse_mode=parse_mode, reply_markup=markup)
+
 def send_item_card(chat_id, item, label, send_photo=True):
     """Отправляет карточку элемента с картинкой (если есть)"""
     text = f"{label}: <b>{escape_html(item['name'])}</b>\n"
@@ -194,7 +226,7 @@ def send_item_card(chat_id, item, label, send_photo=True):
     if item.get('short'): text += f"\n📜 {escape_html(parse_wiki_links(item['short']))}\n"
     if item.get('full'):
         full_text = parse_wiki_links(item['full'])
-        text += f"\n{escape_html(full_text[:500] + '...' if len(full_text) > 500 else full_text)}\n"
+        text += f"\n{escape_html(full_text)}\n"
     if item.get('episodes') and len(item['episodes']) > 0:
         text += f"\n Эпизоды: {', '.join([f'ep.{e}' for e in item['episodes'][:5]])}"
     
@@ -207,12 +239,12 @@ def send_item_card(chat_id, item, label, send_photo=True):
                 photo_file = BytesIO(response.content)
                 bot.send_photo(chat_id, photo_file, caption=text, parse_mode="HTML", reply_markup=get_main_keyboard())
             else:
-                bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
+                send_long_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
         except Exception as e:
             print(f"❌ Не удалось отправить картинку: {e}")
-            bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
+            send_long_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
     else:
-        bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
+        send_long_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
     
     # 2. Затем отправляем случайный стикер (если есть)
     if item['name'] in STICKERS:
@@ -259,7 +291,7 @@ def callback_handler(call):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
-            text="❌ <b>Режим обратной связи отменён.</b>\n\nЕсли захочешь написать снова, просто нажми кнопку «✉️ Написать автору» в главном меню.",
+            text="❌ <b>Режим обратной связи отменён.</b>\n\nЕсли захочешь написать снова, просто нажми кнопку «✉️ Написать автору вики» в главном меню.",
             parse_mode="HTML"
         )
         bot.answer_callback_query(call.id, "Режим отменён")
