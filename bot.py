@@ -220,40 +220,39 @@ def send_long_message(chat_id, text, parse_mode="HTML", reply_markup=None):
         bot.send_message(chat_id, part, parse_mode=parse_mode, reply_markup=markup)
 
 def send_item_card(chat_id, item, label, send_photo=True):
-    """Отправляет карточку элемента с картинкой (если есть)"""
+    """Отправляет карточку элемента с картинкой и полным текстом"""
     text = f"{label}: <b>{escape_html(item['name'])}</b>\n"
     if item.get('type'): text += f"🏷️ {escape_html(item['type'])}\n"
     if item.get('short'): text += f"\n📜 {escape_html(parse_wiki_links(item['short']))}\n"
     if item.get('full'):
         full_text = parse_wiki_links(item['full'])
+        # ⭐ Убрали обрезку [:500] — теперь отправляется полное описание!
         text += f"\n{escape_html(full_text)}\n"
     if item.get('episodes') and len(item['episodes']) > 0:
-        text += f"\n Эпизоды: {', '.join([f'ep.{e}' for e in item['episodes'][:5]])}"
+        text += f"\n🎬 Эпизоды: {', '.join([f'ep.{e}' for e in item['episodes'][:5]])}"
     
-    # 1. Сначала отправляем карточку (с картинкой или без)
+    # 1. Сначала отправляем картинку БЕЗ текста (чтобы не было лимита в 1024 символа)
     if send_photo and item.get('image'):
         try:
             image_url = IMAGES_BASE_URL + item['image']
             response = requests.get(image_url, timeout=10)
             if response.status_code == 200:
                 photo_file = BytesIO(response.content)
-                bot.send_photo(chat_id, photo_file, caption=text, parse_mode="HTML", reply_markup=get_main_keyboard())
-            else:
-                send_long_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
+                bot.send_photo(chat_id, photo_file)
         except Exception as e:
             print(f"❌ Не удалось отправить картинку: {e}")
-            send_long_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
-    else:
-        send_long_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
     
-    # 2. Затем отправляем случайный стикер (если есть)
+    # 2. Затем отправляем полный текст (если он длинный, функция разобьёт его сама)
+    send_long_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
+    
+    # 3. И в конце отправляем случайный стикер (если есть)
     if item['name'] in STICKERS:
         try:
             sticker_list = STICKERS[item['name']]
             random_sticker = random.choice(sticker_list)
             bot.send_sticker(chat_id, random_sticker)
         except Exception as e:
-            print(f"❌ Не удалось отправить стикер для {item['name']}: {e}")
+            print(f" Не удалось отправить стикер для {item['name']}: {e}")
 
 # === 1. КОМАНДА /start ===
 @bot.message_handler(commands=['start'])
