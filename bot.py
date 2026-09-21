@@ -271,36 +271,40 @@ def start(message):
 # === 2. ОБРАБОТКА КНОПОК ===
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
+    # 1. Кнопка "Ещё персонажа"
     if call.data == 'random_char':
-        send_random_character(call.message.chat.id)
-        bot.answer_callback_query(call.id, " Держи нового персонажа!")
-    
+        send_random_character(call.from_user.id) # Используем ID пользователя напрямую
+        bot.answer_callback_query(call.id, "🎲 Держи нового персонажа!")
+        
+    # 2. Кнопка "Написать автору вики"
     elif call.data == 'feedback_mode':
         feedback_mode[call.from_user.id] = True
         cancel_kb = telebot.types.InlineKeyboardMarkup()
         cancel_kb.add(telebot.types.InlineKeyboardButton("❌ Отменить", callback_data='cancel_feedback'))
         bot.send_message(
-            call.message.chat.id, 
-            "✉️ <b>Режим обратной связи включён!</b>\n\nНапиши своё сообщение, и я передам его помощнице Грибного Архивариуса. \n\n<i>(Если передумал, нажми кнопку ниже)</i>",
+            call.from_user.id, 
+            "✉️ <b>Режим обратной связи включён!</b>\n\nНапиши своё сообщение, и я передам его помощнице Грибного Архивариуса.\n\n<i>(Если передумал, нажми кнопку ниже)</i>",
             reply_markup=cancel_kb,
             parse_mode="HTML"
         )
         bot.answer_callback_query(call.id, "✉️ Режим активирован!")
-
+        
+    # 3. Кнопка "Отменить" (обратная связь)
     elif call.data == 'cancel_feedback':
         if call.from_user.id in feedback_mode:
             del feedback_mode[call.from_user.id]
         bot.edit_message_text(
-            chat_id=call.message.chat.id,
+            chat_id=call.from_user.id,
             message_id=call.message.message_id,
-            text="❌ <b>Режим обратной связи отменён.</b>\n\nЕсли захочешь написать снова, просто нажми кнопку «✉️ Написать автору вики» в главном меню.",
+            text="❌ <b>Режим обратной связи отменён.</b>\n\nЕсли захочешь написать снова, просто нажми кнопку «✉️ Написать автору» в главном меню.",
             parse_mode="HTML"
         )
         bot.answer_callback_query(call.id, "Режим отменён")
         
+    # 4. Кнопка "Отмена" (поиск)
     elif call.data == 'cancel_search':
         bot.edit_message_text(
-            chat_id=call.message.chat.id,
+            chat_id=call.from_user.id,
             message_id=call.message.message_id,
             text="❌ <b>Поиск отменён.</b>\n\nНапиши другое имя или используй кнопки ниже:",
             parse_mode="HTML",
@@ -308,15 +312,16 @@ def callback_handler(call):
         )
         bot.answer_callback_query(call.id, "Поиск отменён")
         
+    # 5. Выбор конкретного результата из поиска
     elif call.data.startswith('select_'):
         result_id = call.data.replace('select_', '')
         user_id = call.from_user.id
         
         if user_id in search_results_cache and result_id in search_results_cache[user_id]:
             result = search_results_cache[user_id][result_id]
-            send_item_card(call.message.chat.id, result['item'], result['label'])
-            del search_results_cache[user_id]
-        
+            send_item_card(user_id, result['item'], result['label'])
+            del search_results_cache[user_id] # Очищаем кэш после выбора
+            
         bot.answer_callback_query(call.id, "Выбрано!")
 
 # === 3. КОМАНДА /random ===
@@ -433,4 +438,5 @@ def reload_data(message):
         bot.send_message(message.chat.id, "❌ Не удалось перезагрузить данные.")
 
 print("🤖 Бот запущен и готов к работе 24/7!")
-bot.polling()
+# none_stop=True и interval=0 гарантируют стабильную работу кнопок на Render
+bot.polling(none_stop=True, interval=0, timeout=60)
