@@ -21,6 +21,9 @@ IMAGES_BASE_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 
 bot = telebot.TeleBot(TOKEN)
 
+# ⭐ ВАЖНО: Принудительно удаляем старый вебхук, чтобы работал polling
+bot.remove_webhook()
+
 # === ВЕБ-СЕРВЕР ДЛЯ RENDER ===
 app = Flask(__name__)
 
