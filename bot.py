@@ -4,6 +4,8 @@ import requests
 import re
 import os
 import time
+import json
+import traceback
 from flask import Flask, request
 from io import BytesIO
 
@@ -15,16 +17,15 @@ OWNER_ID = 412598271
 DATA_URL = "https://raw.githubusercontent.com/ins1826/zazer_kalye_wiki_bot/refs/heads/main/data.json"
 IMAGES_BASE_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 
-bot = telebot.TeleBot(TOKEN, threaded=False)
+# Для отправки сообщений (polling не используем — разбираем апдейты руками)
+bot = telebot.TeleBot(TOKEN)
 
-# === ВЕБ-СЕРВЕР ===
+# === WEB ===
 app = Flask(__name__)
-
 WEBHOOK_BASE_URL = os.environ.get("WEBHOOK_BASE_URL", "")
 
 
 def log(*args):
-    """Печать с немедленным сбросом буфера — иначе Render может не показать строки."""
     print(*args, flush=True)
 
 
@@ -32,26 +33,6 @@ def log(*args):
 @app.route('/health')
 def health_check():
     return "OK", 200
-
-
-@app.route(f'/{TOKEN}', methods=['POST'])
-def webhook():
-    """Telegram присылает апдейты сюда. Обрабатываем синхронно."""
-    try:
-        if request.headers.get('content-type') != 'application/json':
-            log("⚠️ POST без application/json")
-            return '', 403
-
-        json_string = request.get_data().decode('utf-8')
-        log(f"📥 UPDATE RECEIVED: {json_string[:300]}")
-
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return '', 200
-    except Exception as e:
-        log(f"❌ Ошибка в webhook route: {e}")
-        # Возвращаем 200, чтобы Telegram не ретраил бесконечно
-        return '', 200
 
 
 @app.route('/webhook_info')
@@ -68,6 +49,21 @@ def webhook_info():
         return {"error": str(e)}, 500
 
 
+@app.route('/force_delete_webhook')
+def force_delete_webhook():
+    try:
+        bot.remove_webhook()
+        return "Webhook removed. Now redeploy (or call /set_webhook_again).", 200
+    except Exception as e:
+        return f"Error: {e}", 500
+
+
+@app.route('/set_webhook_again')
+def set_webhook_again():
+    setup_webhook()
+    return "setup_webhook called, check logs", 200
+
+
 # === ЗАГРУЗКА ДАННЫХ ===
 wiki_data = {}
 
@@ -78,12 +74,10 @@ def load_wiki_data():
         response = requests.get(DATA_URL, timeout=10)
         if response.status_code == 200:
             wiki_data = response.json()
-            chars_count = len(wiki_data.get('characters', []))
-            log(f"✅ Данные загружены: {chars_count} персонажей")
+            log(f"✅ Данные загружены: {len(wiki_data.get('characters', []))} персонажей")
             return True
-        else:
-            log(f"❌ Ошибка загрузки: код {response.status_code}")
-            return False
+        log(f"❌ Ошибка загрузки: код {response.status_code}")
+        return False
     except Exception as e:
         log(f"❌ Ошибка: {e}")
         return False
@@ -95,7 +89,7 @@ feedback_mode = {}
 search_results_cache = {}
 
 
-# === ФУНКЦИИ ===
+# === ХЕЛПЕРЫ ===
 def parse_wiki_links(text):
     if not text:
         return ""
@@ -125,7 +119,7 @@ def get_main_keyboard():
     return keyboard
 
 
-# === СЛОВАРЬ СТИКЕРОВ ===
+# === СТИКЕРЫ ===
 STICKERS = {
     "Коленыч": ["CAACAgIAAxkBAAFTCuVqk1Gsjo9H5j009LQ1ZAuFGdj5OAACzLIAAsem0UsmUDzySoinAT0E"],
     "Брунявая Чуня": ["CAACAgIAAxkBAAFTlklqnTHf4nDUFovhPvD5tvmWZAWx4gACyaoAAkOZsUio7JEAAY7kciE9BA", "CAACAgIAAxkBAAFTllVqnTJmJEH3y5ZWpRdlPSsvJx3ZaAACyacAAigPsEgSWPZ-IU_EDT0E"],
@@ -269,51 +263,48 @@ def send_item_card(chat_id, item, label, send_photo=True):
             log(f"❌ Стикер для {item['name']}: {e}")
 
 
-# === 1. /start ===
-@bot.message_handler(commands=['start'])
-def start(message):
+def send_random_character(chat_id):
+    if not wiki_data or 'characters' not in wiki_data:
+        bot.send_message(chat_id, "❌ Данные ещё не загрузились.")
+        return
+    char = random.choice(wiki_data['characters'])
+    send_item_card(chat_id, char, "👤 Персонаж")
+
+
+def send_welcome(chat_id):
     text = """🪞 <b>Добро пожаловать в Зазеркалье!</b>
 
 Ты стоишь на пороге мира, где Хрычи растут на огороде у бабы Жули, а в подпольном щекоточном клубе высокие требования к кандидатам...
 
 💡 Напиши имя персонажа (например, "Баба Жуля") — я найду его
 💡 Или используй кнопки ниже!"""
-    bot.send_message(message.chat.id, text, reply_markup=get_main_keyboard(), parse_mode="HTML")
+    bot.send_message(chat_id, text, reply_markup=get_main_keyboard(), parse_mode="HTML")
 
 
-# === 1b. ТЕСТОВАЯ КОМАНДА ===
-@bot.message_handler(commands=['testkb'])
-def test_keyboard(message):
-    kb = telebot.types.InlineKeyboardMarkup()
-    kb.add(telebot.types.InlineKeyboardButton("🟢 Тест-кнопка", callback_data='test_click'))
-    bot.send_message(message.chat.id, "Если эта кнопка не нажмётся — проблема в доставке апдейтов, а не в коде.", reply_markup=kb)
+# =========================================================
+# РУЧНОЙ DISPATCH (не полагаемся на process_new_updates)
+# =========================================================
 
-
-# === 2. CALLBACKS ===
-@bot.callback_query_handler(func=lambda call: True)
-def callback_handler(call):
-    log(f"🔔 CALLBACK: data={call.data} from={call.from_user.id}")
+def handle_callback_query(call):
+    log(f"   → callback data = {call.data!r}, from = {call.from_user.id}")
 
     try:
         bot.answer_callback_query(call.id)
     except Exception as e:
-        log(f"⚠️ answer_callback_query: {e}")
+        log(f"   ⚠️ answer_callback_query: {e}")
 
     try:
-        if call.data == 'test_click':
-            bot.send_message(call.from_user.id, "✅ Тест-кнопка работает!")
-
-        elif call.data == 'random_char':
+        if call.data == 'random_char':
             send_random_character(call.from_user.id)
 
         elif call.data == 'feedback_mode':
             feedback_mode[call.from_user.id] = True
-            cancel_kb = telebot.types.InlineKeyboardMarkup()
-            cancel_kb.add(telebot.types.InlineKeyboardButton("❌ Отменить", callback_data='cancel_feedback'))
+            kb = telebot.types.InlineKeyboardMarkup()
+            kb.add(telebot.types.InlineKeyboardButton("❌ Отменить", callback_data='cancel_feedback'))
             bot.send_message(
                 call.from_user.id,
                 "✉️ <b>Режим обратной связи включён!</b>\n\nНапиши своё сообщение, и я передам его помощнице Грибного Архивариуса.\n\n<i>(Если передумал, нажми кнопку ниже)</i>",
-                reply_markup=cancel_kb,
+                reply_markup=kb,
                 parse_mode="HTML"
             )
 
@@ -337,74 +328,29 @@ def callback_handler(call):
 
         elif call.data.startswith('select_'):
             result_id = call.data.replace('select_', '')
-            user_id = call.from_user.id
-            if user_id in search_results_cache and result_id in search_results_cache[user_id]:
-                result = search_results_cache[user_id][result_id]
-                send_item_card(user_id, result['item'], result['label'])
-                del search_results_cache[user_id]
+            uid = call.from_user.id
+            if uid in search_results_cache and result_id in search_results_cache[uid]:
+                result = search_results_cache[uid][result_id]
+                send_item_card(uid, result['item'], result['label'])
+                del search_results_cache[uid]
+
+        elif call.data == 'test_click':
+            bot.send_message(call.from_user.id, "✅ Тест-кнопка сработала!")
+
+        else:
+            log(f"   ⚠️ неизвестный callback_data: {call.data}")
+
     except Exception as e:
-        log(f"❌ callback_handler ({call.data}): {e}")
+        log(f"   ❌ handle_callback_query error: {e}")
+        traceback.print_exc()
 
 
-# === 3. /random ===
-@bot.message_handler(commands=['random'])
-def random_character(message):
-    send_random_character(message.chat.id)
-
-
-def send_random_character(chat_id):
-    if not wiki_data or 'characters' not in wiki_data:
-        bot.send_message(chat_id, "❌ Данные ещё не загрузились.")
-        return
-    char = random.choice(wiki_data['characters'])
-    send_item_card(chat_id, char, "👤 Персонаж")
-
-
-# === 4. TEXT ===
-@bot.message_handler(content_types=['text'])
-def handle_text(message):
-    log(f"✉️ TEXT от {message.from_user.id}: {message.text[:80]}")
-
-    if message.text.startswith('/'):
-        if message.text.lower() == '/cancel':
-            if message.from_user.id in feedback_mode:
-                del feedback_mode[message.from_user.id]
-                bot.send_message(message.chat.id, "❌ <b>Режим обратной связи отменён.</b>", parse_mode="HTML", reply_markup=get_main_keyboard())
-            else:
-                bot.send_message(message.chat.id, "У тебя и так не включён режим обратной связи.", reply_markup=get_main_keyboard())
-        return
-
-    if feedback_mode.get(message.from_user.id):
-        username = f"@{message.from_user.username}" if message.from_user.username else "Без username"
-        forward_text = (
-            f"💬 <b>Новое сообщение!</b>\n"
-            f"👤 <b>От:</b> {escape_html(message.from_user.first_name)} ({escape_html(username)})\n"
-            f"🆔 <b>ID:</b> <code>{message.from_user.id}</code>\n"
-            f"📝 <b>Текст:</b>\n{escape_html(message.text)}"
-        )
-        try:
-            bot.send_message(OWNER_ID, forward_text, parse_mode="HTML")
-            bot.send_message(message.chat.id, "✅ Спасибо! Сообщение отправлено помощнице Грибного Архивариуса! 🪞✨", reply_markup=get_main_keyboard(), parse_mode="HTML")
-        except Exception as e:
-            log(f"❌ Отправка владельцу: {e}")
-            bot.send_message(message.chat.id, "❌ Не удалось отправить сообщение.")
-        del feedback_mode[message.from_user.id]
-        return
-
-    if message.text.isdigit():
-        user_id = message.from_user.id
-        num = message.text
-        if user_id in search_results_cache and num in search_results_cache[user_id]:
-            result = search_results_cache[user_id][num]
-            send_item_card(message.chat.id, result['item'], result['label'])
-            del search_results_cache[user_id]
-            return
-
+def do_search(chat_id, user_id, query):
     if not wiki_data:
-        bot.send_message(message.chat.id, "⏳ Данные ещё загружаются!")
+        bot.send_message(chat_id, "⏳ Данные ещё загружаются!")
         return
 
-    query = message.text.strip().lower()
+    q = query.strip().lower()
     found_items = []
     categories = {
         'characters': '👤 Персонаж',
@@ -412,35 +358,33 @@ def handle_text(message):
         'items': '🎒 Предмет',
         'events': '🎭 Ивент',
         'organizations': '🏛️ Организация',
-        'races': '🧬 Раса'
+        'races': '🧬 Раса',
     }
-
     for category, label in categories.items():
         if category not in wiki_data:
             continue
         for item in wiki_data[category]:
-            if query == item.get('name', '').lower() or query in item.get('name', '').lower():
+            if q == item.get('name', '').lower() or q in item.get('name', '').lower():
                 found_items.append({'category': category, 'label': label, 'item': item})
 
     if not found_items:
-        bot.send_message(message.chat.id, "🤔 Не нашёл. Попробуй точное имя:", reply_markup=get_main_keyboard(), parse_mode="HTML")
+        bot.send_message(chat_id, "🤔 Не нашёл. Попробуй точное имя:", reply_markup=get_main_keyboard())
         return
 
     if len(found_items) == 1:
-        send_item_card(message.chat.id, found_items[0]['item'], found_items[0]['label'])
+        send_item_card(chat_id, found_items[0]['item'], found_items[0]['label'])
         return
 
     if len(found_items) <= 6:
-        keyboard = telebot.types.InlineKeyboardMarkup()
-        user_id = message.from_user.id
+        kb = telebot.types.InlineKeyboardMarkup()
         search_results_cache[user_id] = {}
         for i, result in enumerate(found_items):
-            button_text = f"{result['label']} {result['item']['name']}"
-            button_id = f"result_{i}"
-            search_results_cache[user_id][button_id] = result
-            keyboard.add(telebot.types.InlineKeyboardButton(button_text, callback_data=f'select_{button_id}'))
-        keyboard.add(telebot.types.InlineKeyboardButton("❌ Отмена", callback_data='cancel_search'))
-        bot.send_message(message.chat.id, f"🔍 Найдено {len(found_items)} результатов:", reply_markup=keyboard)
+            btn_text = f"{result['label']} {result['item']['name']}"
+            btn_id = f"result_{i}"
+            search_results_cache[user_id][btn_id] = result
+            kb.add(telebot.types.InlineKeyboardButton(btn_text, callback_data=f'select_{btn_id}'))
+        kb.add(telebot.types.InlineKeyboardButton("❌ Отмена", callback_data='cancel_search'))
+        bot.send_message(chat_id, f"🔍 Найдено {len(found_items)} результатов:", reply_markup=kb)
         return
 
     text = f"🔍 Найдено {len(found_items)} результатов. Напиши номер:\n\n"
@@ -448,21 +392,148 @@ def handle_text(message):
         text += f"{i}. {result['label']} {result['item']['name']}\n"
     if len(found_items) > 10:
         text += f"\n...и ещё {len(found_items) - 10}. Уточни запрос!"
-    user_id = message.from_user.id
     search_results_cache[user_id] = {str(i): r for i, r in enumerate(found_items[:10], 1)}
-    bot.send_message(message.chat.id, text, reply_markup=get_main_keyboard())
+    bot.send_message(chat_id, text, reply_markup=get_main_keyboard())
 
 
-# === 5. /reload ===
-@bot.message_handler(commands=['reload'])
-def reload_data(message):
-    if message.from_user.id != OWNER_ID:
-        bot.send_message(message.chat.id, "❌ Только для администратора!")
+def handle_message(message):
+    user_id = message.from_user.id
+    text = message.text or ""
+    log(f"   → message text = {text[:100]!r}, from = {user_id}")
+
+    # --- Команды ---
+    if text.startswith('/'):
+        parts = text.split(maxsplit=1)
+        cmd = parts[0].lower().lstrip('/').split('@')[0]
+        arg = parts[1].strip() if len(parts) > 1 else ""
+
+        if cmd == 'start':
+            send_welcome(message.chat.id)
+
+        elif cmd == 'random':
+            send_random_character(message.chat.id)
+
+        elif cmd == 'cancel':
+            if user_id in feedback_mode:
+                del feedback_mode[user_id]
+                bot.send_message(message.chat.id, "❌ <b>Режим обратной связи отменён.</b>",
+                                 parse_mode="HTML", reply_markup=get_main_keyboard())
+            else:
+                bot.send_message(message.chat.id, "У тебя и так не включён режим обратной связи.",
+                                 reply_markup=get_main_keyboard())
+
+        elif cmd == 'testkb':
+            kb = telebot.types.InlineKeyboardMarkup()
+            kb.add(telebot.types.InlineKeyboardButton("🟢 Тест-кнопка", callback_data='test_click'))
+            bot.send_message(message.chat.id,
+                             "Если эта кнопка не нажмётся — проблема в доставке callback'ов.\n"
+                             "Для проверки обработчика можно написать: /click test_click",
+                             reply_markup=kb)
+
+        elif cmd == 'click':
+            # /click <callback_data> — эмуляция нажатия кнопки через текст
+            if not arg:
+                bot.send_message(message.chat.id,
+                                 "Использование: /click random_char  или  /click feedback_mode  или  /click test_click")
+                return
+            # Собираем фейковый call и вызываем обработчик напрямую
+            fake = telebot.types.CallbackQuery(
+                id="0",
+                from_user=message.from_user,
+                chat_instance="0",
+                data=arg,
+                message=message,
+            )
+            handle_callback_query(fake)
+
+        elif cmd == 'reload':
+            if user_id != OWNER_ID:
+                bot.send_message(message.chat.id, "❌ Только для администратора!")
+                return
+            if load_wiki_data():
+                bot.send_message(message.chat.id,
+                                 f"✅ Данные перезагружены! {len(wiki_data.get('characters', []))} персонажей.")
+            else:
+                bot.send_message(message.chat.id, "❌ Не удалось перезагрузить данные.")
+
+        elif cmd == 'debug':
+            if user_id != OWNER_ID:
+                bot.send_message(message.chat.id, "❌ Только для администратора!")
+                return
+            info = bot.get_webhook_info()
+            txt = (
+                f"🐞 <b>Debug</b>\n"
+                f"<b>telebot:</b> <code>{telebot.__version__}</code>\n"
+                f"<b>webhook url:</b> <code>{info.url}</code>\n"
+                f"<b>pending:</b> <code>{info.pending_update_count}</code>\n"
+                f"<b>last_err:</b> <code>{info.last_error_message}</code>\n"
+                f"<b>characters:</b> <code>{len(wiki_data.get('characters', []))}</code>"
+            )
+            bot.send_message(message.chat.id, txt, parse_mode="HTML")
+
         return
-    if load_wiki_data():
-        bot.send_message(message.chat.id, f"✅ Данные перезагружены! {len(wiki_data.get('characters', []))} персонажей.")
-    else:
-        bot.send_message(message.chat.id, "❌ Не удалось перезагрузить данные.")
+
+    # --- Режим обратной связи ---
+    if feedback_mode.get(user_id):
+        username = f"@{message.from_user.username}" if message.from_user.username else "Без username"
+        forward_text = (
+            f"💬 <b>Новое сообщение!</b>\n"
+            f"👤 <b>От:</b> {escape_html(message.from_user.first_name)} ({escape_html(username)})\n"
+            f"🆔 <b>ID:</b> <code>{user_id}</code>\n"
+            f"📝 <b>Текст:</b>\n{escape_html(text)}"
+        )
+        try:
+            bot.send_message(OWNER_ID, forward_text, parse_mode="HTML")
+            bot.send_message(message.chat.id,
+                             "✅ Спасибо! Сообщение отправлено помощнице Грибного Архивариуса! 🪞✨",
+                             reply_markup=get_main_keyboard(), parse_mode="HTML")
+        except Exception as e:
+            log(f"❌ Отправка владельцу: {e}")
+            bot.send_message(message.chat.id, "❌ Не удалось отправить сообщение.")
+        del feedback_mode[user_id]
+        return
+
+    # --- Выбор номера из длинного списка ---
+    if text.isdigit():
+        if user_id in search_results_cache and text in search_results_cache[user_id]:
+            result = search_results_cache[user_id][text]
+            send_item_card(message.chat.id, result['item'], result['label'])
+            del search_results_cache[user_id]
+            return
+
+    # --- Обычный поиск ---
+    do_search(message.chat.id, user_id, text)
+
+
+# === WEBHOOK (ручной разбор) ===
+@app.route(f'/{TOKEN}', methods=['POST'])
+def webhook():
+    try:
+        json_string = request.get_data().decode('utf-8')
+        log(f"📥 UPDATE: {json_string[:250]}")
+
+        data = json.loads(json_string)
+
+        # callback_query
+        if data.get('callback_query'):
+            call = telebot.types.CallbackQuery.de_json(data['callback_query'], bot)
+            handle_callback_query(call)
+            return '', 200
+
+        # message
+        if data.get('message'):
+            msg = telebot.types.Message.de_json(data['message'])
+            handle_message(msg)
+            return '', 200
+
+        # прочие апдейты
+        log(f"   ❓ неизвестный тип апдейта: keys={list(data.keys())}")
+        return '', 200
+
+    except Exception as e:
+        log(f"❌ webhook error: {e}")
+        traceback.print_exc()
+        return '', 200
 
 
 # === УСТАНОВКА ВЕБХУКА ===
@@ -495,5 +566,5 @@ setup_webhook()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-    log(f"🤖 Бот запущен на порту {port} (webhook mode)")
+    log(f"🤖 Бот запущен на порту {port} (webhook + ручной dispatch)")
     app.run(host='0.0.0.0', port=port, threaded=True)
