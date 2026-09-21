@@ -1,11 +1,9 @@
 import telebot
 import random
 import requests
-import json
 import re
 import os
 import time
-import threading
 from flask import Flask, request
 from io import BytesIO
 
@@ -17,13 +15,17 @@ OWNER_ID = 412598271
 DATA_URL = "https://raw.githubusercontent.com/ins1826/zazer_kalye_wiki_bot/refs/heads/main/data.json"
 IMAGES_BASE_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(TOKEN, threaded=False)
 
 # === ВЕБ-СЕРВЕР ===
 app = Flask(__name__)
 
-# Если RENDER_EXTERNAL_URL вдруг не подхватится — впиши URL вручную сюда
 WEBHOOK_BASE_URL = os.environ.get("WEBHOOK_BASE_URL", "")
+
+
+def log(*args):
+    """Печать с немедленным сбросом буфера — иначе Render может не показать строки."""
+    print(*args, flush=True)
 
 
 @app.route('/')
@@ -32,32 +34,28 @@ def health_check():
     return "OK", 200
 
 
-def _process_update(json_string):
-    try:
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-    except Exception as e:
-        print(f"❌ Ошибка обработки апдейта: {e}")
-
-
 @app.route(f'/{TOKEN}', methods=['POST'])
 def webhook():
-    """Telegram присылает апдейты сюда. Отвечаем мгновенно, обрабатываем в фоне."""
+    """Telegram присылает апдейты сюда. Обрабатываем синхронно."""
     try:
-        if request.headers.get('content-type') == 'application/json':
-            json_string = request.get_data().decode('utf-8')
-            print(f"📥 Получен апдейт ({len(json_string)} байт)")
-            threading.Thread(target=_process_update, args=(json_string,), daemon=True).start()
-            return '', 200
-        return '', 403
+        if request.headers.get('content-type') != 'application/json':
+            log("⚠️ POST без application/json")
+            return '', 403
+
+        json_string = request.get_data().decode('utf-8')
+        log(f"📥 UPDATE RECEIVED: {json_string[:300]}")
+
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return '', 200
     except Exception as e:
-        print(f"❌ Ошибка в webhook route: {e}")
-        return '', 500
+        log(f"❌ Ошибка в webhook route: {e}")
+        # Возвращаем 200, чтобы Telegram не ретраил бесконечно
+        return '', 200
 
 
 @app.route('/webhook_info')
 def webhook_info():
-    """Открой https://твой-сервис.onrender.com/webhook_info — покажет статус вебхука."""
     try:
         info = bot.get_webhook_info()
         return {
@@ -81,13 +79,13 @@ def load_wiki_data():
         if response.status_code == 200:
             wiki_data = response.json()
             chars_count = len(wiki_data.get('characters', []))
-            print(f"✅ Данные загружены: {chars_count} персонажей")
+            log(f"✅ Данные загружены: {chars_count} персонажей")
             return True
         else:
-            print(f"❌ Ошибка загрузки: код {response.status_code}")
+            log(f"❌ Ошибка загрузки: код {response.status_code}")
             return False
     except Exception as e:
-        print(f"❌ Ошибка: {e}")
+        log(f"❌ Ошибка: {e}")
         return False
 
 
@@ -211,13 +209,12 @@ STICKERS = {
 }
 
 
-# === ФУНКЦИЯ ДЛЯ ДЛИННЫХ СООБЩЕНИЙ ===
+# === ДЛИННЫЕ СООБЩЕНИЯ ===
 def send_long_message(chat_id, text, parse_mode="HTML", reply_markup=None):
     MAX_LENGTH = 4000
     if len(text.encode('utf-8')) <= MAX_LENGTH:
         bot.send_message(chat_id, text, parse_mode=parse_mode, reply_markup=reply_markup)
         return
-
     parts = []
     while len(text.encode('utf-8')) > MAX_LENGTH:
         split_at = text.rfind('\n', 0, MAX_LENGTH)
@@ -227,16 +224,14 @@ def send_long_message(chat_id, text, parse_mode="HTML", reply_markup=None):
             split_at = MAX_LENGTH
         parts.append(text[:split_at])
         text = text[split_at:].lstrip()
-
     if text:
         parts.append(text)
-
     for i, part in enumerate(parts):
         markup = reply_markup if i == len(parts) - 1 else None
         bot.send_message(chat_id, part, parse_mode=parse_mode, reply_markup=markup)
 
 
-# === ОТПРАВКА КАРТОЧКИ ===
+# === КАРТОЧКА ===
 def send_item_card(chat_id, item, label, send_photo=True):
     text = f"{label}: <b>{escape_html(item['name'])}</b>\n"
     if item.get('type'):
@@ -247,7 +242,6 @@ def send_item_card(chat_id, item, label, send_photo=True):
         full_text = parse_wiki_links(item['full'])
         text += f"\n{escape_html(full_text)}\n"
 
-    # Эпизоды: чистим вики-ссылки и оставляем только номера
     if item.get('episodes') and len(item['episodes']) > 0:
         eps = []
         for e in item['episodes'][:5]:
@@ -257,31 +251,25 @@ def send_item_card(chat_id, item, label, send_photo=True):
         if eps:
             text += f"\n🎬 Эпизоды: {', '.join(f'ep. {e}' for e in eps)}"
 
-    # 1. Сначала отправляем картинку БЕЗ текста (чтобы не было лимита в 1024 символа)
     if send_photo and item.get('image'):
         try:
             image_url = IMAGES_BASE_URL + item['image']
             response = requests.get(image_url, timeout=10)
             if response.status_code == 200:
-                photo_file = BytesIO(response.content)
-                bot.send_photo(chat_id, photo_file)
+                bot.send_photo(chat_id, BytesIO(response.content))
         except Exception as e:
-            print(f"❌ Не удалось отправить картинку: {e}")
+            log(f"❌ Картинка: {e}")
 
-    # 2. Затем отправляем полный текст (если он длинный, функция разобьёт его сама)
     send_long_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
 
-    # 3. И в конце отправляем случайный стикер (если есть)
     if item['name'] in STICKERS:
         try:
-            sticker_list = STICKERS[item['name']]
-            random_sticker = random.choice(sticker_list)
-            bot.send_sticker(chat_id, random_sticker)
+            bot.send_sticker(chat_id, random.choice(STICKERS[item['name']]))
         except Exception as e:
-            print(f"❌ Не удалось отправить стикер для {item['name']}: {e}")
+            log(f"❌ Стикер для {item['name']}: {e}")
 
 
-# === 1. КОМАНДА /start ===
+# === 1. /start ===
 @bot.message_handler(commands=['start'])
 def start(message):
     text = """🪞 <b>Добро пожаловать в Зазеркалье!</b>
@@ -293,19 +281,29 @@ def start(message):
     bot.send_message(message.chat.id, text, reply_markup=get_main_keyboard(), parse_mode="HTML")
 
 
-# === 2. ОБРАБОТКА КНОПОК ===
+# === 1b. ТЕСТОВАЯ КОМАНДА ===
+@bot.message_handler(commands=['testkb'])
+def test_keyboard(message):
+    kb = telebot.types.InlineKeyboardMarkup()
+    kb.add(telebot.types.InlineKeyboardButton("🟢 Тест-кнопка", callback_data='test_click'))
+    bot.send_message(message.chat.id, "Если эта кнопка не нажмётся — проблема в доставке апдейтов, а не в коде.", reply_markup=kb)
+
+
+# === 2. CALLBACKS ===
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
-    # ОТВЕЧАЕМ СРАЗУ — иначе Telegram покажет «часики» и может ретраить
+    log(f"🔔 CALLBACK: data={call.data} from={call.from_user.id}")
+
     try:
         bot.answer_callback_query(call.id)
     except Exception as e:
-        print(f"⚠️ Не удалось ответить на callback: {e}")
+        log(f"⚠️ answer_callback_query: {e}")
 
     try:
-        print(f"🔔 Callback: {call.data} от {call.from_user.id}")
+        if call.data == 'test_click':
+            bot.send_message(call.from_user.id, "✅ Тест-кнопка работает!")
 
-        if call.data == 'random_char':
+        elif call.data == 'random_char':
             send_random_character(call.from_user.id)
 
         elif call.data == 'feedback_mode':
@@ -324,7 +322,7 @@ def callback_handler(call):
             bot.edit_message_text(
                 chat_id=call.from_user.id,
                 message_id=call.message.message_id,
-                text="❌ <b>Режим обратной связи отменён.</b>\n\nЕсли захочешь написать снова, просто нажми кнопку «✉️ Написать автору» в главном меню.",
+                text="❌ <b>Режим обратной связи отменён.</b>",
                 parse_mode="HTML"
             )
 
@@ -332,7 +330,7 @@ def callback_handler(call):
             bot.edit_message_text(
                 chat_id=call.from_user.id,
                 message_id=call.message.message_id,
-                text="❌ <b>Поиск отменён.</b>\n\nНапиши другое имя или используй кнопки ниже:",
+                text="❌ <b>Поиск отменён.</b>\n\nНапиши другое имя:",
                 parse_mode="HTML",
                 reply_markup=get_main_keyboard()
             )
@@ -345,10 +343,10 @@ def callback_handler(call):
                 send_item_card(user_id, result['item'], result['label'])
                 del search_results_cache[user_id]
     except Exception as e:
-        print(f"❌ Ошибка в callback_handler ({call.data}): {e}")
+        log(f"❌ callback_handler ({call.data}): {e}")
 
 
-# === 3. КОМАНДА /random ===
+# === 3. /random ===
 @bot.message_handler(commands=['random'])
 def random_character(message):
     send_random_character(message.chat.id)
@@ -356,16 +354,17 @@ def random_character(message):
 
 def send_random_character(chat_id):
     if not wiki_data or 'characters' not in wiki_data:
-        bot.send_message(chat_id, "❌ Ой, данные ещё не загрузились. Попробуй через минуту!")
+        bot.send_message(chat_id, "❌ Данные ещё не загрузились.")
         return
     char = random.choice(wiki_data['characters'])
     send_item_card(chat_id, char, "👤 Персонаж")
 
 
-# === 4. ПОИСК + ВЫБОР НОМЕРА + ОБРАТНАЯ СВЯЗЬ (единый хендлер) ===
+# === 4. TEXT ===
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
-    # Команды
+    log(f"✉️ TEXT от {message.from_user.id}: {message.text[:80]}")
+
     if message.text.startswith('/'):
         if message.text.lower() == '/cancel':
             if message.from_user.id in feedback_mode:
@@ -375,7 +374,6 @@ def handle_text(message):
                 bot.send_message(message.chat.id, "У тебя и так не включён режим обратной связи.", reply_markup=get_main_keyboard())
         return
 
-    # Режим обратной связи
     if feedback_mode.get(message.from_user.id):
         username = f"@{message.from_user.username}" if message.from_user.username else "Без username"
         forward_text = (
@@ -388,12 +386,11 @@ def handle_text(message):
             bot.send_message(OWNER_ID, forward_text, parse_mode="HTML")
             bot.send_message(message.chat.id, "✅ Спасибо! Сообщение отправлено помощнице Грибного Архивариуса! 🪞✨", reply_markup=get_main_keyboard(), parse_mode="HTML")
         except Exception as e:
-            print(f"❌ Не удалось отправить сообщение владельцу: {e}")
+            log(f"❌ Отправка владельцу: {e}")
             bot.send_message(message.chat.id, "❌ Не удалось отправить сообщение.")
         del feedback_mode[message.from_user.id]
         return
 
-    # Выбор номера из предыдущего длинного списка
     if message.text.isdigit():
         user_id = message.from_user.id
         num = message.text
@@ -403,7 +400,6 @@ def handle_text(message):
             del search_results_cache[user_id]
             return
 
-    # Поиск
     if not wiki_data:
         bot.send_message(message.chat.id, "⏳ Данные ещё загружаются!")
         return
@@ -427,17 +423,11 @@ def handle_text(message):
                 found_items.append({'category': category, 'label': label, 'item': item})
 
     if not found_items:
-        bot.send_message(
-            message.chat.id,
-            "🤔 Хм, я не нашёл такого в базе. Попробуй написать точное имя или используй кнопки:",
-            reply_markup=get_main_keyboard(),
-            parse_mode="HTML"
-        )
+        bot.send_message(message.chat.id, "🤔 Не нашёл. Попробуй точное имя:", reply_markup=get_main_keyboard(), parse_mode="HTML")
         return
 
     if len(found_items) == 1:
-        result = found_items[0]
-        send_item_card(message.chat.id, result['item'], result['label'])
+        send_item_card(message.chat.id, found_items[0]['item'], found_items[0]['label'])
         return
 
     if len(found_items) <= 6:
@@ -450,29 +440,24 @@ def handle_text(message):
             search_results_cache[user_id][button_id] = result
             keyboard.add(telebot.types.InlineKeyboardButton(button_text, callback_data=f'select_{button_id}'))
         keyboard.add(telebot.types.InlineKeyboardButton("❌ Отмена", callback_data='cancel_search'))
-        bot.send_message(
-            message.chat.id,
-            f"🔍 Найдено {len(found_items)} результатов. Что именно ты ищешь?",
-            reply_markup=keyboard
-        )
+        bot.send_message(message.chat.id, f"🔍 Найдено {len(found_items)} результатов:", reply_markup=keyboard)
         return
 
-    text = f"🔍 Найдено {len(found_items)} результатов. Напиши номер нужного:\n\n"
+    text = f"🔍 Найдено {len(found_items)} результатов. Напиши номер:\n\n"
     for i, result in enumerate(found_items[:10], 1):
         text += f"{i}. {result['label']} {result['item']['name']}\n"
     if len(found_items) > 10:
-        text += f"\n...и ещё {len(found_items) - 10} результатов. Уточни запрос!"
-
+        text += f"\n...и ещё {len(found_items) - 10}. Уточни запрос!"
     user_id = message.from_user.id
-    search_results_cache[user_id] = {str(i): result for i, result in enumerate(found_items[:10], 1)}
+    search_results_cache[user_id] = {str(i): r for i, r in enumerate(found_items[:10], 1)}
     bot.send_message(message.chat.id, text, reply_markup=get_main_keyboard())
 
 
-# === 5. КОМАНДА /reload ===
+# === 5. /reload ===
 @bot.message_handler(commands=['reload'])
 def reload_data(message):
     if message.from_user.id != OWNER_ID:
-        bot.send_message(message.chat.id, "❌ Эта команда только для администратора!")
+        bot.send_message(message.chat.id, "❌ Только для администратора!")
         return
     if load_wiki_data():
         bot.send_message(message.chat.id, f"✅ Данные перезагружены! {len(wiki_data.get('characters', []))} персонажей.")
@@ -482,34 +467,27 @@ def reload_data(message):
 
 # === УСТАНОВКА ВЕБХУКА ===
 def setup_webhook():
-    base_url = (
-        WEBHOOK_BASE_URL
-        or os.environ.get("RENDER_EXTERNAL_URL")
-        or os.environ.get("WEBHOOK_BASE_URL")
-    )
+    base_url = WEBHOOK_BASE_URL or os.environ.get("RENDER_EXTERNAL_URL")
     if not base_url:
-        print("⚠️ Не найден URL для вебхука. Задай переменную окружения WEBHOOK_BASE_URL "
-              "(например, https://твой-сервис.onrender.com).")
+        log("⚠️ Не найден RENDER_EXTERNAL_URL. Задай WEBHOOK_BASE_URL вручную.")
         return
-
     webhook_url = f"{base_url.rstrip('/')}/{TOKEN}"
-    print(f"🔗 Регистрирую вебхук: {webhook_url}")
+    log(f"🔗 Регистрирую вебхук: {webhook_url}")
 
     try:
         bot.remove_webhook()
         time.sleep(1)
     except Exception as e:
-        print(f"⚠️ remove_webhook: {e}")
+        log(f"⚠️ remove_webhook: {e}")
 
     ok = bot.set_webhook(url=webhook_url, drop_pending_updates=True)
-    print(f"{'✅' if ok else '❌'} set_webhook -> {ok}")
+    log(f"{'✅' if ok else '❌'} set_webhook -> {ok}")
 
     try:
         info = bot.get_webhook_info()
-        print(f"ℹ️ webhook info: url={info.url}, pending={info.pending_update_count}, "
-              f"last_err={info.last_error_message}")
+        log(f"ℹ️ webhook info: url={info.url}, pending={info.pending_update_count}, last_err={info.last_error_message}")
     except Exception as e:
-        print(f"⚠️ get_webhook_info: {e}")
+        log(f"⚠️ get_webhook_info: {e}")
 
 
 # === ЗАПУСК ===
@@ -517,5 +495,5 @@ setup_webhook()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-    print(f"🤖 Бот запущен на порту {port} (webhook mode)")
+    log(f"🤖 Бот запущен на порту {port} (webhook mode)")
     app.run(host='0.0.0.0', port=port, threaded=True)
