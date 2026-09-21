@@ -5,6 +5,7 @@ import json
 import re
 import os
 import threading
+import time
 from flask import Flask
 from io import BytesIO
 
@@ -13,23 +14,21 @@ TOKEN = "8991988855:AAFL12okgGp6WfGuSVHTxHWA1MxaoM25-30"
 WIKI_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 OWNER_ID = 412598271
 
-# Ссылка на data.json на GitHub
 DATA_URL = "https://raw.githubusercontent.com/ins1826/zazer_kalye_wiki_bot/refs/heads/main/data.json"
-
-# Базовый URL для картинок (GitHub Pages)
 IMAGES_BASE_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 
 bot = telebot.TeleBot(TOKEN)
 
-# ⭐ ВАЖНО: Принудительно удаляем старый вебхук, чтобы работал polling
+# ⭐ ВАЖНО: Принудительно удаляем вебхук и ждём, чтобы избежать ошибки 409 на Render
 bot.remove_webhook()
+time.sleep(1)
 
 # === ВЕБ-СЕРВЕР ДЛЯ RENDER ===
 app = Flask(__name__)
 
 @app.route('/')
 def health_check():
-    return "🪞 Бот Зазеркалья работает!", 200
+    return "OK", 200
 
 def run_flask():
     port = int(os.environ.get("PORT", 10000))
@@ -90,35 +89,19 @@ STICKERS = {
     "Коленыч": ["CAACAgIAAxkBAAFTCuVqk1Gsjo9H5j009LQ1ZAuFGdj5OAACzLIAAsem0UsmUDzySoinAT0E"],
     "Брунявая Чуня": ["CAACAgIAAxkBAAFTlklqnTHf4nDUFovhPvD5tvmWZAWx4gACyaoAAkOZsUio7JEAAY7kciE9BA", "CAACAgIAAxkBAAFTllVqnTJmJEH3y5ZWpRdlPSsvJx3ZaAACyacAAigPsEgSWPZ-IU_EDT0E"],
     "Чунявая Бруня": ["CAACAgIAAxkBAAFTllFqnTIxaLxuzniRPTQkaGZVLG7MgAACdrUAAvRxsEifbFEQTwMChz0E", "CAACAgIAAxkBAAFTllVqnTJmJEH3y5ZWpRdlPSsvJx3ZaAACyacAAigPsEgSWPZ-IU_EDT0E"],
-    "Акакий Куролесов": [
-        "CAACAgIAAxkBAAFTCulqk1GyFTtCxtb7Za0F3Cy3evGMlgAClKQAAvjJ0UsRpht3yVpbgT0E",
-        "CAACAgIAAxkBAAFTCutqk1G2rdNWLfg5OcPX-V8jMKNOxwACHasAAshRgEgwiGMJ1hm9tD0E",
-        "CAACAgIAAxkBAAFTCvdqk1HLemkwR7MVjrWCb_1y4G3newACwJcAAshsKUj97YMpXPBZzj0E"
-    ],
+    "Акакий Куролесов": ["CAACAgIAAxkBAAFTCulqk1GyFTtCxtb7Za0F3Cy3evGMlgAClKQAAvjJ0UsRpht3yVpbgT0E", "CAACAgIAAxkBAAFTCutqk1G2rdNWLfg5OcPX-V8jMKNOxwACHasAAshRgEgwiGMJ1hm9tD0E", "CAACAgIAAxkBAAFTCvdqk1HLemkwR7MVjrWCb_1y4G3newACwJcAAshsKUj97YMpXPBZzj0E"],
     "ПВЗ": ["CAACAgIAAxkBAAFTCu1qk1G54034Vd5iNNbh37zYSJTzJgACX7MAArNy0EsGJFZFHJ0JkD0E"],
     "Поленыч": ["CAACAgIAAxkBAAFTCu1qk1G54034Vd5iNNbh37zYSJTzJgACX7MAArNy0EsGJFZFHJ0JkD0E"],
     "Доктор Эпикантус": ["CAACAgIAAxkBAAFTCu9qk1G8AeVfrDLSh3tzkiMWOpB1rgACAaoAAu2K0EsX60LcXYD2eT0E"],
-    "Вальтасар": [
-        "CAACAgIAAxkBAAFTCu9qk1G8AeVfrDLSh3tzkiMWOpB1rgACAaoAAu2K0EsX60LcXYD2eT0E",
-        "CAACAgIAAxkBAAFTCxBqk1HzGP-t3w6SAgVqUiWoWU62uAACpK0AAhDD6EtXJKbixbcWsj0E",
-        "CAACAgIAAxkBAAFTCvFqk1HBuJvUCK_URUjQvRhQBhlBzwACT7EAAnDdeUgzAnv7tV7Lpz0E",
-        "CAACAgIAAxkBAAFTCxJqk1H2JAmmPduOe5EaoTcoKVMXWQACy5cAAmcNgUgPcTdR0xGnjj0E"
-    ],
+    "Вальтасар": ["CAACAgIAAxkBAAFTCu9qk1G8AeVfrDLSh3tzkiMWOpB1rgACAaoAAu2K0EsX60LcXYD2eT0E", "CAACAgIAAxkBAAFTCxBqk1HzGP-t3w6SAgVqUiWoWU62uAACpK0AAhDD6EtXJKbixbcWsj0E", "CAACAgIAAxkBAAFTCvFqk1HBuJvUCK_URUjQvRhQBhlBzwACT7EAAnDdeUgzAnv7tV7Lpz0E", "CAACAgIAAxkBAAFTCxJqk1H2JAmmPduOe5EaoTcoKVMXWQACy5cAAmcNgUgPcTdR0xGnjj0E"],
     "Выбор зелья Вальтасара": ["CAACAgIAAxkBAAFTCxJqk1H2JAmmPduOe5EaoTcoKVMXWQACy5cAAmcNgUgPcTdR0xGnjj0E"],
     "Истуканус": ["CAACAgIAAxkBAAFTCvNqk1HFnkAu7y3eqk-Ri0O5dt9HHAACz6UAAjph0EvH342gWx6sSD0E"],
     "Дон Окунь": ["CAACAgIAAxkBAAFTCvVqk1HIDHRo4UZ5AAHL9FEguEMwchUAAtmxAALbF9FLxtdZhV1AFWg9BA"],
-    "Пацаноиды": [
-        "CAACAgIAAxkBAAFTCvlqk1HOUUaDU7_Gje-KPOnPmAK-hAACC6sAAu2o0Usm-vgvixRWAT0E",
-        "CAACAgIAAxkBAAFTCvtqk1HSmuuI5qVJW7k0jqC58q6fUgACfKkAAq8cEEidpolWgmHh6D0E",
-        "CAACAgIAAxkBAAFTCttqk1DdCtK140wd2E4jXQ9TfIIu1QACvqAAAryMKEhxcEib__xeMD0E"
-    ],
+    "Пацаноиды": ["CAACAgIAAxkBAAFTCvlqk1HOUUaDU7_Gje-KPOnPmAK-hAACC6sAAu2o0Usm-vgvixRWAT0E", "CAACAgIAAxkBAAFTCvtqk1HSmuuI5qVJW7k0jqC58q6fUgACfKkAAq8cEEidpolWgmHh6D0E", "CAACAgIAAxkBAAFTCttqk1DdCtK140wd2E4jXQ9TfIIu1QACvqAAAryMKEhxcEib__xeMD0E"],
     "Бобыли": ["CAACAgIAAxkBAAFTCv1qk1HWAAHFIUt_D8fnJQ7VDzf-oEYAAn2pAALJ19FLcb1M3EVoQiY9BA"],
     "Лесной бобыль": ["CAACAgIAAxkBAAFTCv1qk1HWAAHFIUt_D8fnJQ7VDzf-oEYAAn2pAALJ19FLcb1M3EVoQiY9BA"],
     "Сатор Арепыч": ["CAACAgIAAxkBAAFTCv9qk1Ha_JZZEfQtkTmCJF845cD2ygACTKIAAoJr4UuN6bkqhtCziz0E"],
-    "Кокалка": [
-        "CAACAgIAAxkBAAFTCv9qk1Ha_JZZEfQtkTmCJF845cD2ygACTKIAAoJr4UuN6bkqhtCziz0E",
-        "CAACAgIAAxkBAAFTC0Jqk1JR0-192CVpyXQKb_g3g8KSVgACxqkAAqClEEgm05Dj2lIaJj0E"
-    ],
+    "Кокалка": ["CAACAgIAAxkBAAFTCv9qk1Ha_JZZEfQtkTmCJF845cD2ygACTKIAAoJr4UuN6bkqhtCziz0E", "CAACAgIAAxkBAAFTC0Jqk1JR0-192CVpyXQKb_g3g8KSVgACxqkAAqClEEgm05Dj2lIaJj0E"],
     "ОНО": ["CAACAgIAAxkBAAFTCwNqk1HeGIHzrHv2lzJ9J3fERtE7gwACzZ4AApCw2UtOrQPh_6vRLT0E"],
     "ОНА": ["CAACAgIAAxkBAAFTCwVqk1HhaDZkH5-DDgPKplFltizbBgAC8KMAAvfm0EtpGJW18CY4Wz0E"],
     "Евдокия": ["CAACAgIAAxkBAAFTCwpqk1HnIWRNbybqnbYghqct4MI83AACLrAAArjA2Ev3WAy5Y5T4-D0E"],
@@ -146,10 +129,7 @@ STICKERS = {
     "Битубисас": ["CAACAgIAAxkBAAFTCzhqk1I2AAF3jMSbbaaN-KneqgXpqgEAAl-cAAITTtlLxseuKXPD9WM9BA"],
     "Бубоня": ["CAACAgIAAxkBAAFTCzpqk1I5u6QWo7JOLuzF_1rnCFjEEwACF6UAAusb2EvHY-wO3NeEUj0E"],
     "Синие ящеры": ["CAACAgIAAxkBAAFTCzpqk1I5u6QWo7JOLuzF_1rnCFjEEwACF6UAAusb2EvHY-wO3NeEUj0E"],
-    "Реутень": [
-        "CAACAgIAAxkBAAFTCzxqk1I8hphL34UUaU7PNtB3mduoMQACfKQAAtJd4EukOo_gKnt4CD0E",
-        "CAACAgIAAxkBAAFTCz5qk1JDGiU9yHf7PBL2LqVOU8VFzgACoqgAAr2B4EuYxuf2RyjrjD0E"
-    ],
+    "Реутень": ["CAACAgIAAxkBAAFTCzxqk1I8hphL34UUaU7PNtB3mduoMQACfKQAAtJd4EukOo_gKnt4CD0E", "CAACAgIAAxkBAAFTCz5qk1JDGiU9yHf7PBL2LqVOU8VFzgACoqgAAr2B4EuYxuf2RyjrjD0E"],
     "Подмыхан": ["CAACAgIAAxkBAAFTC0Bqk1JM6E8ml8jD4rOAL2e9LMIHnQACO6gAAkkJ6EtV-eZwjcTAND0E"],
     "Лесной Курбак": ["CAACAgIAAxkBAAFTC4Bqk1KxejJOThJhHp1WYk5mB-k3mgAC16cAAvHmmEhvFvjGS8jjST0E"],
     "Калач": ["CAACAgIAAxkBAAFTC35qk1KvEKJPsH8dTKGlc6K813DDVAACaq0AArYnKUjjoc77h49J-j0E"],
@@ -157,10 +137,7 @@ STICKERS = {
     "Конгресс путешественников": ["CAACAgIAAxkBAAFTC3xqk1KsKECJqPA_CwVSQk3ieqsieQACTqoAAuJmIUi5iZdIHxDisD0E"],
     "Сеньор Понполомео": ["CAACAgIAAxkBAAFTC3pqk1Ko52Z7xO9lW9OD5FIgpDiJVAAChKAAAqCbMEg_HC3--4mhxD0E"],
     "Гузлик": ["CAACAgIAAxkBAAFTC0Rqk1JUSqdgGdIkZpyhPQ6wRyixyAACvpwAAgrP-UuFMiQAAVw5MHo9BA"],
-    "Летописный Артём": [
-        "CAACAgIAAxkBAAFTC0Zqk1JYcvtxoUcirgZDhWJ5wS8k_wACV6IAApI9-EvqUXEIs8EV_j0E",
-        "CAACAgIAAxkBAAFTC0hqk1JbNDAcT_iG7AABzK-2s_Sr6p4AAsGfAAKhz2FIfTOKN3tvn4A9BA"
-    ],
+    "Летописный Артём": ["CAACAgIAAxkBAAFTC0Zqk1JYcvtxoUcirgZDhWJ5wS8k_wACV6IAApI9-EvqUXEIs8EV_j0E", "CAACAgIAAxkBAAFTC0hqk1JbNDAcT_iG7AABzK-2s_Sr6p4AAsGfAAKhz2FIfTOKN3tvn4A9BA"],
     "Мопсосвины": ["CAACAgIAAxkBAAFTC0pqk1JefY-ZnPr6mjjz6jX2d0rQFAACMKAAAp12UUju8ZPhuUtGZj0E"],
     "Грязуны": ["CAACAgIAAxkBAAFTC0xqk1Jh1Qp1sVC45EzzDEhlXOzGBwACJZ8AArUwmUh2Nee5Ad9Rej0E"],
     "Григорий": ["CAACAgIAAxkBAAFTC05qk1JkG6GWxuGwXNmGhUSneydCaQAC2KEAAmxvCUhxZIooEbnJnT0E"],
@@ -190,19 +167,15 @@ STICKERS = {
     "Корпораты": ["CAACAgIAAxkBAAFTlyJqnTbgZTLkE9R8F4bmfa308zCWLgACWqsAAhmUmUgkDojNQ1fB5D0E"],
 }
 
+# === ФУНКЦИЯ ДЛЯ ДЛИННЫХ СООБЩЕНИЙ ===
 def send_long_message(chat_id, text, parse_mode="HTML", reply_markup=None):
-    """Разбивает длинный текст на части и отправляет по очереди"""
-    MAX_LENGTH = 4000  # С запасом от лимита 4096
-    
+    MAX_LENGTH = 4000
     if len(text.encode('utf-8')) <= MAX_LENGTH:
-        # Если текст короткий — отправляем как обычно
         bot.send_message(chat_id, text, parse_mode=parse_mode, reply_markup=reply_markup)
         return
     
-    # Если текст длинный — разбиваем на части
     parts = []
     while len(text.encode('utf-8')) > MAX_LENGTH:
-        # Ищем место для разрыва (конец строки или пробел)
         split_at = text.rfind('\n', 0, MAX_LENGTH)
         if split_at == -1:
             split_at = text.rfind(' ', 0, MAX_LENGTH)
@@ -212,24 +185,20 @@ def send_long_message(chat_id, text, parse_mode="HTML", reply_markup=None):
         parts.append(text[:split_at])
         text = text[split_at:].lstrip()
     
-    # Добавляем последнюю часть
     if text:
         parts.append(text)
     
-    # Отправляем все части
     for i, part in enumerate(parts):
-        # Клавиатуру добавляем только к последнему сообщению
         markup = reply_markup if i == len(parts) - 1 else None
         bot.send_message(chat_id, part, parse_mode=parse_mode, reply_markup=markup)
 
+# === ОТПРАВКА КАРТОЧКИ ===
 def send_item_card(chat_id, item, label, send_photo=True):
-    """Отправляет карточку элемента с картинкой и полным текстом"""
     text = f"{label}: <b>{escape_html(item['name'])}</b>\n"
     if item.get('type'): text += f"🏷️ {escape_html(item['type'])}\n"
     if item.get('short'): text += f"\n📜 {escape_html(parse_wiki_links(item['short']))}\n"
     if item.get('full'):
         full_text = parse_wiki_links(item['full'])
-        # ⭐ Убрали обрезку [:500] — теперь отправляется полное описание!
         text += f"\n{escape_html(full_text)}\n"
     if item.get('episodes') and len(item['episodes']) > 0:
         text += f"\n🎬 Эпизоды: {', '.join([f'ep.{e}' for e in item['episodes'][:5]])}"
@@ -255,12 +224,12 @@ def send_item_card(chat_id, item, label, send_photo=True):
             random_sticker = random.choice(sticker_list)
             bot.send_sticker(chat_id, random_sticker)
         except Exception as e:
-            print(f" Не удалось отправить стикер для {item['name']}: {e}")
+            print(f"❌ Не удалось отправить стикер для {item['name']}: {e}")
 
 # === 1. КОМАНДА /start ===
 @bot.message_handler(commands=['start'])
 def start(message):
-    text = """ <b>Добро пожаловать в Зазеркалье!</b>
+    text = """🪞 <b>Добро пожаловать в Зазеркалье!</b>
 
 Ты стоишь на пороге мира, где Хрычи растут на огороде у бабы Жули, а в подпольном щекоточном клубе высокие требования к кандидатам...
 
@@ -273,10 +242,10 @@ def start(message):
 def callback_handler(call):
     # 1. Кнопка "Ещё персонажа"
     if call.data == 'random_char':
-        send_random_character(call.from_user.id) # Используем ID пользователя напрямую
+        send_random_character(call.from_user.id)
         bot.answer_callback_query(call.id, "🎲 Держи нового персонажа!")
         
-    # 2. Кнопка "Написать автору вики"
+    # 2. Кнопка "Написать автору"
     elif call.data == 'feedback_mode':
         feedback_mode[call.from_user.id] = True
         cancel_kb = telebot.types.InlineKeyboardMarkup()
@@ -320,7 +289,7 @@ def callback_handler(call):
         if user_id in search_results_cache and result_id in search_results_cache[user_id]:
             result = search_results_cache[user_id][result_id]
             send_item_card(user_id, result['item'], result['label'])
-            del search_results_cache[user_id] # Очищаем кэш после выбора
+            del search_results_cache[user_id]
             
         bot.answer_callback_query(call.id, "Выбрано!")
 
@@ -360,12 +329,12 @@ def handle_text(message):
         return
     
     if not wiki_data:
-        bot.send_message(message.chat.id, " Данные ещё загружаются!")
+        bot.send_message(message.chat.id, "⏳ Данные ещё загружаются!")
         return
     
     query = message.text.strip().lower()
     found_items = []
-    categories = {'characters': '👤 Персонаж', 'locations': '️ Локация', 'items': ' Предмет', 'events': '🎭 Ивент', 'organizations': '🏛️ Организация', 'races': '🧬 Раса'}
+    categories = {'characters': '👤 Персонаж', 'locations': '🗺️ Локация', 'items': '🎒 Предмет', 'events': '🎭 Ивент', 'organizations': '🏛️ Организация', 'races': '🧬 Раса'}
     
     for category, label in categories.items():
         if category not in wiki_data: continue
@@ -386,15 +355,12 @@ def handle_text(message):
         keyboard = telebot.types.InlineKeyboardMarkup()
         user_id = message.from_user.id
         search_results_cache[user_id] = {}
-        
         for i, result in enumerate(found_items):
             button_text = f"{result['label']} {result['item']['name']}"
             button_id = f"result_{i}"
             search_results_cache[user_id][button_id] = result
             keyboard.add(telebot.types.InlineKeyboardButton(button_text, callback_data=f'select_{button_id}'))
-        
         keyboard.add(telebot.types.InlineKeyboardButton("❌ Отмена", callback_data='cancel_search'))
-        
         bot.send_message(
             message.chat.id, 
             f"🔍 Найдено {len(found_items)} результатов. Что именно ты ищешь?",
@@ -402,16 +368,14 @@ def handle_text(message):
         )
         return
     
-    text = f" Найдено {len(found_items)} результатов. Напиши номер нужного:\n\n"
+    text = f"🔍 Найдено {len(found_items)} результатов. Напиши номер нужного:\n\n"
     for i, result in enumerate(found_items[:10], 1):
         text += f"{i}. {result['label']} {result['item']['name']}\n"
-    
     if len(found_items) > 10:
         text += f"\n...и ещё {len(found_items) - 10} результатов. Уточни запрос!"
     
     user_id = message.from_user.id
     search_results_cache[user_id] = {str(i): result for i, result in enumerate(found_items[:10], 1)}
-    
     bot.send_message(message.chat.id, text, reply_markup=get_main_keyboard())
 
 @bot.message_handler(content_types=['text'])
@@ -419,7 +383,6 @@ def handle_number_selection(message):
     if message.text.isdigit():
         user_id = message.from_user.id
         num = message.text
-        
         if user_id in search_results_cache and num in search_results_cache[user_id]:
             result = search_results_cache[user_id][num]
             send_item_card(message.chat.id, result['item'], result['label'])
