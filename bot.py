@@ -4,9 +4,8 @@ import requests
 import json
 import re
 import os
-import threading
 import time
-from flask import Flask
+from flask import Flask, request
 from io import BytesIO
 
 # === НАСТРОЙКИ ===
@@ -19,22 +18,23 @@ IMAGES_BASE_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 
 bot = telebot.TeleBot(TOKEN)
 
-# ⭐ ВАЖНО: Принудительно удаляем вебхук и ждём, чтобы избежать ошибки 409 на Render
-bot.remove_webhook()
-time.sleep(1)
-
-# === ВЕБ-СЕРВЕР ДЛЯ RENDER ===
+# === ВЕБ-СЕРВЕР ===
 app = Flask(__name__)
 
 @app.route('/')
+@app.route('/health')
 def health_check():
     return "OK", 200
 
-def run_flask():
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
-
-threading.Thread(target=run_flask, daemon=True).start()
+@app.route(f'/{TOKEN}', methods=['POST'])
+def webhook():
+    """Сюда Telegram шлёт апдейты."""
+    if request.headers.get('content-type') == 'application/json':
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return '', 200
+    return '', 403
 
 # === ЗАГРУЗКА ДАННЫХ ===
 wiki_data = {}
@@ -80,7 +80,10 @@ def get_main_keyboard():
         telebot.types.InlineKeyboardButton("✉️ Написать автору вики", callback_data='feedback_mode')
     )
     keyboard.row(
-        telebot.types.InlineKeyboardButton("📖 Открыть Энциклопедию", web_app=telebot.types.WebAppInfo(url=WIKI_URL))
+        telebot.types.InlineKeyboardButton(
+            "📖 Открыть Энциклопедию",
+            web_app=telebot.types.WebAppInfo(url=WIKI_URL)
+        )
     )
     return keyboard
 
@@ -173,7 +176,6 @@ def send_long_message(chat_id, text, parse_mode="HTML", reply_markup=None):
     if len(text.encode('utf-8')) <= MAX_LENGTH:
         bot.send_message(chat_id, text, parse_mode=parse_mode, reply_markup=reply_markup)
         return
-    
     parts = []
     while len(text.encode('utf-8')) > MAX_LENGTH:
         split_at = text.rfind('\n', 0, MAX_LENGTH)
@@ -181,13 +183,10 @@ def send_long_message(chat_id, text, parse_mode="HTML", reply_markup=None):
             split_at = text.rfind(' ', 0, MAX_LENGTH)
         if split_at == -1:
             split_at = MAX_LENGTH
-        
         parts.append(text[:split_at])
         text = text[split_at:].lstrip()
-    
     if text:
         parts.append(text)
-    
     for i, part in enumerate(parts):
         markup = reply_markup if i == len(parts) - 1 else None
         bot.send_message(chat_id, part, parse_mode=parse_mode, reply_markup=markup)
@@ -202,8 +201,7 @@ def send_item_card(chat_id, item, label, send_photo=True):
         text += f"\n{escape_html(full_text)}\n"
     if item.get('episodes') and len(item['episodes']) > 0:
         text += f"\n🎬 Эпизоды: {', '.join([f'ep.{e}' for e in item['episodes'][:5]])}"
-    
-    # 1. Сначала отправляем картинку БЕЗ текста (чтобы не было лимита в 1024 символа)
+
     if send_photo and item.get('image'):
         try:
             image_url = IMAGES_BASE_URL + item['image']
@@ -213,11 +211,9 @@ def send_item_card(chat_id, item, label, send_photo=True):
                 bot.send_photo(chat_id, photo_file)
         except Exception as e:
             print(f"❌ Не удалось отправить картинку: {e}")
-    
-    # 2. Затем отправляем полный текст (если он длинный, функция разобьёт его сама)
+
     send_long_message(chat_id, text, parse_mode="HTML", reply_markup=get_main_keyboard())
-    
-    # 3. И в конце отправляем случайный стикер (если есть)
+
     if item['name'] in STICKERS:
         try:
             sticker_list = STICKERS[item['name']]
@@ -240,28 +236,24 @@ def start(message):
 # === 2. ОБРАБОТКА КНОПОК ===
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
-    # 1. Кнопка "Ещё персонажа"
     if call.data == 'random_char':
         send_random_character(call.from_user.id)
         bot.answer_callback_query(call.id, "🎲 Держи нового персонажа!")
-        
-    # 2. Кнопка "Написать автору"
+
     elif call.data == 'feedback_mode':
         feedback_mode[call.from_user.id] = True
         cancel_kb = telebot.types.InlineKeyboardMarkup()
         cancel_kb.add(telebot.types.InlineKeyboardButton("❌ Отменить", callback_data='cancel_feedback'))
         bot.send_message(
-            call.from_user.id, 
+            call.from_user.id,
             "✉️ <b>Режим обратной связи включён!</b>\n\nНапиши своё сообщение, и я передам его помощнице Грибного Архивариуса.\n\n<i>(Если передумал, нажми кнопку ниже)</i>",
             reply_markup=cancel_kb,
             parse_mode="HTML"
         )
         bot.answer_callback_query(call.id, "✉️ Режим активирован!")
-        
-    # 3. Кнопка "Отменить" (обратная связь)
+
     elif call.data == 'cancel_feedback':
-        if call.from_user.id in feedback_mode:
-            del feedback_mode[call.from_user.id]
+        feedback_mode.pop(call.from_user.id, None)
         bot.edit_message_text(
             chat_id=call.from_user.id,
             message_id=call.message.message_id,
@@ -269,8 +261,7 @@ def callback_handler(call):
             parse_mode="HTML"
         )
         bot.answer_callback_query(call.id, "Режим отменён")
-        
-    # 4. Кнопка "Отмена" (поиск)
+
     elif call.data == 'cancel_search':
         bot.edit_message_text(
             chat_id=call.from_user.id,
@@ -280,17 +271,14 @@ def callback_handler(call):
             reply_markup=get_main_keyboard()
         )
         bot.answer_callback_query(call.id, "Поиск отменён")
-        
-    # 5. Выбор конкретного результата из поиска
+
     elif call.data.startswith('select_'):
         result_id = call.data.replace('select_', '')
         user_id = call.from_user.id
-        
         if user_id in search_results_cache and result_id in search_results_cache[user_id]:
             result = search_results_cache[user_id][result_id]
             send_item_card(user_id, result['item'], result['label'])
             del search_results_cache[user_id]
-            
         bot.answer_callback_query(call.id, "Выбрано!")
 
 # === 3. КОМАНДА /random ===
@@ -305,9 +293,10 @@ def send_random_character(chat_id):
     char = random.choice(wiki_data['characters'])
     send_item_card(chat_id, char, "👤 Персонаж")
 
-# === 4. ПОИСК С УМНЫМ ВЫБОРОМ ===
+# === 4. ПОИСК + ВЫБОР НОМЕРА + ОБРАТНАЯ СВЯЗЬ (единый хендлер) ===
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
+    # Команды
     if message.text.startswith('/'):
         if message.text.lower() == '/cancel':
             if message.from_user.id in feedback_mode:
@@ -316,41 +305,72 @@ def handle_text(message):
             else:
                 bot.send_message(message.chat.id, "У тебя и так не включён режим обратной связи.", reply_markup=get_main_keyboard())
         return
-    
+
+    # Режим обратной связи
     if feedback_mode.get(message.from_user.id):
         username = f"@{message.from_user.username}" if message.from_user.username else "Без username"
-        forward_text = f"💬 <b>Новое сообщение!</b>\n👤 <b>От:</b> {escape_html(message.from_user.first_name)} ({escape_html(username)})\n🆔 <b>ID:</b> <code>{message.from_user.id}</code>\n📝 <b>Текст:</b>\n{escape_html(message.text)}"
+        forward_text = (
+            f"💬 <b>Новое сообщение!</b>\n"
+            f"👤 <b>От:</b> {escape_html(message.from_user.first_name)} ({escape_html(username)})\n"
+            f"🆔 <b>ID:</b> <code>{message.from_user.id}</code>\n"
+            f"📝 <b>Текст:</b>\n{escape_html(message.text)}"
+        )
         try:
             bot.send_message(OWNER_ID, forward_text, parse_mode="HTML")
             bot.send_message(message.chat.id, "✅ Спасибо! Сообщение отправлено помощнице Грибного Архивариуса! 🪞✨", reply_markup=get_main_keyboard(), parse_mode="HTML")
-        except:
+        except Exception as e:
+            print(f"❌ Не удалось отправить сообщение владельцу: {e}")
             bot.send_message(message.chat.id, "❌ Не удалось отправить сообщение.")
         del feedback_mode[message.from_user.id]
         return
-    
+
+    # Выбор номера из предыдущего длинного списка
+    if message.text.isdigit():
+        user_id = message.from_user.id
+        num = message.text
+        if user_id in search_results_cache and num in search_results_cache[user_id]:
+            result = search_results_cache[user_id][num]
+            send_item_card(message.chat.id, result['item'], result['label'])
+            del search_results_cache[user_id]
+            return
+
+    # Поиск
     if not wiki_data:
         bot.send_message(message.chat.id, "⏳ Данные ещё загружаются!")
         return
-    
+
     query = message.text.strip().lower()
     found_items = []
-    categories = {'characters': '👤 Персонаж', 'locations': '🗺️ Локация', 'items': '🎒 Предмет', 'events': '🎭 Ивент', 'organizations': '🏛️ Организация', 'races': '🧬 Раса'}
-    
+    categories = {
+        'characters': '👤 Персонаж',
+        'locations': '🗺️ Локация',
+        'items': '🎒 Предмет',
+        'events': '🎭 Ивент',
+        'organizations': '🏛️ Организация',
+        'races': '🧬 Раса'
+    }
+
     for category, label in categories.items():
-        if category not in wiki_data: continue
+        if category not in wiki_data:
+            continue
         for item in wiki_data[category]:
             if query == item.get('name', '').lower() or query in item.get('name', '').lower():
                 found_items.append({'category': category, 'label': label, 'item': item})
-    
+
     if not found_items:
-        bot.send_message(message.chat.id, "🤔 Хм, я не нашёл такого в базе. Попробуй написать точное имя или используй кнопки:", reply_markup=get_main_keyboard(), parse_mode="HTML")
+        bot.send_message(
+            message.chat.id,
+            "🤔 Хм, я не нашёл такого в базе. Попробуй написать точное имя или используй кнопки:",
+            reply_markup=get_main_keyboard(),
+            parse_mode="HTML"
+        )
         return
-    
+
     if len(found_items) == 1:
         result = found_items[0]
         send_item_card(message.chat.id, result['item'], result['label'])
         return
-    
+
     if len(found_items) <= 6:
         keyboard = telebot.types.InlineKeyboardMarkup()
         user_id = message.from_user.id
@@ -362,32 +382,21 @@ def handle_text(message):
             keyboard.add(telebot.types.InlineKeyboardButton(button_text, callback_data=f'select_{button_id}'))
         keyboard.add(telebot.types.InlineKeyboardButton("❌ Отмена", callback_data='cancel_search'))
         bot.send_message(
-            message.chat.id, 
+            message.chat.id,
             f"🔍 Найдено {len(found_items)} результатов. Что именно ты ищешь?",
             reply_markup=keyboard
         )
         return
-    
+
     text = f"🔍 Найдено {len(found_items)} результатов. Напиши номер нужного:\n\n"
     for i, result in enumerate(found_items[:10], 1):
         text += f"{i}. {result['label']} {result['item']['name']}\n"
     if len(found_items) > 10:
         text += f"\n...и ещё {len(found_items) - 10} результатов. Уточни запрос!"
-    
+
     user_id = message.from_user.id
     search_results_cache[user_id] = {str(i): result for i, result in enumerate(found_items[:10], 1)}
     bot.send_message(message.chat.id, text, reply_markup=get_main_keyboard())
-
-@bot.message_handler(content_types=['text'])
-def handle_number_selection(message):
-    if message.text.isdigit():
-        user_id = message.from_user.id
-        num = message.text
-        if user_id in search_results_cache and num in search_results_cache[user_id]:
-            result = search_results_cache[user_id][num]
-            send_item_card(message.chat.id, result['item'], result['label'])
-            del search_results_cache[user_id]
-            return
 
 # === 5. КОМАНДА /reload ===
 @bot.message_handler(commands=['reload'])
@@ -400,6 +409,32 @@ def reload_data(message):
     else:
         bot.send_message(message.chat.id, "❌ Не удалось перезагрузить данные.")
 
-print("🤖 Бот запущен и готов к работе 24/7!")
-# none_stop=True и interval=0 гарантируют стабильную работу кнопок на Render
-bot.polling(none_stop=True, interval=0, timeout=60)
+# === УСТАНОВКА ВЕБХУКА ===
+def setup_webhook():
+    """Регистрируем вебхук на URL, который Render выдал сервису."""
+    base_url = os.environ.get("RENDER_EXTERNAL_URL") or os.environ.get("WEBHOOK_BASE_URL")
+    if not base_url:
+        print("⚠️ RENDER_EXTERNAL_URL не найден — вебхук не установлен. "
+              "Проверь, что сервис на Render имеет тип Web Service.")
+        return
+
+    webhook_url = f"{base_url.rstrip('/')}/{TOKEN}"
+
+    # Сносим старый вебхук и pending updates (там могли осесть «застрявшие» апдейты от polling)
+    bot.remove_webhook()
+    time.sleep(1)
+
+    ok = bot.set_webhook(url=webhook_url, drop_pending_updates=True)
+    if ok:
+        print(f"✅ Вебхук установлен: {webhook_url}")
+    else:
+        print(f"❌ Не удалось установить вебхук на {webhook_url}")
+
+
+# === ЗАПУСК ===
+setup_webhook()
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    print(f"🤖 Бот запущен на порту {port} (webhook mode)")
+    app.run(host='0.0.0.0', port=port)
