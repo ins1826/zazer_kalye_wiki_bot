@@ -10,14 +10,13 @@ from flask import Flask, request
 from io import BytesIO
 
 # === НАСТРОЙКИ ===
-TOKEN = "8991988855:AAFL12okgGp6WfGuSVHTxHWA1MxaoM25-30"
+TOKEN = "8991988855:AAFjGNghbPUxH2Bwoytdfn0q9QMy5ywo_0E"
 WIKI_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 OWNER_ID = 412598271
 
 DATA_URL = "https://raw.githubusercontent.com/ins1826/zazer_kalye_wiki_bot/refs/heads/main/data.json"
 IMAGES_BASE_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 
-# Для отправки сообщений (polling не используем — разбираем апдейты руками)
 bot = telebot.TeleBot(TOKEN)
 
 # === WEB ===
@@ -36,7 +35,7 @@ def health_check():
 
 
 @app.route('/webhook_info')
-def webhook_info():
+def webhook_info_route():
     try:
         info = bot.get_webhook_info()
         return {
@@ -47,21 +46,6 @@ def webhook_info():
         }, 200
     except Exception as e:
         return {"error": str(e)}, 500
-
-
-@app.route('/force_delete_webhook')
-def force_delete_webhook():
-    try:
-        bot.remove_webhook()
-        return "Webhook removed. Now redeploy (or call /set_webhook_again).", 200
-    except Exception as e:
-        return f"Error: {e}", 500
-
-
-@app.route('/set_webhook_again')
-def set_webhook_again():
-    setup_webhook()
-    return "setup_webhook called, check logs", 200
 
 
 # === ЗАГРУЗКА ДАННЫХ ===
@@ -79,7 +63,7 @@ def load_wiki_data():
         log(f"❌ Ошибка загрузки: код {response.status_code}")
         return False
     except Exception as e:
-        log(f"❌ Ошибка: {e}")
+        log(f"❌ Ошибка загрузки: {e}")
         return False
 
 
@@ -282,69 +266,81 @@ def send_welcome(chat_id):
 
 
 # =========================================================
-# РУЧНОЙ DISPATCH (не полагаемся на process_new_updates)
+# ОБЩАЯ ЛОГИКА КНОПОК (не зависит от класса CallbackQuery)
 # =========================================================
+def process_callback(data, from_user, chat_id, message_id=None, callback_id=None):
+    """
+    data — строка callback_data
+    from_user — user объект
+    chat_id — чат
+    message_id — id сообщения с кнопкой (может быть None)
+    callback_id — id для answerCallbackQuery (None, если вызов из /click)
+    """
+    log(f"   🎯 process_callback: data={data!r}, from={from_user.id}")
 
-def handle_callback_query(call):
-    log(f"   → callback data = {call.data!r}, from = {call.from_user.id}")
+    if callback_id:
+        try:
+            bot.answer_callback_query(callback_id)
+        except Exception as e:
+            log(f"   ⚠️ answer_callback_query: {e}")
 
     try:
-        bot.answer_callback_query(call.id)
-    except Exception as e:
-        log(f"   ⚠️ answer_callback_query: {e}")
+        if data == 'random_char':
+            send_random_character(from_user.id)
 
-    try:
-        if call.data == 'random_char':
-            send_random_character(call.from_user.id)
-
-        elif call.data == 'feedback_mode':
-            feedback_mode[call.from_user.id] = True
+        elif data == 'feedback_mode':
+            feedback_mode[from_user.id] = True
             kb = telebot.types.InlineKeyboardMarkup()
             kb.add(telebot.types.InlineKeyboardButton("❌ Отменить", callback_data='cancel_feedback'))
             bot.send_message(
-                call.from_user.id,
+                from_user.id,
                 "✉️ <b>Режим обратной связи включён!</b>\n\nНапиши своё сообщение, и я передам его помощнице Грибного Архивариуса.\n\n<i>(Если передумал, нажми кнопку ниже)</i>",
                 reply_markup=kb,
                 parse_mode="HTML"
             )
 
-        elif call.data == 'cancel_feedback':
-            feedback_mode.pop(call.from_user.id, None)
-            bot.edit_message_text(
-                chat_id=call.from_user.id,
-                message_id=call.message.message_id,
-                text="❌ <b>Режим обратной связи отменён.</b>",
-                parse_mode="HTML"
-            )
+        elif data == 'cancel_feedback':
+            feedback_mode.pop(from_user.id, None)
+            if message_id:
+                bot.edit_message_text(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    text="❌ <b>Режим обратной связи отменён.</b>",
+                    parse_mode="HTML"
+                )
 
-        elif call.data == 'cancel_search':
-            bot.edit_message_text(
-                chat_id=call.from_user.id,
-                message_id=call.message.message_id,
-                text="❌ <b>Поиск отменён.</b>\n\nНапиши другое имя:",
-                parse_mode="HTML",
-                reply_markup=get_main_keyboard()
-            )
+        elif data == 'cancel_search':
+            if message_id:
+                bot.edit_message_text(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    text="❌ <b>Поиск отменён.</b>\n\nНапиши другое имя:",
+                    parse_mode="HTML",
+                    reply_markup=get_main_keyboard()
+                )
 
-        elif call.data.startswith('select_'):
-            result_id = call.data.replace('select_', '')
-            uid = call.from_user.id
+        elif data.startswith('select_'):
+            result_id = data.replace('select_', '')
+            uid = from_user.id
             if uid in search_results_cache and result_id in search_results_cache[uid]:
                 result = search_results_cache[uid][result_id]
                 send_item_card(uid, result['item'], result['label'])
                 del search_results_cache[uid]
 
-        elif call.data == 'test_click':
-            bot.send_message(call.from_user.id, "✅ Тест-кнопка сработала!")
+        elif data == 'test_click':
+            bot.send_message(from_user.id, "✅ Тест-кнопка сработала!")
 
         else:
-            log(f"   ⚠️ неизвестный callback_data: {call.data}")
+            log(f"   ⚠️ неизвестный callback_data: {data}")
 
     except Exception as e:
-        log(f"   ❌ handle_callback_query error: {e}")
+        log(f"   ❌ process_callback error: {e}")
         traceback.print_exc()
 
 
+# =========================================================
+# ОБРАБОТКА ТЕКСТОВЫХ СООБЩЕНИЙ
+# =========================================================
 def do_search(chat_id, user_id, query):
     if not wiki_data:
         bot.send_message(chat_id, "⏳ Данные ещё загружаются!")
@@ -431,20 +427,13 @@ def handle_message(message):
                              reply_markup=kb)
 
         elif cmd == 'click':
-            # /click <callback_data> — эмуляция нажатия кнопки через текст
             if not arg:
                 bot.send_message(message.chat.id,
                                  "Использование: /click random_char  или  /click feedback_mode  или  /click test_click")
                 return
-            # Собираем фейковый call и вызываем обработчик напрямую
-            fake = telebot.types.CallbackQuery(
-                id="0",
-                from_user=message.from_user,
-                chat_instance="0",
-                data=arg,
-                message=message,
-            )
-            handle_callback_query(fake)
+            # эмулируем нажатие кнопки, вызывая общую логику напрямую
+            process_callback(arg, message.from_user, message.chat.id,
+                             message_id=message.message_id, callback_id=None)
 
         elif cmd == 'reload':
             if user_id != OWNER_ID:
@@ -456,20 +445,25 @@ def handle_message(message):
             else:
                 bot.send_message(message.chat.id, "❌ Не удалось перезагрузить данные.")
 
-        elif cmd == 'debug':
+        elif cmd == 'whoami' or cmd == 'debug':
             if user_id != OWNER_ID:
                 bot.send_message(message.chat.id, "❌ Только для администратора!")
                 return
-            info = bot.get_webhook_info()
-            txt = (
-                f"🐞 <b>Debug</b>\n"
-                f"<b>telebot:</b> <code>{telebot.__version__}</code>\n"
-                f"<b>webhook url:</b> <code>{info.url}</code>\n"
-                f"<b>pending:</b> <code>{info.pending_update_count}</code>\n"
-                f"<b>last_err:</b> <code>{info.last_error_message}</code>\n"
-                f"<b>characters:</b> <code>{len(wiki_data.get('characters', []))}</code>"
-            )
-            bot.send_message(message.chat.id, txt, parse_mode="HTML")
+            try:
+                info = bot.get_webhook_info()
+                tb_ver = getattr(telebot, "__version__", "неизвестно")
+                txt = (
+                    f"🐞 <b>Debug</b>\n"
+                    f"<b>telebot:</b> <code>{tb_ver}</code>\n"
+                    f"<b>webhook url:</b> <code>{info.url}</code>\n"
+                    f"<b>pending:</b> <code>{info.pending_update_count}</code>\n"
+                    f"<b>last_err_date:</b> <code>{info.last_error_date}</code>\n"
+                    f"<b>last_err_msg:</b> <code>{info.last_error_message}</code>\n"
+                    f"<b>characters:</b> <code>{len(wiki_data.get('characters', []))}</code>"
+                )
+                bot.send_message(message.chat.id, txt, parse_mode="HTML")
+            except Exception as e:
+                bot.send_message(message.chat.id, f"Ошибка: <code>{e}</code>", parse_mode="HTML")
 
         return
 
@@ -505,28 +499,38 @@ def handle_message(message):
     do_search(message.chat.id, user_id, text)
 
 
-# === WEBHOOK (ручной разбор) ===
+# =========================================================
+# WEBHOOK
+# =========================================================
 @app.route(f'/{TOKEN}', methods=['POST'])
 def webhook():
     try:
         json_string = request.get_data().decode('utf-8')
-        log(f"📥 UPDATE: {json_string[:250]}")
+        log(f"📥 UPDATE: {json_string[:300]}")
 
         data = json.loads(json_string)
+        log(f"   → keys = {list(data.keys())}")
 
-        # callback_query
         if data.get('callback_query'):
-            call = telebot.types.CallbackQuery.de_json(data['callback_query'], bot)
-            handle_callback_query(call)
+            cq = data['callback_query']
+            user = cq.get('from', {})
+            msg = cq.get('message', {})
+            chat = msg.get('chat', {}) if msg else {}
+            log(f"   → CALLBACK_QUERY data={cq.get('data')!r} from={user.get('id')}")
+            process_callback(
+                data=cq.get('data', ''),
+                from_user=telebot.types.User.de_json(user),
+                chat_id=chat.get('id', user.get('id')),
+                message_id=msg.get('message_id') if msg else None,
+                callback_id=cq.get('id'),
+            )
             return '', 200
 
-        # message
         if data.get('message'):
             msg = telebot.types.Message.de_json(data['message'])
             handle_message(msg)
             return '', 200
 
-        # прочие апдейты
         log(f"   ❓ неизвестный тип апдейта: keys={list(data.keys())}")
         return '', 200
 
@@ -551,7 +555,12 @@ def setup_webhook():
     except Exception as e:
         log(f"⚠️ remove_webhook: {e}")
 
-    ok = bot.set_webhook(url=webhook_url, drop_pending_updates=True)
+    # ЯВНО разрешаем callback_query — иногда без этого Telegram их пропускает
+    ok = bot.set_webhook(
+        url=webhook_url,
+        drop_pending_updates=True,
+        allowed_updates=["message", "edited_message", "callback_query", "inline_query", "channel_post"],
+    )
     log(f"{'✅' if ok else '❌'} set_webhook -> {ok}")
 
     try:
