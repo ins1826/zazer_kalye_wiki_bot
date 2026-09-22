@@ -5,13 +5,22 @@ import re
 import os
 import time
 import json
+import logging
 import traceback
 from flask import Flask, request
 from io import BytesIO
 
 # === НАСТРОЙКИ ===
-TOKEN = "8991988855:AAFjGNghbPUxH2Bwoytdfn0q9QMy5ywo_0E"
+TOKEN = os.environ.get("BOT_TOKEN", "").strip()
+WEBHOOK_PATH = os.environ.get("WEBHOOK_PATH", "").strip().strip("/")
+
 WIKI_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
+
+if not TOKEN:
+    raise SystemExit("❌ BOT_TOKEN не задан в переменных окружения Render")
+if not WEBHOOK_PATH:
+    raise SystemExit("❌ WEBHOOK_PATH не задан в переменных окружения Render")
+
 OWNER_ID = 412598271
 
 DATA_URL = "https://raw.githubusercontent.com/ins1826/zazer_kalye_wiki_bot/refs/heads/main/data.json"
@@ -19,13 +28,55 @@ IMAGES_BASE_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 
 bot = telebot.TeleBot(TOKEN)
 
-# === WEB ===
-app = Flask(__name__)
-WEBHOOK_BASE_URL = os.environ.get("WEBHOOK_BASE_URL", "")
+# === МАСКИРОВКА СЕКРЕТОВ В ЛОГАХ ===
+def mask_secret(s):
+    """8991988855:AAF... -> 89919…:AAF…"""
+    if not s:
+        return s
+    if ":" in s:
+        left, _, right = s.partition(":")
+        if len(left) >= 5 and len(right) >= 4:
+            return f"{left[:5]}…:{right[:4]}…"
+    if len(s) > 10:
+        return s[:5] + "…"
+    return "…"
+
+
+def mask_path(path):
+    """wh_a94f7c2e1b8d4e9f… -> wh_a94f…1a7c (для логов/сообщений)"""
+    if not path:
+        return path
+    if len(path) <= 12:
+        return path
+    return f"{path[:6]}…{path[-4:]}"
 
 
 def log(*args):
     print(*args, flush=True)
+
+
+# === WEB ===
+app = Flask(__name__)
+WEBHOOK_BASE_URL = os.environ.get("WEBHOOK_BASE_URL", "")
+
+# Необязательно: прячем WEBHOOK_PATH в логах Werkzeug
+class _MaskWerkzeugFilter(logging.Filter):
+    def filter(self, record):
+        try:
+            if WEBHOOK_PATH and record.args:
+                def _mask(x):
+                    if isinstance(x, str) and WEBHOOK_PATH in x:
+                        return x.replace(WEBHOOK_PATH, mask_path(WEBHOOK_PATH))
+                    return x
+                if isinstance(record.args, tuple):
+                    record.args = tuple(_mask(a) for a in record.args)
+                elif isinstance(record.args, dict):
+                    record.args = {k: _mask(v) for k, v in record.args.items()}
+        except Exception:
+            pass
+        return True
+
+logging.getLogger("werkzeug").addFilter(_MaskWerkzeugFilter())
 
 
 @app.route('/')
@@ -38,8 +89,11 @@ def health_check():
 def webhook_info_route():
     try:
         info = bot.get_webhook_info()
+        safe_url = info.url
+        if WEBHOOK_PATH and WEBHOOK_PATH in safe_url:
+            safe_url = safe_url.replace(WEBHOOK_PATH, mask_path(WEBHOOK_PATH))
         return {
-            "url": info.url,
+            "url": safe_url,
             "pending_update_count": info.pending_update_count,
             "last_error_date": info.last_error_date,
             "last_error_message": info.last_error_message,
@@ -266,16 +320,9 @@ def send_welcome(chat_id):
 
 
 # =========================================================
-# ОБЩАЯ ЛОГИКА КНОПОК (не зависит от класса CallbackQuery)
+# ОБЩАЯ ЛОГИКА КНОПОК
 # =========================================================
 def process_callback(data, from_user, chat_id, message_id=None, callback_id=None):
-    """
-    data — строка callback_data
-    from_user — user объект
-    chat_id — чат
-    message_id — id сообщения с кнопкой (может быть None)
-    callback_id — id для answerCallbackQuery (None, если вызов из /click)
-    """
     log(f"   🎯 process_callback: data={data!r}, from={from_user.id}")
 
     if callback_id:
@@ -419,6 +466,9 @@ def handle_message(message):
                                  reply_markup=get_main_keyboard())
 
         elif cmd == 'testkb':
+            # Тест-команда только для владельца — обычным юзерам не нужна
+            if user_id != OWNER_ID:
+                return
             kb = telebot.types.InlineKeyboardMarkup()
             kb.add(telebot.types.InlineKeyboardButton("🟢 Тест-кнопка", callback_data='test_click'))
             bot.send_message(message.chat.id,
@@ -427,11 +477,13 @@ def handle_message(message):
                              reply_markup=kb)
 
         elif cmd == 'click':
+            # Только владелец
+            if user_id != OWNER_ID:
+                return
             if not arg:
                 bot.send_message(message.chat.id,
                                  "Использование: /click random_char  или  /click feedback_mode  или  /click test_click")
                 return
-            # эмулируем нажатие кнопки, вызывая общую логику напрямую
             process_callback(arg, message.from_user, message.chat.id,
                              message_id=message.message_id, callback_id=None)
 
@@ -445,17 +497,20 @@ def handle_message(message):
             else:
                 bot.send_message(message.chat.id, "❌ Не удалось перезагрузить данные.")
 
-        elif cmd == 'whoami' or cmd == 'debug':
+        elif cmd in ('whoami', 'debug'):
             if user_id != OWNER_ID:
                 bot.send_message(message.chat.id, "❌ Только для администратора!")
                 return
             try:
                 info = bot.get_webhook_info()
+                safe_url = info.url
+                if WEBHOOK_PATH and WEBHOOK_PATH in safe_url:
+                    safe_url = safe_url.replace(WEBHOOK_PATH, mask_path(WEBHOOK_PATH))
                 tb_ver = getattr(telebot, "__version__", "неизвестно")
                 txt = (
                     f"🐞 <b>Debug</b>\n"
                     f"<b>telebot:</b> <code>{tb_ver}</code>\n"
-                    f"<b>webhook url:</b> <code>{info.url}</code>\n"
+                    f"<b>webhook url:</b> <code>{safe_url}</code>\n"
                     f"<b>pending:</b> <code>{info.pending_update_count}</code>\n"
                     f"<b>last_err_date:</b> <code>{info.last_error_date}</code>\n"
                     f"<b>last_err_msg:</b> <code>{info.last_error_message}</code>\n"
@@ -502,7 +557,7 @@ def handle_message(message):
 # =========================================================
 # WEBHOOK
 # =========================================================
-@app.route(f'/{TOKEN}', methods=['POST'])
+@app.route(f'/{WEBHOOK_PATH}', methods=['POST'])
 def webhook():
     try:
         json_string = request.get_data().decode('utf-8')
@@ -546,8 +601,9 @@ def setup_webhook():
     if not base_url:
         log("⚠️ Не найден RENDER_EXTERNAL_URL. Задай WEBHOOK_BASE_URL вручную.")
         return
-    webhook_url = f"{base_url.rstrip('/')}/{TOKEN}"
-    log(f"🔗 Регистрирую вебхук: {webhook_url}")
+
+    webhook_url = f"{base_url.rstrip('/')}/{WEBHOOK_PATH}"
+    log(f"🔗 Регистрирую вебхук: {base_url.rstrip('/')}/{mask_path(WEBHOOK_PATH)}")
 
     try:
         bot.remove_webhook()
@@ -555,7 +611,6 @@ def setup_webhook():
     except Exception as e:
         log(f"⚠️ remove_webhook: {e}")
 
-    # ЯВНО разрешаем callback_query — иногда без этого Telegram их пропускает
     ok = bot.set_webhook(
         url=webhook_url,
         drop_pending_updates=True,
@@ -565,7 +620,11 @@ def setup_webhook():
 
     try:
         info = bot.get_webhook_info()
-        log(f"ℹ️ webhook info: url={info.url}, pending={info.pending_update_count}, last_err={info.last_error_message}")
+        safe_url = info.url
+        if WEBHOOK_PATH and WEBHOOK_PATH in safe_url:
+            safe_url = safe_url.replace(WEBHOOK_PATH, mask_path(WEBHOOK_PATH))
+        log(f"ℹ️ webhook info: url={safe_url}, pending={info.pending_update_count}, "
+            f"last_err={info.last_error_message}")
     except Exception as e:
         log(f"⚠️ get_webhook_info: {e}")
 
