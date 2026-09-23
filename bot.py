@@ -26,11 +26,27 @@ OWNER_ID = 412598271
 DATA_URL = "https://raw.githubusercontent.com/ins1826/zazer_kalye_wiki_bot/refs/heads/main/data.json"
 IMAGES_BASE_URL = "https://ins1826.github.io/zazer_kalye_wiki_bot/"
 
+# ⬇⬇⬇ ЗАМЕНИ ССЫЛКИ И НИКИ НА РЕАЛЬНЫЕ АВТОРОВ ЗАЗЕРКАЛЬЯ ⬇⬇⬇
+AUTO_REPLY_NOT_AUTHOR = """🪞 <b>Я — вики-бот Зазеркалья, а не автор</b>
+
+Я всего лишь помощница Грибного Архивариуса: собираю и показываю информацию о мире, персонажах и событиях. Я не создаю этот мир и не могу отвечать за сюжетные решения или идеи авторов.
+
+Если ты хочешь задать вопрос именно <b>авторам Зазеркалья</b>, вот куда стоит написать:
+
+— <a href="https://t.me/zazer_kalye">Зазеркалье</a>
+— <a href="@zazerkalych">Зазеркалыч</a>
+
+Спасибо, что интересуешься миром Зазеркалья! ✨"""
+# ⬆⬆⬆ ЗАМЕНИ ССЫЛКИ И НИКИ НА РЕАЛЬНЫЕ АВТОРОВ ЗАЗЕРКАЛЬЯ ⬆⬆⬆
+
+# Префикс для ответов от владельца пользователю (можно менять)
+REPLY_PREFIX = "💬 <b>Ответ от помощницы Грибного Архивариуса:</b>\n\n"
+
 bot = telebot.TeleBot(TOKEN)
+
 
 # === МАСКИРОВКА СЕКРЕТОВ В ЛОГАХ ===
 def mask_secret(s):
-    """8991988855:AAF... -> 89919…:AAF…"""
     if not s:
         return s
     if ":" in s:
@@ -43,7 +59,6 @@ def mask_secret(s):
 
 
 def mask_path(path):
-    """wh_a94f7c2e1b8d4e9f… -> wh_a94f…1a7c (для логов/сообщений)"""
     if not path:
         return path
     if len(path) <= 12:
@@ -59,7 +74,7 @@ def log(*args):
 app = Flask(__name__)
 WEBHOOK_BASE_URL = os.environ.get("WEBHOOK_BASE_URL", "")
 
-# Необязательно: прячем WEBHOOK_PATH в логах Werkzeug
+
 class _MaskWerkzeugFilter(logging.Filter):
     def filter(self, record):
         try:
@@ -75,6 +90,7 @@ class _MaskWerkzeugFilter(logging.Filter):
         except Exception:
             pass
         return True
+
 
 logging.getLogger("werkzeug").addFilter(_MaskWerkzeugFilter())
 
@@ -125,6 +141,8 @@ load_wiki_data()
 
 feedback_mode = {}
 search_results_cache = {}
+# Кто ждёт ответа владельца: {OWNER_ID: target_user_id}
+owner_reply_mode = {}
 
 
 # === ХЕЛПЕРЫ ===
@@ -155,6 +173,19 @@ def get_main_keyboard():
         )
     )
     return keyboard
+
+
+def get_owner_message_keyboard(target_user_id):
+    """Кнопки под уведомлением, которое бот шлёт владельцу."""
+    kb = telebot.types.InlineKeyboardMarkup()
+    kb.row(
+        telebot.types.InlineKeyboardButton("✍️ Ответить", callback_data=f'reply_to_{target_user_id}'),
+        telebot.types.InlineKeyboardButton("🪞 Я не автор", callback_data=f'not_author_{target_user_id}'),
+    )
+    kb.row(
+        telebot.types.InlineKeyboardButton("🗑 Удалить уведомление", callback_data='delete_msg'),
+    )
+    return kb
 
 
 # === СТИКЕРЫ ===
@@ -325,13 +356,27 @@ def send_welcome(chat_id):
 def process_callback(data, from_user, chat_id, message_id=None, callback_id=None):
     log(f"   🎯 process_callback: data={data!r}, from={from_user.id}")
 
-    if callback_id:
-        try:
-            bot.answer_callback_query(callback_id)
-        except Exception as e:
-            log(f"   ⚠️ answer_callback_query: {e}")
+    def answer(text=None, show_alert=False):
+        if callback_id:
+            try:
+                if text is None:
+                    bot.answer_callback_query(callback_id)
+                else:
+                    bot.answer_callback_query(callback_id, text, show_alert=show_alert)
+            except Exception as e:
+                log(f"   ⚠️ answer_callback_query: {e}")
 
     try:
+        # --- Защита: кнопки под уведомлениями — только для владельца ---
+        owner_only_prefixes = ('reply_to_', 'not_author_')
+        if data.startswith(owner_only_prefixes) and from_user.id != OWNER_ID:
+            answer("Эта кнопка доступна только владельцу бота.", show_alert=True)
+            return
+        if data in ('delete_msg', 'cancel_reply_mode') and from_user.id != OWNER_ID:
+            answer("Эта кнопка доступна только владельцу бота.", show_alert=True)
+            return
+
+        # --- Обработчики ---
         if data == 'random_char':
             send_random_character(from_user.id)
 
@@ -377,12 +422,74 @@ def process_callback(data, from_user, chat_id, message_id=None, callback_id=None
         elif data == 'test_click':
             bot.send_message(from_user.id, "✅ Тест-кнопка сработала!")
 
+        # --- НОВОЕ: ответить пользователю ---
+        elif data.startswith('reply_to_'):
+            try:
+                target_uid = int(data.replace('reply_to_', ''))
+            except ValueError:
+                answer("Некорректный ID пользователя.", show_alert=True)
+                return
+            owner_reply_mode[OWNER_ID] = target_uid
+            kb = telebot.types.InlineKeyboardMarkup()
+            kb.add(telebot.types.InlineKeyboardButton("❌ Отменить ответ", callback_data='cancel_reply_mode'))
+            bot.send_message(
+                OWNER_ID,
+                f"✍️ <b>Режим ответа пользователю</b> <code>{target_uid}</code>\n\n"
+                f"Напиши сообщение — я сразу отправлю его этому пользователю.\n\n"
+                f"<i>Отмена — /cancel_reply или кнопка ниже.</i>",
+                reply_markup=kb,
+                parse_mode="HTML"
+            )
+            answer("Режим ответа включён")
+
+        # --- НОВОЕ: автоответ «я не автор» ---
+        elif data.startswith('not_author_'):
+            try:
+                target_uid = int(data.replace('not_author_', ''))
+            except ValueError:
+                answer("Некорректный ID пользователя.", show_alert=True)
+                return
+            try:
+                bot.send_message(target_uid, AUTO_REPLY_NOT_AUTHOR,
+                                 parse_mode="HTML", disable_web_page_preview=False)
+                bot.send_message(OWNER_ID, f"✅ Автоответ «Я не автор» отправлен пользователю <code>{target_uid}</code>.",
+                                 parse_mode="HTML")
+                answer("Отправлено")
+            except Exception as e:
+                log(f"❌ not_author send: {e}")
+                bot.send_message(OWNER_ID, f"❌ Не удалось отправить автоответ: <code>{e}</code>",
+                                 parse_mode="HTML")
+                answer("Ошибка отправки", show_alert=True)
+
+        # --- НОВОЕ: удалить уведомление ---
+        elif data == 'delete_msg':
+            if message_id:
+                try:
+                    bot.delete_message(chat_id, message_id)
+                except Exception as e:
+                    log(f"⚠️ delete_message: {e}")
+                    bot.send_message(OWNER_ID, f"⚠️ Не удалось удалить сообщение: <code>{e}</code>",
+                                     parse_mode="HTML")
+            answer()
+
+        # --- НОВОЕ: отмена режима ответа ---
+        elif data == 'cancel_reply_mode':
+            owner_reply_mode.pop(OWNER_ID, None)
+            bot.send_message(OWNER_ID, "❌ Режим ответа отменён.")
+            answer("Отменено")
+
         else:
             log(f"   ⚠️ неизвестный callback_data: {data}")
+            answer()
+
+        # Если дошли без answer — отвечаем «ok»
+        if callback_id:
+            answer()
 
     except Exception as e:
         log(f"   ❌ process_callback error: {e}")
         traceback.print_exc()
+        answer("Произошла ошибка", show_alert=True)
 
 
 # =========================================================
@@ -444,6 +551,29 @@ def handle_message(message):
     text = message.text or ""
     log(f"   → message text = {text[:100]!r}, from = {user_id}")
 
+    # --- РЕЖИМ ОТВЕТА ВЛАДЕЛЬЦА (не команды) ---
+    if user_id == OWNER_ID and OWNER_ID in owner_reply_mode and not text.startswith('/'):
+        target_uid = owner_reply_mode[OWNER_ID]
+        try:
+            bot.send_message(
+                target_uid,
+                f"{REPLY_PREFIX}{escape_html(text)}",
+                parse_mode="HTML"
+            )
+            bot.send_message(OWNER_ID,
+                             f"✅ Ответ отправлен пользователю <code>{target_uid}</code>.",
+                             parse_mode="HTML")
+            log(f"   ✉️ reply sent from owner to {target_uid}")
+        except Exception as e:
+            log(f"❌ reply to user {target_uid} failed: {e}")
+            bot.send_message(OWNER_ID,
+                             f"❌ Не удалось отправить ответ пользователю <code>{target_uid}</code>:\n"
+                             f"<code>{escape_html(str(e))}</code>\n\n"
+                             f"<i>Возможно, пользователь заблокировал бота или удалил чат.</i>",
+                             parse_mode="HTML")
+        owner_reply_mode.pop(OWNER_ID, None)
+        return
+
     # --- Команды ---
     if text.startswith('/'):
         parts = text.split(maxsplit=1)
@@ -465,8 +595,16 @@ def handle_message(message):
                 bot.send_message(message.chat.id, "У тебя и так не включён режим обратной связи.",
                                  reply_markup=get_main_keyboard())
 
+        elif cmd == 'cancel_reply':
+            if user_id != OWNER_ID:
+                return
+            if OWNER_ID in owner_reply_mode:
+                owner_reply_mode.pop(OWNER_ID, None)
+                bot.send_message(message.chat.id, "❌ Режим ответа отменён.")
+            else:
+                bot.send_message(message.chat.id, "Ты и так не в режиме ответа.")
+
         elif cmd == 'testkb':
-            # Тест-команда только для владельца — обычным юзерам не нужна
             if user_id != OWNER_ID:
                 return
             kb = telebot.types.InlineKeyboardMarkup()
@@ -477,7 +615,6 @@ def handle_message(message):
                              reply_markup=kb)
 
         elif cmd == 'click':
-            # Только владелец
             if user_id != OWNER_ID:
                 return
             if not arg:
@@ -522,7 +659,7 @@ def handle_message(message):
 
         return
 
-    # --- Режим обратной связи ---
+    # --- Режим обратной связи (пользователь пишет в вики) ---
     if feedback_mode.get(user_id):
         username = f"@{message.from_user.username}" if message.from_user.username else "Без username"
         forward_text = (
@@ -532,7 +669,13 @@ def handle_message(message):
             f"📝 <b>Текст:</b>\n{escape_html(text)}"
         )
         try:
-            bot.send_message(OWNER_ID, forward_text, parse_mode="HTML")
+            bot.send_message(
+                OWNER_ID,
+                forward_text,
+                parse_mode="HTML",
+                reply_markup=get_owner_message_keyboard(user_id),
+                disable_web_page_preview=True,
+            )
             bot.send_message(message.chat.id,
                              "✅ Спасибо! Сообщение отправлено помощнице Грибного Архивариуса! 🪞✨",
                              reply_markup=get_main_keyboard(), parse_mode="HTML")
