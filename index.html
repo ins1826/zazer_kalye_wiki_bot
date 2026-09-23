@@ -392,11 +392,12 @@ overflow-y: auto;
 #graph-canvas{display:block;width:100%;height:100%}
 /* === КНОПКИ УПРАВЛЕНИЯ === */
 .graph-controls{position:absolute;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:6px;z-index:10}
-.graph-controls button,.graph-toggle-sidebar{
+.map-controls{position:absolute;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:6px;z-index:10}
+.graph-controls button,.graph-toggle-sidebar,.map-controls button{
 background:rgba(42,42,58,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 color:#e8e8f0;border:1px solid #3a3a4a;padding:6px 12px;border-radius:6px;
 cursor:pointer;font-size:.85em;transition:all .2s;font-family:inherit}
-.graph-controls button:hover,.graph-toggle-sidebar:hover{background:#3a3a4a;border-color:#c9a0ff}
+.graph-controls button:hover,.graph-toggle-sidebar:hover,.map-controls button:hover{background:#3a3a4a;border-color:#c9a0ff}
 .graph-toggle-sidebar{display:none;z-index:101}
 @media(max-width:900px){
 .graph-toggle-sidebar{display:block;margin:10px auto 0;width:fit-content}
@@ -461,6 +462,29 @@ display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding:10px;
 background:rgba(18,18,28,.5);border:1px solid #2a2a3a;border-radius:8px;font-size:.8em}
 .graph-legend-item{display:flex;align-items:center;gap:5px;color:#bbb}
 .graph-legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+/* === КАРТА ЗАЗЕРКАЛЬЯ === */
+#map-container{
+  position:relative;width:100%;height:75vh;min-height:500px;max-height:1000px;
+  overflow:hidden;touch-action:none;background:#0a0a12;
+  border:1px solid #2a2a3a;border-radius:8px;
+  cursor:grab;user-select:none
+}
+#map-container:active{cursor:grabbing}
+#map-container:fullscreen{background:#05050a;height:100vh;border-radius:0}
+#map-image{
+  position:absolute;top:0;left:0;
+  pointer-events:none;user-select:none;-webkit-user-drag:none;
+  will-change:transform;transform-origin:0 0;
+  image-rendering:auto
+}
+.map-info{
+  position:absolute;bottom:12px;right:12px;
+  color:#888;font-size:.8em;background:rgba(15,15,23,.75);
+  padding:4px 10px;border-radius:6px;z-index:10;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid #2a2a3a
+}
 
 /* Plot timeline */
 .plot-card {
@@ -811,6 +835,7 @@ body.admin-mode .admin-only { display: inline-block !important; }
   <button class="tab-btn" data-tab="organizations">Организации</button>
   <button class="tab-btn" data-tab="races">Расы</button>
   <button class="tab-btn" data-tab="transcripts">Транскрибация</button>
+  <button class="tab-btn" data-tab="map">Карта</button>
 </nav>
 
 <div id="tab-characters" class="tab-content">
@@ -2618,6 +2643,19 @@ body.admin-mode .admin-only { display: inline-block !important; }
     <button class="admin-only" onclick="openEdit('transcripts')">➕ Добавить эпизод</button>
   </div>
   <div id="grid-transcripts"></div>
+</div>
+
+<div id="tab-map" class="tab-content hidden">
+  <div id="map-container">
+    <img id="map-image" src="images/map.png" alt="Карта Зазеркалья" draggable="false">
+    <div class="map-controls">
+      <button onclick="mapZoom(1.25)">➕ Приблизить</button>
+      <button onclick="mapZoom(0.8)">➖ Отдалить</button>
+      <button onclick="mapReset()">🔄 Сброс</button>
+      <button onclick="mapFullscreen()">⛶ На весь экран</button>
+    </div>
+    <div class="map-info" id="map-info">Загружаю карту…</div>
+  </div>
 </div>
 
 <div class="modal-bg" id="modal-bg">
@@ -4834,6 +4872,12 @@ resizeCanvas();
 graphCenter();
 }, 50);
 }
+// Подгонка карты при открытии вкладки
+if (tab === 'map') {
+setTimeout(() => {
+mapFit();
+}, 60);
+}
 });
 });
 
@@ -4846,6 +4890,7 @@ function renderCurrentTab() {
   else if (currentTab === 'organizations') renderGeneric('organizations');
   else if (currentTab === 'races') renderGeneric('races');
   else if (currentTab === 'transcripts') renderTranscripts();
+  else if (currentTab === 'map') initMap();
   else if (currentTab === 'graph') renderGraph();
 }
 
@@ -4938,6 +4983,180 @@ function downloadAllTranscripts() {
   a.download = 'zazerkalye_transcripts_all.txt';
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// ============ КАРТА ЗАЗЕРКАЛЬЯ ============
+let mapState = { x: 0, y: 0, s: 1 };
+let mapNatural = { w: 0, h: 0 };
+let mapInited = false;
+let mapEl = null, mapImg = null;
+
+function initMap() {
+  if (!mapEl) {
+    mapEl = document.getElementById('map-container');
+    mapImg = document.getElementById('map-image');
+  }
+  if (!mapEl || !mapImg) return;
+
+  // Если картинка ещё не загружалась — подписываемся
+  if (!mapInited) {
+    mapInited = true;
+
+    const onLoad = () => {
+      mapNatural.w = mapImg.naturalWidth;
+      mapNatural.h = mapImg.naturalHeight;
+      mapFit();
+    };
+    mapImg.addEventListener('load', onLoad);
+    mapImg.addEventListener('error', () => {
+      const info = document.getElementById('map-info');
+      if (info) info.textContent = '⚠️ Картинка не найдена: ' + (mapImg.getAttribute('src') || '');
+    });
+
+    // Если картинка уже в кэше — сработаем сразу
+    if (mapImg.complete && mapImg.naturalWidth) onLoad();
+
+    attachMapHandlers();
+  } else if (mapNatural.w) {
+    // Переоткрытие вкладки — просто подгоняем под новый размер контейнера
+    mapFit();
+  }
+}
+
+function applyMapTransform() {
+  if (!mapImg) return;
+  mapImg.style.transform = `translate(${mapState.x}px, ${mapState.y}px) scale(${mapState.s})`;
+}
+
+function updateMapInfo() {
+  const info = document.getElementById('map-info');
+  if (!info || !mapNatural.w) return;
+  info.textContent = `${mapNatural.w} × ${mapNatural.h}px · ${Math.round(mapState.s * 100)}%`;
+}
+
+function mapFit() {
+  if (!mapEl || !mapNatural.w) return;
+  const r = mapEl.getBoundingClientRect();
+  if (r.width === 0 || r.height === 0) return;
+  const s = Math.min(r.width / mapNatural.w, r.height / mapNatural.h) * 0.95;
+  mapState.s = s;
+  mapState.x = (r.width - mapNatural.w * s) / 2;
+  mapState.y = (r.height - mapNatural.h * s) / 2;
+  applyMapTransform();
+  updateMapInfo();
+}
+
+function mapReset() { mapFit(); }
+
+function mapZoom(factor, cx, cy) {
+  if (!mapEl) return;
+  const r = mapEl.getBoundingClientRect();
+  if (cx == null) cx = r.width / 2;
+  if (cy == null) cy = r.height / 2;
+  const newS = Math.max(0.1, Math.min(8, mapState.s * factor));
+  mapState.x = cx - (cx - mapState.x) * (newS / mapState.s);
+  mapState.y = cy - (cy - mapState.y) * (newS / mapState.s);
+  mapState.s = newS;
+  applyMapTransform();
+  updateMapInfo();
+}
+
+function mapFullscreen() {
+  if (!mapEl) return;
+  if (!document.fullscreenElement) {
+    (mapEl.requestFullscreen || mapEl.webkitRequestFullscreen || function(){}).call(mapEl);
+  } else {
+    (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+  }
+}
+
+document.addEventListener('fullscreenchange', () => {
+  // после входа/выхода подгоняем под новый размер
+  setTimeout(mapFit, 60);
+});
+
+function attachMapHandlers() {
+  let dragging = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
+
+  mapEl.addEventListener('mousedown', e => {
+    if (e.target.closest('button')) return;
+    dragging = true;
+    startX = e.clientX; startY = e.clientY;
+    startTx = mapState.x; startTy = mapState.y;
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    mapState.x = startTx + (e.clientX - startX);
+    mapState.y = startTy + (e.clientY - startY);
+    applyMapTransform();
+  });
+  window.addEventListener('mouseup', () => { dragging = false; });
+
+  mapEl.addEventListener('wheel', e => {
+    e.preventDefault();
+    const r = mapEl.getBoundingClientRect();
+    mapZoom(e.deltaY > 0 ? 0.9 : 1.1, e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+
+  mapEl.addEventListener('dblclick', e => {
+    const r = mapEl.getBoundingClientRect();
+    mapZoom(1.5, e.clientX - r.left, e.clientY - r.top);
+  });
+
+  // Touch
+  let touchMode = null;
+  let tStart = { x: 0, y: 0 }, tPos = { x: 0, y: 0 };
+  let pinch = { dist: 0, s: 1, cx: 0, cy: 0 };
+
+  mapEl.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      touchMode = 'pan';
+      const t = e.touches[0];
+      tStart.x = t.clientX; tStart.y = t.clientY;
+      tPos.x = mapState.x; tPos.y = mapState.y;
+    } else if (e.touches.length === 2) {
+      touchMode = 'pinch';
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const r = mapEl.getBoundingClientRect();
+      pinch.dist = Math.hypot(dx, dy) || 1;
+      pinch.s = mapState.s;
+      pinch.cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left;
+      pinch.cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top;
+    }
+  }, { passive: false });
+
+  mapEl.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (touchMode === 'pan' && e.touches.length === 1) {
+      const t = e.touches[0];
+      mapState.x = tPos.x + (t.clientX - tStart.x);
+      mapState.y = tPos.y + (t.clientY - tStart.y);
+      applyMapTransform();
+    } else if (touchMode === 'pinch' && e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const newS = Math.max(0.1, Math.min(8, pinch.s * (dist / pinch.dist)));
+      mapState.x = pinch.cx - (pinch.cx - mapState.x) * (newS / mapState.s);
+      mapState.y = pinch.cy - (pinch.cy - mapState.y) * (newS / mapState.s);
+      mapState.s = newS;
+      applyMapTransform();
+      updateMapInfo();
+    }
+  }, { passive: false });
+
+  mapEl.addEventListener('touchend', e => {
+    if (!e.touches.length) touchMode = null;
+  });
+
+  // Обработка изменения размера окна
+  window.addEventListener('resize', () => {
+    if (!document.getElementById('tab-map').classList.contains('hidden')) {
+      mapFit();
+    }
+  });
 }
 
 // ============ ПОИСК ============
@@ -5796,7 +6015,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия beta19 · Обновлено: 23.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия beta17 · Обновлено: 06.09.2026.</div>
 </footer>
 
 </body></html>
