@@ -317,6 +317,7 @@ margin: 0;
 .race-Петухи { border-left-color: #ffaa3a !important; }
 .race-Осы { border-left-color: #ffcc3a !important; }
 .race-Пескари { border-left-color: #6ac7d4 !important; }
+.race-Механизм { border-left-color: #8a9ec4 !important; }
 .race-Другое { border-left-color: #5a5a6a !important; }
 
 .tag-Человек { background: #4a9eff33 !important; color: #4a9eff !important; }
@@ -329,6 +330,7 @@ margin: 0;
 .tag-Человек-Существо { background: #c9a0ff33 !important; color: #c9a0ff !important; }
 .tag-Организация { background: #ff7a7a33 !important; color: #ff7a7a !important; }
 .tag-Существа { background: #8a8a9a33 !important; color: #bbb !important; }
+.tag-Механизм { background: #8a9ec433 !important; color: #8a9ec4 !important; }
 
 /* Modal */
 .modal-bg {
@@ -852,6 +854,7 @@ body.admin-mode .admin-only { display: inline-block !important; }
     <option>Существа</option>
     <option>Человек/Существо</option>
     <option>Растение/Существо</option>
+    <option>Механизм</option>
   </select>
   <select id="sort-characters" class="sort-select">
     <option value="name-asc">🔤 По имени (А→Я)</option>
@@ -4621,7 +4624,8 @@ function raceClass(type) {
     'Существо/Человек': 'Человек-Существо',
     'Человек/Существо': 'Человек-Существо',
     'Растение/Существо': 'Растение-Существо',
-    'Организация': 'Организация'
+    'Организация': 'Организация',
+    'Механизм': 'Механизм'
   };
   return map[type] || 'Другое';
 }
@@ -5208,7 +5212,7 @@ function openEdit(type, idx = -1) {
   if (type === 'characters') {
   html += `<label>🏷️ Тип</label>
     <select id="f-type">
-      ${['Человек','Существо','Бобыль','Синий ящер','Кокша','Божество','Существа','Человек/Существо','Растение/Существо'].map(t => `<option ${item.type===t?'selected':''}>${t}</option>`).join('')}
+      ${['Человек','Существо','Бобыль','Синий ящер','Кокша','Божество','Существа','Человек/Существо','Растение/Существо','Механизм'].map(t => `<option ${item.type===t?'selected':''}>${t}</option>`).join('')}
     </select>`;
 }
   html += `<label>📛 Название</label><input id="f-name" value="${escapeHtml(item.name||'')}">`;
@@ -5377,7 +5381,7 @@ const GRAPH_COLORS = {
 'Божество':'#ffd700','Существа':'#8a8a9a',
 'Человек-Существо':'#c9a0ff','Человек/Существо':'#c9a0ff',
 'Растение-Существо':'#b88a3a','Растение/Существо':'#b88a3a',
-'Организация':'#ff7a7a','Другое':'#5a5a6a'
+'Организация':'#ff7a7a','Механизм':'#8a9ec4','Другое':'#5a5a6a'
 };
 
 function raceClassGraph(t){
