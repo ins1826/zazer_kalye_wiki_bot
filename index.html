@@ -466,6 +466,12 @@ background:rgba(18,18,28,.5);border:1px solid #2a2a3a;border-radius:8px;font-siz
 .graph-legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
 
 /* === КАРТА ЗАЗЕРКАЛЬЯ === */
+.map-layout{display:grid;grid-template-columns:1fr 280px;gap:12px;width:100%}
+@media(max-width:900px){
+  .map-layout{grid-template-columns:1fr}
+  .map-sidebar{position:fixed!important;right:0;top:0;bottom:0;width:280px!important;z-index:100;transform:translateX(100%);transition:transform .3s;max-height:100vh!important;border-radius:0!important}
+  .map-sidebar.open{transform:translateX(0)}
+}
 #map-container{
   position:relative;width:100%;height:75vh;min-height:500px;max-height:1000px;
   overflow:hidden;touch-action:none;background:#0a0a12;
@@ -473,6 +479,7 @@ background:rgba(18,18,28,.5);border:1px solid #2a2a3a;border-radius:8px;font-siz
   cursor:grab;user-select:none
 }
 #map-container:active{cursor:grabbing}
+#map-container.placement-mode, #map-container.placement-mode:active{cursor:crosshair!important}
 #map-container:fullscreen{background:#05050a;height:100vh;border-radius:0}
 #map-image{
   position:absolute;top:0;left:0;
@@ -480,12 +487,100 @@ background:rgba(18,18,28,.5);border:1px solid #2a2a3a;border-radius:8px;font-siz
   will-change:transform;transform-origin:0 0;
   image-rendering:auto
 }
+#map-markers{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  pointer-events:none;overflow:visible;z-index:5
+}
+.map-marker{
+  position:absolute;top:0;left:0;
+  width:14px;height:14px;border-radius:50%;
+  background:#c9a0ff;color:#c9a0ff;
+  box-shadow:0 0 0 2px rgba(201,160,255,0.35),0 2px 6px rgba(0,0,0,0.55);
+  cursor:pointer;pointer-events:auto;
+  transition:box-shadow .15s;
+  will-change:transform
+}
+.map-marker:hover{
+  box-shadow:0 0 0 4px rgba(201,160,255,0.6),0 2px 12px rgba(0,0,0,0.7)
+}
+.map-marker.is-group{
+  background:transparent;
+  border:2px solid currentColor;
+  box-shadow:0 0 0 2px rgba(255,255,255,0.12),0 2px 6px rgba(0,0,0,0.5);
+  width:13px;height:13px
+}
+.map-marker.is-active{
+  animation:mapMarkerPulse 1.3s ease-out infinite;
+  z-index:3;
+  box-shadow:0 0 0 4px currentColor,0 2px 10px rgba(0,0,0,0.7)
+}
+@keyframes mapMarkerPulse{
+  0%  {outline:0 solid currentColor;outline-offset:0}
+  70% {outline:12px solid transparent;outline-offset:0}
+  100%{outline:12px solid transparent;outline-offset:0}
+}
 .map-info{
   position:absolute;bottom:12px;right:12px;
   color:#888;font-size:.8em;background:rgba(15,15,23,.75);
   padding:4px 10px;border-radius:6px;z-index:10;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   border:1px solid #2a2a3a
+}
+.map-info-btn{
+  position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;
+  background:rgba(42,42,58,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid #3a3a4a;color:#c9a0ff;font-size:1em;font-weight:700;
+  cursor:pointer;z-index:10;transition:all .2s;font-family:inherit
+}
+.map-info-btn:hover{border-color:#c9a0ff;background:#3a3a4a}
+.map-info-popup{
+  position:absolute;top:50px;right:12px;
+  background:rgba(26,26,37,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid #3a3a4a;border-radius:10px;padding:14px 18px;font-size:.85em;
+  color:#ccc;z-index:20;display:none;max-width:260px;box-shadow:0 8px 32px rgba(0,0,0,.5)
+}
+.map-info-popup.show{display:block}
+.map-sidebar{
+  background:rgba(15,15,23,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.05);border-radius:8px;
+  padding:16px;overflow-y:auto;font-size:.9em;
+  max-height:75vh
+}
+.map-sidebar h3{margin:0 0 10px;color:#c9a0ff;font-size:1em}
+.map-sidebar input[type="text"]{
+  width:100%;padding:8px 10px;background:rgba(26,26,37,.7);border:1px solid #2a2a3a;
+  border-radius:6px;color:#e8e8f0;font-size:.9em;margin-bottom:12px;font-family:inherit
+}
+.map-sidebar input[type="text"]:focus{outline:none;border-color:#c9a0ff}
+.map-section{margin-bottom:16px}
+.map-section-title{color:#888;font-size:.85em;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.map-nav-item{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 10px;margin-bottom:3px;
+  background:rgba(26,26,37,.6);border:1px solid #2a2a3a;
+  border-radius:6px;cursor:pointer;font-size:.88em;
+  transition:all .15s
+}
+.map-nav-item:hover{
+  background:rgba(58,42,90,.7);border-color:#c9a0ff;color:#fff
+}
+.map-nav-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.map-nav-count{
+  font-size:.75em;padding:1px 7px;border-radius:8px;
+  background:#2a2a3a;color:#888;flex-shrink:0
+}
+.map-group-item .map-group-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0
+}
+.map-empty{color:#666;font-size:.85em;padding:6px 10px}
+.map-toggle-sidebar{display:none}
+@media(max-width:900px){
+  .map-toggle-sidebar{
+    display:block;margin:10px auto 0;width:fit-content;
+    background:rgba(42,42,58,.85);color:#e8e8f0;border:1px solid #3a3a4a;
+    padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.85em;font-family:inherit
+  }
+  .map-toggle-sidebar:hover{background:#3a3a4a;border-color:#c9a0ff}
 }
 
 /* Plot timeline */
@@ -2649,15 +2744,49 @@ body.admin-mode .admin-only { display: inline-block !important; }
 </div>
 
 <div id="tab-map" class="tab-content hidden">
-  <div id="map-container">
-    <img id="map-image" src="images/map.png" alt="Карта Зазеркалья" draggable="false">
-    <div class="map-controls">
-      <button onclick="mapZoom(1.25)">➕ Приблизить</button>
-      <button onclick="mapZoom(0.8)">➖ Отдалить</button>
-      <button onclick="mapReset()">🔄 Сброс</button>
-      <button onclick="mapFullscreen()">⛶ На весь экран</button>
+  <div class="map-layout">
+    <div id="map-container">
+      <img id="map-image" src="images/map.png" alt="Карта Зазеркалья" draggable="false">
+      <div id="map-markers"></div>
+      <div class="map-controls">
+        <button onclick="mapZoom(1.25)">➕ Приблизить</button>
+        <button onclick="mapZoom(0.8)">➖ Отдалить</button>
+        <button onclick="mapReset()">🔄 Сброс</button>
+        <button onclick="mapFullscreen()">⛶ На весь экран</button>
+        <button onclick="shareMapView()">🔗 Поделиться видом</button>
+        <button class="admin-only" id="map-placement-btn" onclick="togglePlacementMode()">📍 Разметка</button>
+      </div>
+      <button class="map-info-btn" onclick="toggleMapInfoPopup()">i</button>
+      <div class="map-info-popup" id="map-info-popup">
+        <div class="hint-row"><b>💻 ПК:</b></div>
+        <div class="hint-row">• Перетаскивание — двигать карту</div>
+        <div class="hint-row">• Колёсико — масштаб</div>
+        <div class="hint-row">• Двойной клик по пустому — приблизить</div>
+        <div class="hint-row">• Двойной клик по точке — карточка</div>
+        <div class="hint-row" style="margin-top:8px"><b>📱 Смартфон:</b></div>
+        <div class="hint-row">• 1 палец — двигать карту</div>
+        <div class="hint-row">• 2 пальца — масштаб</div>
+        <div class="hint-row">• Двойной тап по точке — карточка</div>
+      </div>
+      <div class="map-info" id="map-info">Загружаю карту…</div>
     </div>
-    <div class="map-info" id="map-info">Загружаю карту…</div>
+    <button class="map-toggle-sidebar" onclick="toggleMapSidebar()">📍 Навигация</button>
+    <div class="map-sidebar" id="map-sidebar">
+      <h3>📍 Быстрый переход</h3>
+      <input type="text" id="map-search" placeholder="🔍 Поиск по названию…">
+      <div class="map-section">
+        <div class="map-section-title">🏛️ Локации</div>
+        <div id="map-location-list"></div>
+      </div>
+      <div class="map-section">
+        <div class="map-section-title">🗺️ Группы точек</div>
+        <div id="map-group-list"></div>
+      </div>
+      <div class="map-section">
+        <div class="map-section-title">🎨 Легенда</div>
+        <div class="graph-legend" id="map-legend"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2686,6 +2815,37 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div class="modal-full" id="modalFull"></div>
 <div class="modal-episodes" id="modalEpisodes"></div>
 </div>
+</div>
+
+<!-- Мини-модалка для постановки точки на карте -->
+<div class="modal-bg" id="map-point-modal">
+  <div class="modal" style="max-width:520px">
+    <h2>📍 Точка на карте</h2>
+    <label>Тип точки</label>
+    <select id="mp-type" onchange="updatePointEditorVisibility()">
+      <option value="location">🏛️ Локация (двойной клик открывает карточку)</option>
+      <option value="group">🗺️ Группа (для быстрого обхода)</option>
+    </select>
+    <div id="mp-location-fields">
+      <label>Название локации</label>
+      <select id="mp-location-name"></select>
+      <p style="font-size:.85em;color:#888;margin-top:8px;line-height:1.5">
+        Двойной клик по точке откроет карточку этой локации.<br>
+        Если локации ещё нет — оставь «пустое имя» (точка будет просто визуальной).
+      </p>
+    </div>
+    <div id="mp-group-fields" style="display:none">
+      <label>Группа</label>
+      <select id="mp-group-id"></select>
+      <p style="font-size:.85em;color:#888;margin-top:8px;line-height:1.5">
+        Точки группы не открывают карточку — они служат для циклического обхода через сайдбар.
+      </p>
+    </div>
+    <div class="btns">
+      <button onclick="closePointEditor()">Отмена</button>
+      <button class="primary" onclick="saveMapPoint()">💾 Сохранить</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -4436,6 +4596,17 @@ const DEFAULT_DATA = {
       ]
     }
   ],
+  "map": {
+    "image": "images/map.png",
+    "groups": [
+      { "id": "doors", "title": "🚪 Дырки от дверей",       "color": "#c9a0ff" },
+      { "id": "lair",  "title": "🐉 Логово синих ящеров",   "color": "#1a5fff" },
+      { "id": "pipes", "title": "🕳️ Вход в трубы",           "color": "#8a9ec4" },
+      { "id": "wells", "title": "💧 Спектральный колодец",   "color": "#6ac7d4" },
+      { "id": "gosha", "title": "🐟 Следы Подводного Гоши",  "color": "#7ac74f" }
+    ],
+    "points": []
+  },
   "transcripts": [
     { "episode": 1, "name": "", "text": "Он не уйдёт с дороги, пока не увидит твой голос. Но из-за простуды ты говоришь слишком волнисто, чтобы он мог тебя услышать. Ведь говорила мать надеть бурлешку." },
     { "episode": 2, "name": "", "text": "Евдокия хочет пощекотать тебя своим роскошным зеленеющим пером. Ей надоело щекотать морковные пятки. Тем более, что баба Жуля прогнала с огорода. Морковный хохот ей спать мешает." },
@@ -4993,38 +5164,76 @@ function downloadAllTranscripts() {
 let mapState = { x: 0, y: 0, s: 1 };
 let mapNatural = { w: 0, h: 0 };
 let mapInited = false;
-let mapEl = null, mapImg = null;
+let mapEl = null, mapImg = null, mapMarkersEl = null;
+let mapGroupCycle = {};
+let mapPlacementMode = false;
+let mapPendingPoint = null;
+let mapViewAppliedFromURL = false;
+let lastMapPointTemplate = null;
+let _lastMarkerTap = 0;
+
+const DEFAULT_MAP_GROUPS = [
+  { id: 'doors', title: '🚪 Дырки от дверей',       color: '#c9a0ff' },
+  { id: 'lair',  title: '🐉 Логово синих ящеров',   color: '#1a5fff' },
+  { id: 'pipes', title: '🕳️ Вход в трубы',           color: '#8a9ec4' },
+  { id: 'wells', title: '💧 Спектральный колодец',   color: '#6ac7d4' },
+  { id: 'gosha', title: '🐟 Следы Подводного Гоши',  color: '#7ac74f' }
+];
+
+function getMapGroups() {
+  if (data.map && Array.isArray(data.map.groups) && data.map.groups.length) return data.map.groups;
+  return DEFAULT_MAP_GROUPS;
+}
+function getMapPoints() {
+  if (data.map && Array.isArray(data.map.points)) return data.map.points;
+  return [];
+}
+function getGroupColor(groupId) {
+  const g = getMapGroups().find(x => x.id === groupId);
+  return (g && g.color) || '#c9a0ff';
+}
 
 function initMap() {
   if (!mapEl) {
     mapEl = document.getElementById('map-container');
     mapImg = document.getElementById('map-image');
+    mapMarkersEl = document.getElementById('map-markers');
   }
   if (!mapEl || !mapImg) return;
 
-  // Если картинка ещё не загружалась — подписываемся
+  const desiredSrc = (data.map && data.map.image) || 'images/map.png';
+  if (mapImg.getAttribute('src') !== desiredSrc) {
+    mapImg.src = desiredSrc;
+  }
+
   if (!mapInited) {
     mapInited = true;
-
-    const onLoad = () => {
-      mapNatural.w = mapImg.naturalWidth;
-      mapNatural.h = mapImg.naturalHeight;
-      mapFit();
-    };
-    mapImg.addEventListener('load', onLoad);
-    mapImg.addEventListener('error', () => {
-      const info = document.getElementById('map-info');
-      if (info) info.textContent = '⚠️ Картинка не найдена: ' + (mapImg.getAttribute('src') || '');
-    });
-
-    // Если картинка уже в кэше — сработаем сразу
-    if (mapImg.complete && mapImg.naturalWidth) onLoad();
-
+    mapImg.addEventListener('load', onMapImageLoad);
+    mapImg.addEventListener('error', onMapImageError);
+    if (mapImg.complete && mapImg.naturalWidth) onMapImageLoad();
     attachMapHandlers();
   } else if (mapNatural.w) {
-    // Переоткрытие вкладки — просто подгоняем под новый размер контейнера
-    mapFit();
+    renderMapMarkers();
+    renderMapSidebar();
+    renderMapLegend();
+    if (!mapViewAppliedFromURL && !applyMapViewFromURL()) {
+      mapFit();
+    }
   }
+}
+
+function onMapImageLoad() {
+  mapNatural.w = mapImg.naturalWidth;
+  mapNatural.h = mapImg.naturalHeight;
+  renderMapMarkers();
+  renderMapSidebar();
+  renderMapLegend();
+  if (!applyMapViewFromURL()) mapFit();
+}
+
+function onMapImageError() {
+  const info = document.getElementById('map-info');
+  if (info) info.textContent = '⚠️ Картинка не найдена: ' + (mapImg.getAttribute('src') || '');
 }
 
 function applyMapTransform() {
@@ -5032,10 +5241,24 @@ function applyMapTransform() {
   mapImg.style.transform = `translate(${mapState.x}px, ${mapState.y}px) scale(${mapState.s})`;
 }
 
+function updateMarkersPosition() {
+  if (!mapMarkersEl) return;
+  const points = getMapPoints();
+  const children = mapMarkersEl.children;
+  for (let i = 0; i < children.length; i++) {
+    const p = points[i];
+    if (!p) continue;
+    const sx = mapState.x + p.x * mapState.s;
+    const sy = mapState.y + p.y * mapState.s;
+    children[i].style.transform = `translate(${sx}px, ${sy}px) translate(-50%, -50%)`;
+  }
+}
+
 function updateMapInfo() {
   const info = document.getElementById('map-info');
   if (!info || !mapNatural.w) return;
-  info.textContent = `${mapNatural.w} × ${mapNatural.h}px · ${Math.round(mapState.s * 100)}%`;
+  const points = getMapPoints().length;
+  info.textContent = `${mapNatural.w} × ${mapNatural.h}px · ${Math.round(mapState.s * 100)}% · точек: ${points}`;
 }
 
 function mapFit() {
@@ -5047,6 +5270,7 @@ function mapFit() {
   mapState.x = (r.width - mapNatural.w * s) / 2;
   mapState.y = (r.height - mapNatural.h * s) / 2;
   applyMapTransform();
+  updateMarkersPosition();
   updateMapInfo();
 }
 
@@ -5062,6 +5286,7 @@ function mapZoom(factor, cx, cy) {
   mapState.y = cy - (cy - mapState.y) * (newS / mapState.s);
   mapState.s = newS;
   applyMapTransform();
+  updateMarkersPosition();
   updateMapInfo();
 }
 
@@ -5075,24 +5300,362 @@ function mapFullscreen() {
 }
 
 document.addEventListener('fullscreenchange', () => {
-  // после входа/выхода подгоняем под новый размер
-  setTimeout(mapFit, 60);
+  setTimeout(() => { mapFit(); }, 60);
 });
 
+// ============ МЕТКИ НА КАРТЕ ============
+function renderMapMarkers() {
+  if (!mapMarkersEl) mapMarkersEl = document.getElementById('map-markers');
+  if (!mapMarkersEl) return;
+  mapMarkersEl.innerHTML = '';
+  const points = getMapPoints();
+
+  points.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'map-marker';
+    el.dataset.idx = String(i);
+    const isGroup = !!p.group;
+    const color = isGroup ? getGroupColor(p.group) : '#c9a0ff';
+    el.style.color = color;
+    if (isGroup) el.classList.add('is-group');
+    else el.style.background = color;
+
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      if (mapPlacementMode) {
+        if (confirm('Удалить эту точку?')) {
+          data.map.points.splice(i, 1);
+          save();
+          renderMapMarkers();
+          renderMapSidebar();
+          updateMapInfo();
+          showToast('🗑️ Точка удалена');
+        }
+      } else {
+        highlightMarkerElement(el);
+      }
+    });
+
+    el.addEventListener('dblclick', e => {
+      e.stopPropagation();
+      if (mapPlacementMode) return;
+      openMapMarkerCard(i);
+    });
+
+    // Ручной детект двойного тапа (для мобилки)
+    el.addEventListener('touchend', e => {
+      const now = Date.now();
+      if (now - _lastMarkerTap < 350) {
+        e.preventDefault();
+        if (!mapPlacementMode) openMapMarkerCard(i);
+        _lastMarkerTap = 0;
+      } else {
+        _lastMarkerTap = now;
+      }
+    }, { passive: false });
+
+    mapMarkersEl.appendChild(el);
+  });
+
+  updateMarkersPosition();
+}
+
+function highlightMarkerElement(el) {
+  if (!mapMarkersEl) return;
+  mapMarkersEl.querySelectorAll('.map-marker.is-active').forEach(m => m.classList.remove('is-active'));
+  el.classList.add('is-active');
+}
+
+function highlightMarkerByPointIdx(idx) {
+  if (!mapMarkersEl) return;
+  const el = mapMarkersEl.querySelector(`.map-marker[data-idx="${idx}"]`);
+  if (el) highlightMarkerElement(el);
+}
+
+function openMapMarkerCard(i) {
+  const p = getMapPoints()[i];
+  if (!p) return;
+  if (!p.name) {
+    showToast('У этой точки нет привязанной локации');
+    return;
+  }
+  const item = findWikiItem(p.name);
+  if (item) openWikiModal(item);
+  else showToast('Локация «' + p.name + '» не найдена в базе');
+}
+
+// ============ БЫСТРЫЙ ПЕРЕХОД ============
+function centerOnMapPoint(p, targetScale) {
+  if (!mapEl || !p) return;
+  const r = mapEl.getBoundingClientRect();
+  const s = Math.max(0.2, Math.min(8, targetScale || Math.max(mapState.s, 1.2)));
+  mapState.s = s;
+  mapState.x = r.width / 2 - p.x * s;
+  mapState.y = r.height / 2 - p.y * s;
+  applyMapTransform();
+  updateMarkersPosition();
+  updateMapInfo();
+}
+
+function mapGoToLocation(name) {
+  const points = getMapPoints().filter(p => p.name === name && !p.group);
+  if (!points.length) {
+    showToast('Точка этой локации не отмечена на карте');
+    return;
+  }
+  const target = points[0];
+  centerOnMapPoint(target);
+  highlightMarkerByPointIdx(getMapPoints().indexOf(target));
+}
+
+function mapGoToGroup(groupId) {
+  const all = getMapPoints();
+  const points = all.filter(p => p.group === groupId);
+  if (!points.length) {
+    showToast('В этой группе пока нет точек');
+    return;
+  }
+  if (mapGroupCycle[groupId] == null) mapGroupCycle[groupId] = 0;
+  const idx = mapGroupCycle[groupId] % points.length;
+  mapGroupCycle[groupId] = (idx + 1) % points.length;
+  const target = points[idx];
+  centerOnMapPoint(target);
+  highlightMarkerByPointIdx(all.indexOf(target));
+  const group = getMapGroups().find(g => g.id === groupId);
+  const title = group ? group.title : groupId;
+  showToast(`${title} — точка ${idx + 1} из ${points.length}`);
+}
+
+// ============ САЙДБАР ============
+function renderMapSidebar() {
+  const locList = document.getElementById('map-location-list');
+  const grpList = document.getElementById('map-group-list');
+  if (!locList || !grpList) return;
+  const q = (document.getElementById('map-search')?.value || '').toLowerCase();
+
+  const points = getMapPoints();
+  const groups = getMapGroups();
+
+  const locNames = new Set();
+  points.forEach(p => { if (p.name && !p.group) locNames.add(p.name); });
+  let sortedLocs = [...locNames].sort((a, b) => a.localeCompare(b, 'ru'));
+  if (q) sortedLocs = sortedLocs.filter(n => n.toLowerCase().includes(q));
+
+  if (!sortedLocs.length) {
+    locList.innerHTML = '<div class="map-empty">Нет отмеченных локаций</div>';
+  } else {
+    locList.innerHTML = sortedLocs.map(name => {
+      const count = points.filter(p => p.name === name && !p.group).length;
+      const safe = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return `<div class="map-nav-item" onclick="mapGoToLocation('${safe}')">
+        <span class="map-nav-name">${escapeHtml(name)}</span>
+        ${count > 1 ? `<span class="map-nav-count">${count}</span>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  const filteredGroups = q ? groups.filter(g => g.title.toLowerCase().includes(q)) : groups;
+  if (!filteredGroups.length) {
+    grpList.innerHTML = '<div class="map-empty">Нет групп</div>';
+  } else {
+    grpList.innerHTML = filteredGroups.map(g => {
+      const count = points.filter(p => p.group === g.id).length;
+      const color = g.color || '#c9a0ff';
+      const safeId = String(g.id).replace(/'/g, "\\'");
+      return `<div class="map-nav-item map-group-item" onclick="mapGoToGroup('${safeId}')">
+        <span class="map-group-dot" style="background:${color}"></span>
+        <span class="map-nav-name">${escapeHtml(g.title)}</span>
+        <span class="map-nav-count">${count}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderMapLegend() {
+  const legend = document.getElementById('map-legend');
+  if (!legend) return;
+  let html = `<div class="graph-legend-item">
+    <span class="graph-legend-dot" style="background:#c9a0ff"></span>
+    <span>Локация</span>
+  </div>`;
+  html += getMapGroups().map(g => {
+    const color = g.color || '#c9a0ff';
+    return `<div class="graph-legend-item">
+      <span class="graph-legend-dot" style="background:${color}"></span>
+      <span>${escapeHtml(g.title)}</span>
+    </div>`;
+  }).join('');
+  legend.innerHTML = html;
+}
+
+// ============ URL-SHARE ============
+function shareMapView() {
+  if (!mapEl || !mapNatural.w) return;
+  const r = mapEl.getBoundingClientRect();
+  const cx = (r.width / 2 - mapState.x) / mapState.s;
+  const cy = (r.height / 2 - mapState.y) / mapState.s;
+  const nx = (cx / mapNatural.w).toFixed(4);
+  const ny = (cy / mapNatural.h).toFixed(4);
+  const s = mapState.s.toFixed(3);
+  const url = new URL(window.location.href);
+  url.searchParams.set('map', `${nx},${ny},${s}`);
+  const finalUrl = url.toString();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(finalUrl).then(
+      () => showToast('🔗 Ссылка скопирована'),
+      () => prompt('Скопируйте ссылку:', finalUrl)
+    );
+  } else {
+    prompt('Скопируйте ссылку:', finalUrl);
+  }
+}
+
+function applyMapViewFromURL() {
+  if (!mapEl || !mapNatural.w) return false;
+  const params = new URLSearchParams(window.location.search);
+  const m = params.get('map');
+  if (!m) return false;
+  const parts = m.split(',');
+  if (parts.length < 3) return false;
+  const nx = parseFloat(parts[0]);
+  const ny = parseFloat(parts[1]);
+  const s = parseFloat(parts[2]);
+  if (isNaN(nx) || isNaN(ny) || isNaN(s)) return false;
+  const cx = nx * mapNatural.w;
+  const cy = ny * mapNatural.h;
+  const r = mapEl.getBoundingClientRect();
+  mapState.s = s;
+  mapState.x = r.width / 2 - cx * s;
+  mapState.y = r.height / 2 - cy * s;
+  applyMapTransform();
+  updateMarkersPosition();
+  updateMapInfo();
+  mapViewAppliedFromURL = true;
+  return true;
+}
+
+// ============ РЕЖИМ РАЗМЕТКИ ============
+function togglePlacementMode() {
+  mapPlacementMode = !mapPlacementMode;
+  const btn = document.getElementById('map-placement-btn');
+  if (mapPlacementMode) {
+    mapEl.classList.add('placement-mode');
+    if (btn) { btn.textContent = '✖ Выйти из разметки'; btn.classList.add('primary'); }
+    showToast('📍 Клик по карте — поставить точку · Клик по точке — удалить');
+  } else {
+    mapEl.classList.remove('placement-mode');
+    if (btn) { btn.textContent = '📍 Разметка'; btn.classList.remove('primary'); }
+  }
+}
+
+function openPointEditor(editIdx, x, y) {
+  mapPendingPoint = { x, y, editIdx: editIdx == null ? null : editIdx };
+  const modal = document.getElementById('map-point-modal');
+  if (!modal) return;
+  const typeSel = document.getElementById('mp-type');
+  const locSel  = document.getElementById('mp-location-name');
+  const grpSel  = document.getElementById('mp-group-id');
+
+  locSel.innerHTML = '<option value="">— пустое имя —</option>' +
+    (data.locations || []).slice().sort((a, b) => a.name.localeCompare(b.name, 'ru'))
+      .map(l => `<option value="${escapeHtml(l.name)}">${escapeHtml(l.name)}</option>`).join('');
+
+  grpSel.innerHTML = getMapGroups()
+    .map(g => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.title)}</option>`).join('');
+
+  if (editIdx != null) {
+    const p = getMapPoints()[editIdx];
+    if (p && p.group) {
+      typeSel.value = 'group';
+      grpSel.value = p.group;
+    } else {
+      typeSel.value = 'location';
+      locSel.value = (p && p.name) || '';
+    }
+  } else if (lastMapPointTemplate) {
+    typeSel.value = lastMapPointTemplate.type;
+    if (lastMapPointTemplate.type === 'group') {
+      grpSel.value = lastMapPointTemplate.groupId;
+    } else {
+      locSel.value = lastMapPointTemplate.name || '';
+    }
+  } else {
+    typeSel.value = 'location';
+    locSel.value = '';
+  }
+
+  updatePointEditorVisibility();
+  modal.classList.add('active');
+}
+
+function updatePointEditorVisibility() {
+  const type = document.getElementById('mp-type')?.value;
+  document.getElementById('mp-location-fields').style.display = (type === 'location') ? '' : 'none';
+  document.getElementById('mp-group-fields').style.display    = (type === 'group') ? '' : 'none';
+}
+
+function closePointEditor() {
+  const modal = document.getElementById('map-point-modal');
+  if (modal) modal.classList.remove('active');
+  mapPendingPoint = null;
+}
+
+function saveMapPoint() {
+  if (!mapPendingPoint) return;
+  const type = document.getElementById('mp-type').value;
+  const point = { x: Math.round(mapPendingPoint.x), y: Math.round(mapPendingPoint.y) };
+  if (type === 'location') {
+    point.name = (document.getElementById('mp-location-name').value || '').trim();
+  } else {
+    point.group = document.getElementById('mp-group-id').value;
+  }
+  if (!data.map) data.map = {};
+  if (!Array.isArray(data.map.points)) data.map.points = [];
+  if (mapPendingPoint.editIdx != null) {
+    data.map.points[mapPendingPoint.editIdx] = point;
+  } else {
+    data.map.points.push(point);
+  }
+  // Запоминаем для быстрой постановки следующей точки того же типа
+  lastMapPointTemplate = (type === 'location')
+    ? { type: 'location', name: point.name }
+    : { type: 'group', groupId: point.group };
+
+  save();
+  closePointEditor();
+  renderMapMarkers();
+  renderMapSidebar();
+  updateMapInfo();
+  showToast('📍 Точка сохранена');
+}
+
+// ============ ПОДСКАЗКА / САЙДБАР ============
+function toggleMapInfoPopup() {
+  document.getElementById('map-info-popup')?.classList.toggle('show');
+}
+function toggleMapSidebar() {
+  document.getElementById('map-sidebar')?.classList.toggle('open');
+}
+
+// ============ ОБРАБОТЧИКИ КАРТЫ ============
 function attachMapHandlers() {
   let dragging = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
+  let moved = false;
 
   mapEl.addEventListener('mousedown', e => {
     if (e.target.closest('button')) return;
-    dragging = true;
+    if (e.target.closest('.map-marker')) return;
+    dragging = true; moved = false;
     startX = e.clientX; startY = e.clientY;
     startTx = mapState.x; startTy = mapState.y;
   });
   window.addEventListener('mousemove', e => {
     if (!dragging) return;
+    if (Math.abs(e.clientX - startX) > 3 || Math.abs(e.clientY - startY) > 3) moved = true;
     mapState.x = startTx + (e.clientX - startX);
     mapState.y = startTy + (e.clientY - startY);
     applyMapTransform();
+    updateMarkersPosition();
   });
   window.addEventListener('mouseup', () => { dragging = false; });
 
@@ -5103,16 +5666,30 @@ function attachMapHandlers() {
   }, { passive: false });
 
   mapEl.addEventListener('dblclick', e => {
+    if (e.target.closest('.map-marker')) return;
     const r = mapEl.getBoundingClientRect();
     mapZoom(1.5, e.clientX - r.left, e.clientY - r.top);
   });
 
-  // Touch
+  // Постановка точки в режиме разметки
+  mapEl.addEventListener('click', e => {
+    if (!mapPlacementMode) return;
+    if (e.target.closest('button')) return;
+    if (e.target.closest('.map-marker')) return;
+    if (moved) return;
+    const r = mapEl.getBoundingClientRect();
+    const mx = (e.clientX - r.left - mapState.x) / mapState.s;
+    const my = (e.clientY - r.top - mapState.y) / mapState.s;
+    openPointEditor(null, mx, my);
+  });
+
+  // Touch (панорама + щипок)
   let touchMode = null;
   let tStart = { x: 0, y: 0 }, tPos = { x: 0, y: 0 };
   let pinch = { dist: 0, s: 1, cx: 0, cy: 0 };
 
   mapEl.addEventListener('touchstart', e => {
+    if (e.target.closest('.map-marker')) return;
     e.preventDefault();
     if (e.touches.length === 1) {
       touchMode = 'pan';
@@ -5132,12 +5709,14 @@ function attachMapHandlers() {
   }, { passive: false });
 
   mapEl.addEventListener('touchmove', e => {
+    if (e.target.closest('.map-marker')) return;
     e.preventDefault();
     if (touchMode === 'pan' && e.touches.length === 1) {
       const t = e.touches[0];
       mapState.x = tPos.x + (t.clientX - tStart.x);
       mapState.y = tPos.y + (t.clientY - tStart.y);
       applyMapTransform();
+      updateMarkersPosition();
     } else if (touchMode === 'pinch' && e.touches.length === 2) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -5147,6 +5726,7 @@ function attachMapHandlers() {
       mapState.y = pinch.cy - (pinch.cy - mapState.y) * (newS / mapState.s);
       mapState.s = newS;
       applyMapTransform();
+      updateMarkersPosition();
       updateMapInfo();
     }
   }, { passive: false });
@@ -5155,12 +5735,15 @@ function attachMapHandlers() {
     if (!e.touches.length) touchMode = null;
   });
 
-  // Обработка изменения размера окна
   window.addEventListener('resize', () => {
-    if (!document.getElementById('tab-map').classList.contains('hidden')) {
-      mapFit();
+    const tabMap = document.getElementById('tab-map');
+    if (tabMap && !tabMap.classList.contains('hidden')) {
+      updateMarkersPosition();
     }
   });
+
+  const search = document.getElementById('map-search');
+  if (search) search.addEventListener('input', renderMapSidebar);
 }
 
 // ============ ПОИСК ============
@@ -5284,10 +5867,12 @@ item.episode = document.getElementById('f-episode').value.trim();
   showToast();
 }
 
-function showToast() {
+function showToast(msg) {
   const toast = document.getElementById('toast');
+  toast.textContent = msg || '✅ Сохранено!';
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2000);
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
 function deleteItem(type, idx) {
@@ -5752,6 +6337,12 @@ console.log("⚠️ Не удалось загрузить data.json, испол
 updateStats();
 buildGraph();
 renderCurrentTab();
+
+// Авто-открытие карты, если в URL есть ?map=...
+if (new URLSearchParams(location.search).has('map')) {
+  const tabBtn = document.querySelector('.tab-btn[data-tab="map"]');
+  if (tabBtn) tabBtn.click();
+}
 }
 
 
@@ -6019,7 +6610,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия beta18 · Обновлено: 23.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия beta21 · Обновлено: 24.09.2026.</div>
 </footer>
 
 </body></html>
