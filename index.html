@@ -583,6 +583,100 @@ background:rgba(18,18,28,.5);border:1px solid #2a2a3a;border-radius:8px;font-siz
   .map-toggle-sidebar:hover{background:#3a3a4a;border-color:#c9a0ff}
 }
 
+/* ===== ТЕСТ НА ЗНАНИЕ ЗАЗЕРКАЛЬЯ ===== */
+.quiz-wrap{max-width:820px;margin:0 auto;padding:0 4px}
+
+.quiz-start{
+  background:#1a1a25;border:1px solid #2a2a3a;border-left:4px solid #c9a0ff;
+  border-radius:12px;padding:28px 24px;text-align:center
+}
+.quiz-start h2{color:#c9a0ff;font-size:1.6em;margin-bottom:10px}
+.quiz-start p{color:#aaa;margin-bottom:18px;line-height:1.6}
+.quiz-start button{
+  background:#5a3a8a;border:1px solid #7a5aaa;color:#fff;
+  padding:12px 28px;font-size:1em;border-radius:8px;cursor:pointer;
+  transition:all .2s;font-family:inherit
+}
+.quiz-start button:hover{background:#7a5aaa;border-color:#c9a0ff}
+.quiz-meta{color:#666;font-size:.85em;margin-top:14px}
+
+.quiz-question-card{
+  background:#1a1a25;border:1px solid #2a2a3a;border-radius:12px;
+  padding:24px;position:relative
+}
+.quiz-progress{
+  height:6px;background:#2a2a3a;border-radius:3px;overflow:hidden;margin-bottom:20px
+}
+.quiz-progress-bar{
+  height:100%;background:linear-gradient(90deg,#5a3a8a,#c9a0ff);
+  transition:width .3s ease;width:0%
+}
+.quiz-counter{color:#888;font-size:.85em;margin-bottom:14px;text-align:right}
+.quiz-q-text{
+  font-size:1.15em;color:#fff;line-height:1.5;margin-bottom:20px;font-weight:600
+}
+.quiz-answers{display:flex;flex-direction:column;gap:10px}
+.quiz-answer{
+  background:#0f0f17;border:1px solid #3a3a4a;color:#e8e8f0;
+  padding:14px 18px;border-radius:8px;cursor:pointer;text-align:left;
+  font-size:1em;font-family:inherit;transition:all .15s;
+  display:flex;align-items:center;gap:12px
+}
+.quiz-answer:hover:not(.disabled){border-color:#c9a0ff;background:#1e1e2a}
+.quiz-answer .letter{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:50%;background:#2a2a3a;
+  color:#c9a0ff;font-weight:700;font-size:.85em;flex-shrink:0
+}
+.quiz-answer.correct{border-color:#7ac74f;background:#1a2a1a}
+.quiz-answer.correct .letter{background:#7ac74f;color:#000}
+.quiz-answer.wrong{border-color:#8a3a3a;background:#2a1a1a}
+.quiz-answer.wrong .letter{background:#8a3a3a;color:#fff}
+.quiz-answer.disabled{cursor:default;opacity:.75}
+.quiz-answer:disabled{cursor:default}
+
+.quiz-result{
+  background:#1a1a25;border:1px solid #2a2a3a;border-left:4px solid #c9a0ff;
+  border-radius:12px;padding:28px 24px;text-align:center;position:relative;
+  animation:modalFadeIn .4s ease
+}
+.quiz-result-img{
+  width:140px;height:140px;object-fit:cover;border-radius:50%;
+  border:3px solid #c9a0ff;margin:0 auto 16px;display:block;
+  box-shadow:0 6px 24px rgba(201,160,255,.25)
+}
+.quiz-result-rank{font-size:2.4em;color:#c9a0ff;font-weight:700;margin-bottom:6px}
+.quiz-result-score{font-size:1.5em;color:#fff;margin-bottom:8px}
+.quiz-result-desc{color:#aaa;line-height:1.6;margin-bottom:20px}
+.quiz-result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.quiz-result-actions button{
+  padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;
+  font-size:.95em;transition:all .2s;border:1px solid #3a3a4a;
+  background:#2a2a3a;color:#e8e8f0
+}
+.quiz-result-actions button.primary{background:#5a3a8a;border-color:#7a5aaa;color:#fff}
+.quiz-result-actions button:hover{border-color:#c9a0ff;background:#3a3a4a}
+.quiz-result-actions button.primary:hover{background:#7a5aaa}
+
+.quiz-review{margin-top:16px;text-align:left}
+.quiz-review-item{
+  background:#0f0f17;border:1px solid #2a2a3a;border-left:3px solid #5a3a8a;
+  border-radius:6px;padding:10px 14px;margin-bottom:8px;font-size:.9em
+}
+.quiz-review-item.ok{border-left-color:#7ac74f}
+.quiz-review-item.bad{border-left-color:#8a3a3a}
+.quiz-review-item .qr-q{color:#ccc;margin-bottom:4px}
+.quiz-review-item .qr-ans{color:#888;font-size:.88em}
+.quiz-review-item .qr-ans b{color:#c9a0ff;font-weight:500}
+.quiz-review-item.bad .qr-ans b{color:#7ac74f}
+
+/* Конфетти */
+#confettiCanvas{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:9998;display:none
+}
+#confettiCanvas.active{display:block}
+
 /* Plot timeline */
 .plot-card {
   background: #1a1a25;
@@ -933,6 +1027,7 @@ body.admin-mode .admin-only { display: inline-block !important; }
   <button class="tab-btn" data-tab="races">Расы</button>
   <button class="tab-btn" data-tab="transcripts">Транскрибация</button>
   <button class="tab-btn" data-tab="map">Карта</button>
+  <button class="tab-btn" data-tab="quiz">🎯 Тест</button>
 </nav>
 
 <div id="tab-characters" class="tab-content">
@@ -2782,6 +2877,14 @@ body.admin-mode .admin-only { display: inline-block !important; }
     </div>
   </div>
 </div>
+
+<div id="tab-quiz" class="tab-content hidden">
+  <div class="quiz-wrap" id="quiz-wrap">
+    <!-- содержимое генерируется JS -->
+  </div>
+</div>
+
+<canvas id="confettiCanvas"></canvas>
 
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
@@ -4754,6 +4857,127 @@ const DEFAULT_DATA = {
 };
 // __DEFAULT_DATA_END__
 
+// ============ ВОПРОСЫ ТЕСТА (100 штук) ============
+// q — вопрос, a — варианты, c — индекс правильного, tag — тема (опционально)
+const QUIZ_QUESTIONS = [
+  {q:"Кто организовал гонки?",a:["Вальтасар","Истуканус","Коленыч","Видус"],c:0,tag:"events"},
+  {q:"Кто организовал викторины «Раз - и квас!»?",a:["Гузлик","Вальтасар","Пахомий","Дон Окунь"],c:1,tag:"events"},
+  {q:"Кто сбежал из Сладкого хлева?",a:["Птозный Эдгар","Мопсосвины","Сырный Джо","Магога"],c:0,tag:"characters"},
+  {q:"Кто такая Баба Жуля?",a:["Летающая корова","Бабушка Огородница","Злая ведьма","Майонезная тётенька"],c:1,tag:"characters"},
+  {q:"Что выращивает Баба Жуля на огороде?",a:["Яблоки и груши","Хрычи и морковные пятки","Розы и тюльпаны","Ложки и вилки"],c:1,tag:"items"},
+  {q:"Кого изгоняет Орлундий?",a:["Полипов","Синих ящеров","Грязунов","Калачей"],c:0,tag:"characters"},
+  {q:"Как расшифровывается ПВЗ?",a:["Приключения Великого Замага","Порталы в Зазеркалье","Проводник В Зазеркалье","Полезная Всячина Заречная"],c:1,tag:"locations"},
+  {q:"Кто такой Поленыч?",a:["Страж труб","Учитель бобылей","Проводник в Зазеркалье","Великий Замаг"],c:2,tag:"characters"},
+  {q:"Кто такая Микаэлла?",a:["Альтер эго Тёти Вари","Королева пацаноидов","Хозяйка Сырного Джо","Мать Мигунов"],c:0,tag:"characters"},
+  {q:"Что символизирует Шапец?",a:["Статус","Богатство","Власть","Ум"],c:0,tag:"items"},
+  {q:"Кто коллекционирует ложки?",a:["Сеньор Понполомео","Казимир","Гузлик","Дон Окунь"],c:0,tag:"characters"},
+  {q:"Кто ворует ложки для Сеньора Понполомео?",a:["Казимир","Мыши","Коленыч","Птозный Эдгар"],c:0,tag:"characters"},
+  {q:"Что охраняет Колбасный страж?",a:["Лабиринт Кривина","Сладкий хлев","Логово Вальтасара","Медный град"],c:0,tag:"characters"},
+  {q:"Чем можно подкупить Колбасного стража?",a:["Свежим укропом","Мясным хлебом","Кукичами","Сыром"],c:0,tag:"items"},
+  {q:"Кто спрашивает: «Брунявая чуня или Чунявая бруня»?",a:["ОНО","Истуканус","Коленыч","Пахомий"],c:1,tag:"characters"},
+  {q:"Как расшифровывается ОНО?",a:["Очень Нервный Объект","Орбитальный Непревзойдённый Объект","Обитатель Ночного Озера","Огромный Наблюдающий Организм"],c:1,tag:"characters"},
+  {q:"Кто покровительствует Пацаноидам?",a:["ОНО","ОНА","Истуканус","Баба Жуля"],c:0,tag:"characters"},
+  {q:"Что запретила ОНА?",a:["Чак-Чак","Щекотку","Гонки","Ложки"],c:1,tag:"characters"},
+  {q:"Кто покровительствует игре Чак-Чак?",a:["ОНА","ОНО","Истуканус","Видус"],c:0,tag:"events"},
+  {q:"Кто даёт 2 кукича за 1 пакич?",a:["Загадочный господин","Дядюшка Фантасмагор","Дон Окунь","Сырный Джо"],c:0,tag:"characters"},
+  {q:"Где обитает Бутыльон?",a:["В Запретной пустыне","В Лавовом озере","В Сумеречной роще","В трубах"],c:0,tag:"characters"},
+  {q:"Что хранит Бутыльон?",a:["Знание о жемчужинах","Тайну вихрей","Рецепт Скипа","Секрет ОНО"],c:0,tag:"characters"},
+  {q:"Кто приручил Пескарей доставлять письма?",a:["Птозный Эдгар","Поленыч","Дон Окунь","Пчелисей"],c:0,tag:"characters"},
+  {q:"Почему Пескари сворачивали с курса?",a:["Почуяли яства имения Кривина","Устали","Заблудились","Их прогнали"],c:0,tag:"characters"},
+  {q:"Кто автор «Мультипрограммы»?",a:["Доктор Эпикантус","Профессор Игорь Диод","Петька","Дегенератор"],c:0,tag:"characters"},
+  {q:"Кто создал Дегенератор?",a:["Профессор Игорь Диод","Доктор Эпикантус","Петька","Н'ясортеп"],c:0,tag:"items"},
+  {q:"Кто случайно запустил Дегенератор?",a:["Петька","Пахомий","Григорий","Михаил"],c:0,tag:"characters"},
+  {q:"Кто смог приблизиться к Дегенератору?",a:["Н'ясортеп","Поленыч","Истуканус","ОНО"],c:0,tag:"characters"},
+  {q:"Из кого образуется Н'ясортеп?",a:["Из полипов","Из грязунов","Из осов","Из мигунов"],c:0,tag:"characters"},
+  {q:"Что умеет Н'ясортеп?",a:["Захватывать чужую речь","Летать","Готовить Скип","Управлять временем"],c:0,tag:"characters"},
+  {q:"Что делает Жадность на лайке?",a:["Замедляет катушки","Ворует ложки","Пугает кокшей","Прячет сыр"],c:0,tag:"characters"},
+  {q:"Чем задобрить Жадность на лайке?",a:["Кукичами","Мясным хлебом","Войлочными катышками","Сыром"],c:0,tag:"items"},
+  {q:"Кто такой Видус?",a:["Мастер Чак-Чака","Хозяин трущоб","Брат ОНО","Охотник на бобылей"],c:0,tag:"characters"},
+  {q:"В чём свойство Гремучего Древа?",a:["Древесина для Истукануса","Это источник силы для ОНО","Это оружие ОНА","Отличный строительный материал"],c:0,tag:"items"},
+  {q:"Кто сделан из Гремучего Древа?",a:["Поленыч","Пахомий","Камнюки","Мигуны"],c:0,tag:"characters"},
+  {q:"Кто такая Валькирия?",a:["Потенциальный член Ордена босых ведьм","Дочь ОНО","Жена Истукануса","Хранительница спектрального колодца"],c:0,tag:"races"},
+  {q:"Кто верховная ведьма в Ордене босых ведьм?",a:["Рудесса","Евдокия","Тётя Варя","Баба Жуля"],c:0,tag:"organizations"},
+  {q:"Какая реликвия у Ордена босых ведьм?",a:["Перо Золотого Какаду","Шапец","Кокалка","Зеленеющее перо"],c:0,tag:"items"},
+  {q:"Что носят босые ведьмы, чтобы не выдавать маршруты?",a:["Копыта","Кроксы","Бурлешку","Ничего"],c:0,tag:"items"},
+  {q:"Кто такой Харитон Ряков?",a:["Председатель Конгресса путешественников","Мэр Медного града","Кузнец Вальтасара","Хозяин Почтампа"],c:0,tag:"characters"},
+  {q:"Кто не терпит спорщиков?",a:["Харитон Ряков","Вальтасар","Истуканус","Дон Окунь"],c:0,tag:"characters"},
+  {q:"Как называют жителей Медного града?",a:["Корпораты","Кукичи","Меднюки","Пацаноиды"],c:0,tag:"races"},
+  {q:"Каков основной показатель достоинства у Корпоратов?",a:["Улыбка","Кукичи","Ложки","Шапец"],c:0,tag:"races"},
+  {q:"Что любит Дон Окунь?",a:["Чувствовать себя важным","Воровать ложки","Считать кукичи","Учить молодых"],c:0,tag:"characters"},
+  {q:"Кем на самом деле является Дон Окунь?",a:["Пескарём под прикрытием","Мопсом под прикрытием","Замаскированным бобылём","Синим Ящером"],c:0,tag:"characters"},
+  {q:"Кто знает, где потерянные жемчужины?",a:["Фукс","Пахомий","Григорий","Круглый Толик"],c:0,tag:"characters"},
+  {q:"Кто живёт вместе с Фуксом в дупле?",a:["Пахомий","Рудло","Казимир","Сортирный Сатир"],c:0,tag:"characters"},
+  {q:"Кто такой Рудло?",a:["Говорящий крот","Летучая мышь","Огненный жук","Сова"],c:0,tag:"characters"},
+  {q:"Что украл Григорий?",a:["Он ничего не крадёт","Ложки","Достоинство","Кукичи"],c:0,tag:"characters"},
+  {q:"От чего Григорий испытывает возмущение?",a:["От красного цвета","От синего цвета","От запаха сыра","От громких звуков"],c:0,tag:"characters"},
+  {q:"Кто такой Сортирный Сатир?",a:["Ироничный остряк","Хранитель труб","Учитель бабы Жули","Повар Кривина"],c:0,tag:"characters"},
+  {q:"Кто телохранитель Кривина?",a:["Смоломаз","Сатор Арепыч","Коленыч","Михаил"],c:0,tag:"characters"},
+  {q:"Что ищет Смоломаз в уборных?",a:["Сортирного Сатира","Ложки","Фекалии","Уборную"],c:0,tag:"characters"},
+  {q:"Кто чувствителен к сатире?",a:["Господин Кривин","Дон Окунь","Истуканус","Вальтасар"],c:0,tag:"characters"},
+  {q:"Где живёт господин Кривин?",a:["В имении в Сумеречной роще","В Медном граде","В Сладком хлеве","В трубах"],c:0,tag:"locations"},
+  {q:"Кто охраняет имение Кривина от бобылей?",a:["Сатор Арепыч","Смоломаз","Коленыч","Поленыч"],c:0,tag:"characters"},
+  {q:"Кто такой Сатор Арепыч в миру?",a:["Георгий Николаевич Крукопацкий","Анатолий Иванович Полено","Виктор Пенопластович Корнеплод","Пётр Иванович Крукопацкий"],c:0,tag:"characters"},
+  {q:"Кем был Сатор Арепыч в нашем мире?",a:["Офицером армии","Работник соц. служб","Говновозом","Художником"],c:0,tag:"characters"},
+  {q:"Кого беспощадно кокает Сатор Арепыч?",a:["Бобылей","Грязунов","Полипов","Осов"],c:0,tag:"characters"},
+  {q:"Кто такой Реутень?",a:["Бобыль с толстой скорлупой","Лидер пацаноидов","Хозяин горы","Страж колодца"],c:0,tag:"characters"},
+  {q:"Кто одержим идеей заполучить скорлупу Реутеня?",a:["Доктор Эпикантус","Грибной Архивариус","Пахомий","Дон Окунь"],c:0,tag:"characters"},
+  {q:"Кто любит грызть скорлупу бобылей?",a:["Михаил","Коленыч","Орлундий","Птозный Эдгар"],c:0,tag:"characters"},
+  {q:"Кто такой Баранча?",a:["Один из трёх крепышей","Пескарь под прикрытием","Летучая мышь","Хранитель  спектрального колодца"],c:0,tag:"characters"},
+  {q:"Кто из крепышей редко вылезает из дупла?",a:["Пахомий","Баранча","Михаил","Григорий"],c:0,tag:"characters"},
+  {q:"Что любят делать Баранча и Михаил?",a:["Играть в Чак-Чак прохожими","Собирать грибы","Петь песни","Красть ложки"],c:0,tag:"characters"},
+  {q:"Что такое Мясной хлеб?",a:["Любимая еда Баранчи","Валюта Зазеркалья","Оружие Коленыча","Корм для псов"],c:0,tag:"items"},
+  {q:"Как зовут говорящий мясной хлеб?",a:["Борька","Кукич","Гузлик","Пахомий"],c:0,tag:"characters"},
+  {q:"Кто такой Птозный Эдгар?",a:["Глаз в шапце","Слепой пёс","Хранитель спектрального колодца","Повар"],c:0,tag:"characters"},
+  {q:"Что привозит Эдгар из Запретной пустыни?",a:["Алмазы","Ложки","Мясной хлеб","Сыр"],c:0,tag:"characters"},
+  {q:"Кто такая Толстомясочка?",a:["Питомец Бабы Жули","Королева пацаноидов","Дочь Истукануса","Хранительница Медного града"],c:0,tag:"characters"},
+  {q:"Что любит делать Толстомясочка?",a:["Валяться на печи","Собирать грибы","Красть ложки","Пугать бобылей"],c:0,tag:"characters"},
+  {q:"Кто сожитель Бабы Жули?",a:["Дед Ченя","Дядюшка Фантасмагор","Пахомий","Птозный Эдгар"],c:0,tag:"characters"},
+  {q:"Чем занимается Дед Ченя?",a:["Пропалывает Гычу","Готовит Скип","Собирает кукичи","Играет в Чак-Чак"],c:0,tag:"characters"},
+  {q:"Что такое Гыча?",a:["Варево Бабы Жули","Вид бобыля","Особое сырное оружие","Растение с огорода Бабы Жули"],c:0,tag:"items"},
+  {q:"Из чего состоит Гыча?",a:["Из морковных пяток и хрычей","Из хрящей и кукичей","Из пыли и мёда","Из ложек и вилок"],c:0,tag:"items"},
+  {q:"Кто такая Алевтина?",a:["Художница картин","Королева Сырного Джо","Охотница на бобылей","Хранительница ПВЗ"],c:0,tag:"characters"},
+  {q:"Во что превращается Алевтина при рассыпании бисера?",a:["В павлина","В кокшу","В паука","В рыбу"],c:0,tag:"characters"},
+  {q:"Что ценит Алевтина?",a:["Шапец","Сыр","Ложки","Кукичи"],c:0,tag:"items"},
+  {q:"Сколько можно оттачивать искусство коканья?",a:["Бесконешно","Пол минуты","До прихода Коленыча","Пока разрешает Господин Кривин"],c:0,tag:"items"},
+  {q:"Что использует Алевтина в истинной форме?",a:["Молот","Топор","Кинжал","Косу"],c:0,tag:"items"},
+  {q:"Кто такой Идибикс?",a:["Гуттаперчивый любитель грибов","Повар Кривина","Дровосек Гремучего Древа","Хрящевой мясник"],c:0,tag:"characters"},
+  {q:"Какой гриб особенно ценит Идибикс?",a:["Бахромку","Хрыч","Гриб-бытовик","Пахомистый груздь"],c:0,tag:"items"},
+  {q:"Что такое Брунявый марш?",a:["Стихийное явление","Вид бобыля","Праздник","Оружие"],c:0,tag:"items"},
+  {q:"Кто такая Чунявая Бруня?",a:["Змейка из цирка","Лягушка-муха","Кухарка","Пекарь"],c:0,tag:"characters"},
+  {q:"Из какого цирка сбежала Бруня?",a:["Из Фантасмагорического","Из Солнечного","Из Медного","Из Небесного"],c:0,tag:"locations"},
+  {q:"Кто такой Дядюшка Фантасмагор?",a:["Бредящий эксцентрик","Художник авангардист","Кузнец счастья","Певец"],c:0,tag:"characters"},
+  {q:"Что считает отличным строительным материалом Дядюшка Фантасмагор?",a:["Кукичи","Ложки","Газобетон","Скорлупу"],c:0,tag:"items"},
+  {q:"Какие соленья Дядюшка Фантасмагор берёт с собой на приём Г-на Кривина?",a:["Алмазные","Огуречные","Бурлешковые","Томатные"],c:0,tag:"items"},
+  {q:"Что возвёл Дядюшка Фантасмагор?",a:["Хрящёвки","Медный град","Сладкий хлев","Трубы"],c:0,tag:"locations"},
+  {q:"Из чего строятся Хрящёвки?",a:["Из хрящевой ткани","Из бесхозных камней","Из мёда","Из кукичей"],c:0,tag:"locations"},
+  {q:"Кто помог Дядюшке Фантасмагору с хрящевой тканью?",a:["Доктор Эпикантус","Профессор Игорь Диод","Петька","Поленыч"],c:0,tag:"characters"},
+  {q:"Что хочет построить Дядюшка Фантасмагор в противовес Медному граду?",a:["Конкурента","Секту","Хрящевой Град","Армию"],c:0,tag:"locations"},
+  {q:"Кто такой Грибной Архивариус?",a:["Работник Архива","Бобыль","Скрипач","Пастух"],c:0,tag:"characters"},
+  {q:"Что часто путает Грибной Архивариус?",a:["Полки","Время","Друзей","Кукичи"],c:0,tag:"characters"},
+  {q:"Кто помощник Грибного Архивариуса?",a:["Летописный Артём","Коленыч","Чёрный Эклер","Епень"],c:0,tag:"characters"},
+  {q:"Что делает Летописный Артём?",a:["Ведёт сводки","Готовит еду","Охраняет клад","Учит язык"],c:0,tag:"characters"},
+  {q:"Кто придумал миф про Яшку Асмагра?",a:["Летописный Артём","Гузлик","Пахомий","Дон Окунь"],c:0,tag:"characters"},
+  {q:"Кто такие Бесхозные Камни?",a:["Существа под покровительством ОНА","Просто груда камней","Стая пескарей","Игрушки Кривина"],c:0,tag:"characters"},
+  {q:"Кого ненавидят Бесхозные Камни?",a:["Епеня","Гузлика","Поленыча","Фукса"],c:0,tag:"characters"},
+  {q:"Кто такой Епень?",a:["Небыличник с новым лицом","Мэр города","Врач","Пекарь"],c:0,tag:"characters"},
+  {q:"Кому Епень отдал своё лицо?",a:["Многоликому Филиппу","Птозному Эдгару","Дону Окуню","Коленычу"],c:0,tag:"characters"}
+];
+
+const QUIZ_RANKS = [
+  { min: 90, title: "Ходячая энциклопедия Зазеркалья", img: "images/ONO.png",
+    desc: "Невероятно! Ты знаешь Зазеркалье лучше, чем сами Зазеркальцы. ОНО лично тобой доволен." },
+  { min: 75, title: "Мудрец Зазеркалья", img: "images/Istukanus.png",
+    desc: "Впечатляющий результат! Истуканус бы задал тебе свой вопрос без всяких сомнений." },
+  { min: 60, title: "Знаток Зазеркалья", img: "images/Akakiy_Kurolesov.png",
+    desc: "Отличный результат! Акакий Куролесов был бы рад обсудить с тобой грибные места." },
+  { min: 40, title: "Гость Зазеркалья", img: "images/Baba_ZHulya.png",
+    desc: "Неплохо! Баба Жуля угостила бы тебя черпачком Гычи за старание." },
+  { min: 0, title: "Новичок Зазеркалья", img: "images/Lesnoy_Kurbak.png",
+    desc: "Ты только в начале пути. Лесной Курбак не пустит тебя дальше, пока не увидит твой голос." }
+];
+
+const QUIZ_QUESTIONS_TO_SHOW = 20;
+
 // ============ СОСТОЯНИЕ ============
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
 // === РЕЖИМ АДМИНИСТРАТОРА ===
@@ -5054,6 +5278,10 @@ setTimeout(() => {
 mapFit();
 }, 60);
 }
+// Сброс теста при каждом новом входе на вкладку
+if (tab === 'quiz') {
+quizState = null;
+}
 });
 });
 
@@ -5067,6 +5295,7 @@ function renderCurrentTab() {
   else if (currentTab === 'races') renderGeneric('races');
   else if (currentTab === 'transcripts') renderTranscripts();
   else if (currentTab === 'map') initMap();
+  else if (currentTab === 'quiz') renderQuiz();
   else if (currentTab === 'graph') renderGraph();
 }
 
@@ -5159,6 +5388,246 @@ function downloadAllTranscripts() {
   a.download = 'zazerkalye_transcripts_all.txt';
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// ============ ТЕСТ НА ЗНАНИЕ ЗАЗЕРКАЛЬЯ ============
+let quizState = null;
+
+function shuffleArr(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderQuiz() {
+  const wrap = document.getElementById('quiz-wrap');
+  if (!wrap) return;
+
+  // Экран старта
+  if (!quizState) {
+    let best = null;
+    try { best = localStorage.getItem('zz_quiz_best'); } catch(e){}
+    wrap.innerHTML = `
+      <div class="quiz-start">
+        <h2>🎯 Насколько ты знаешь Зазеркалье?</h2>
+        <p>Тебя ждёт ${QUIZ_QUESTIONS_TO_SHOW} случайных вопросов из ${QUIZ_QUESTIONS.length}.<br>
+           Проверь себя: новичок ты или ходячая энциклопедия Зазеркалья?</p>
+        <button onclick="quizStart()">▶ Начать тест</button>
+        ${best ? `<div class="quiz-meta">🏆 Твой лучший результат: <b style="color:#c9a0ff">${best}%</b></div>` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  // Экран вопроса
+  if (quizState.phase === 'question') {
+    const total = quizState.questions.length;
+    const idx = quizState.current;
+    const q = quizState.questions[idx];
+    const progress = (idx / total) * 100;
+
+    const LETTERS = ['A','B','C','D'];
+    const answersHtml = q.a.map((text, i) => {
+      let cls = 'quiz-answer';
+      if (quizState.answered != null) {
+        cls += ' disabled';
+        if (i === q.c) cls += ' correct';
+        else if (i === quizState.answered) cls += ' wrong';
+      }
+      return `<button class="${cls}" onclick="quizAnswer(${i})" ${quizState.answered != null ? 'disabled' : ''}>
+        <span class="letter">${LETTERS[i]}</span>
+        <span>${escapeHtml(text)}</span>
+      </button>`;
+    }).join('');
+
+    wrap.innerHTML = `
+      <div class="quiz-question-card">
+        <div class="quiz-progress"><div class="quiz-progress-bar" style="width:${progress}%"></div></div>
+        <div class="quiz-counter">Вопрос ${idx + 1} из ${total}</div>
+        <div class="quiz-q-text">${escapeHtml(q.q)}</div>
+        <div class="quiz-answers">${answersHtml}</div>
+      </div>
+    `;
+    return;
+  }
+
+  // Экран результата
+  if (quizState.phase === 'result') {
+    const correct = quizState.correct;
+    const total = quizState.questions.length;
+    const percent = Math.round((correct / total) * 100);
+    const rank = QUIZ_RANKS.find(r => percent >= r.min) || QUIZ_RANKS[QUIZ_RANKS.length - 1];
+
+    // Лучший результат в localStorage
+    try {
+      const prevBest = parseInt(localStorage.getItem('zz_quiz_best') || '0', 10);
+      if (percent > prevBest) localStorage.setItem('zz_quiz_best', String(percent));
+    } catch(e){}
+
+    const reviewHtml = quizState.questions.map((q, i) => {
+      const userAns = quizState.userAnswers[i];
+      const ok = userAns === q.c;
+      return `<div class="quiz-review-item ${ok ? 'ok' : 'bad'}">
+        <div class="qr-q">${i+1}. ${escapeHtml(q.q)}</div>
+        <div class="qr-ans">Ты: <b>${escapeHtml(q.a[userAns] ?? '—')}</b>${ok ? '' : ` · Правильно: <b>${escapeHtml(q.a[q.c])}</b>`}</div>
+      </div>`;
+    }).join('');
+
+    wrap.innerHTML = `
+      <div class="quiz-result">
+        <img class="quiz-result-img" src="${escapeHtml(rank.img)}" alt="${escapeHtml(rank.title)}" onerror="this.style.display='none'">
+        <div class="quiz-result-rank">${percent}%</div>
+        <div class="quiz-result-score">${correct} из ${total} правильных</div>
+        <div style="color:#c9a0ff;font-weight:600;margin-bottom:6px">${escapeHtml(rank.title)}</div>
+        <div class="quiz-result-desc">${escapeHtml(rank.desc)}</div>
+        <div class="quiz-result-actions">
+          <button class="primary" onclick="quizStart()">🔄 Пройти снова</button>
+          <button onclick="quizShare(${percent}, '${escapeHtml(rank.title).replace(/'/g,"\\'")}')">📤 Поделиться</button>
+          <button onclick="quizReviewToggle()">📋 Разбор ответов</button>
+        </div>
+        <div class="quiz-review" id="quiz-review" style="display:none">${reviewHtml}</div>
+      </div>
+    `;
+
+    // Фейерверк при 90%+
+    if (percent >= 90) {
+      setTimeout(() => fireConfetti(), 200);
+    } else if (percent >= 75) {
+      setTimeout(() => fireConfetti(1200), 200);
+    }
+    return;
+  }
+}
+
+function quizStart() {
+  const pool = shuffleArr(QUIZ_QUESTIONS).slice(0, Math.min(QUIZ_QUESTIONS_TO_SHOW, QUIZ_QUESTIONS.length));
+  const questions = pool.map(q => {
+    const originalCorrect = q.a[q.c];
+    const shuffled = shuffleArr(q.a);
+    const newCorrect = shuffled.indexOf(originalCorrect);
+    return { q: q.q, a: shuffled, c: newCorrect, tag: q.tag };
+  });
+  quizState = {
+    phase: 'question',
+    questions,
+    current: 0,
+    correct: 0,
+    answered: null,
+    userAnswers: []
+  };
+  renderQuiz();
+}
+
+function quizAnswer(i) {
+  if (!quizState || quizState.answered != null) return;
+  const q = quizState.questions[quizState.current];
+  quizState.answered = i;
+  quizState.userAnswers[quizState.current] = i;
+  if (i === q.c) quizState.correct++;
+  renderQuiz();
+
+  // Автопереход
+  setTimeout(() => {
+    quizState.current++;
+    quizState.answered = null;
+    if (quizState.current >= quizState.questions.length) {
+      quizState.phase = 'result';
+    }
+    renderQuiz();
+  }, 900);
+}
+
+function quizReviewToggle() {
+  const el = document.getElementById('quiz-review');
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function quizShare(percent, title) {
+  const text = `🪞 Я знаю Зазеркалье на ${percent}%!\nМой уровень: ${title} 🎯\n\nПроверь себя: ${location.origin}${location.pathname}#quiz`;
+  if (navigator.share) {
+    navigator.share({ title: 'Тест по Зазеркалью', text, url: location.href }).catch(()=>{});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(
+      () => showToast('📋 Результат скопирован!'),
+      () => prompt('Скопируй текст:', text)
+    );
+  } else {
+    prompt('Скопируй текст:', text);
+  }
+}
+
+// ============ ФЕЙЕРВЕРК ============
+function fireConfetti(duration = 3000) {
+  const canvas = document.getElementById('confettiCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.classList.add('active');
+
+  const colors = ['#c9a0ff','#ff6b9d','#7ac74f','#4a9eff','#ffd700','#ff7a7a'];
+  const particles = [];
+  const COUNT = 180;
+
+  for (let i = 0; i < COUNT; i++) {
+    const side = Math.random() < 0.5 ? 0 : 1; // 0 = слева, 1 = справа
+    particles.push({
+      x: side === 0 ? -20 : canvas.width + 20,
+      y: canvas.height * 0.3 + Math.random() * canvas.height * 0.4,
+      vx: (side === 0 ? 1 : -1) * (4 + Math.random() * 6),
+      vy: -8 - Math.random() * 8,
+      size: 6 + Math.random() * 8,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.3,
+      life: 1,
+      shape: Math.random() < 0.5 ? 'square' : 'circle'
+    });
+  }
+
+  const startTime = Date.now();
+  let rafId;
+
+  function draw() {
+    const elapsed = Date.now() - startTime;
+    if (elapsed > duration + 2000) {
+      canvas.classList.remove('active');
+      cancelAnimationFrame(rafId);
+      return;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+      p.vy += 0.35; // гравитация
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.rotSpeed;
+      if (elapsed > duration) p.life = Math.max(0, p.life - 0.02);
+
+      ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      if (p.shape === 'square') {
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  draw();
 }
 
 // ============ КАРТА ЗАЗЕРКАЛЬЯ ============
@@ -6410,6 +6879,11 @@ renderCurrentTab();
 // Авто-открытие карты, если в URL есть ?map=...
 if (new URLSearchParams(location.search).has('map')) {
   const tabBtn = document.querySelector('.tab-btn[data-tab="map"]');
+  if (tabBtn) tabBtn.click();
+}
+// Авто-открытие теста, если в URL есть #quiz
+if (location.hash === '#quiz') {
+  const tabBtn = document.querySelector('.tab-btn[data-tab="quiz"]');
   if (tabBtn) tabBtn.click();
 }
 }
