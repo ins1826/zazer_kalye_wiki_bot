@@ -573,12 +573,13 @@ background:rgba(18,18,28,.5);border:1px solid #2a2a3a;border-radius:8px;font-siz
   width:10px;height:10px;border-radius:50%;flex-shrink:0
 }
 .map-empty{color:#666;font-size:.85em;padding:6px 10px}
-.map-toggle-sidebar{display:none}
+.map-toggle-sidebar{display:none;position:relative;z-index:101}
 @media(max-width:900px){
   .map-toggle-sidebar{
     display:block;margin:10px auto 0;width:fit-content;
     background:rgba(42,42,58,.85);color:#e8e8f0;border:1px solid #3a3a4a;
-    padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.85em;font-family:inherit
+    padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.85em;font-family:inherit;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)
   }
   .map-toggle-sidebar:hover{background:#3a3a4a;border-color:#c9a0ff}
 }
@@ -5547,9 +5548,9 @@ function quizReviewToggle() {
 }
 
 function quizShare(percent, title) {
-  const text = `🪞 Я знаю Зазеркалье на ${percent}%!\nМой уровень: ${title} 🎯\n\nПроверь себя: ${location.origin}${location.pathname}#quiz`;
+  const text = `🪞 Я знаю Зазеркалье на ${percent}%!\nМой уровень: ${title} 🎯\n\nПроверь себя: https://t.me/zazer_kalye_wiki_bot`;
   if (navigator.share) {
-    navigator.share({ title: 'Тест по Зазеркалью', text, url: location.href }).catch(()=>{});
+    navigator.share({ title: 'Тест по Зазеркалью', text }).catch(()=>{});
   } else if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(
       () => showToast('📋 Результат скопирован!'),
@@ -7141,6 +7142,49 @@ function attachCardClicks() {
 attachCardClicks();
 const observer = new MutationObserver(() => attachCardClicks());
 observer.observe(document.body, { childList: true, subtree: true });
+
+// ============ ЗАКРЫТИЕ САЙДБАРОВ ПО КЛИКУ ВНЕ ============
+function closeSidebarsIfOutside(e) {
+  // Граф связей
+  const gsb = document.getElementById('graph-sidebar');
+  if (gsb && gsb.classList.contains('open')) {
+    if (!e.target.closest('#graph-sidebar') && !e.target.closest('.graph-toggle-sidebar')) {
+      gsb.classList.remove('open');
+    }
+  }
+  // Карта
+  const msb = document.getElementById('map-sidebar');
+  if (msb && msb.classList.contains('open')) {
+    if (!e.target.closest('#map-sidebar') && !e.target.closest('.map-toggle-sidebar')) {
+      msb.classList.remove('open');
+    }
+  }
+}
+
+// Клик мышью (десктоп)
+document.addEventListener('click', closeSidebarsIfOutside);
+
+// Тап (мобилка). Отслеживаем смещение, чтобы не закрывать при панорамировании.
+let _sbTouchStart = null;
+document.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    _sbTouchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  } else {
+    _sbTouchStart = null;
+  }
+}, { passive: true });
+
+document.addEventListener('touchend', e => {
+  if (!_sbTouchStart) return;
+  const t = e.changedTouches[0];
+  const dx = Math.abs(t.clientX - _sbTouchStart.x);
+  const dy = Math.abs(t.clientY - _sbTouchStart.y);
+  _sbTouchStart = null;
+  // Считаем «тапом» только если палец почти не двигался
+  if (dx < 8 && dy < 8) {
+    closeSidebarsIfOutside(e);
+  }
+}, { passive: true });
 </script>
 
 
