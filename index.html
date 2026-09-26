@@ -1054,6 +1054,12 @@ body.admin-mode #personality-debug { display: block !important; }
 .transcript-card .tt-buttons button.dl:hover {
   border-color: #7ac74f;
 }
+.transcript-card .tt-buttons button.copy {
+  color: #7aa7ff;
+}
+.transcript-card .tt-buttons button.copy:hover {
+  border-color: #7aa7ff;
+}
 #grid-transcripts {
   display: grid;
   grid-template-columns: 1fr;
@@ -2977,6 +2983,7 @@ body.admin-mode .admin-only { display: inline-block !important; }
       <option value="length-asc">📝 Короткие тексты</option>
     </select>
     <button onclick="downloadAllTranscripts()">📥 Скачать всё .txt</button>
+    <button onclick="copyAllTranscripts()">📋 Копировать всё</button>
     <button class="admin-only" onclick="openEdit('transcripts')">➕ Добавить эпизод</button>
   </div>
   <div id="grid-transcripts"></div>
@@ -3092,10 +3099,16 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <!-- Модалка для ручного копирования текста (MiniApp fallback) -->
 <div class="modal-bg" id="transcript-copy-modal">
   <div class="modal" style="max-width:720px">
-    <h2 id="transcript-copy-title">Файл</h2>
-    <p style="color:#888;font-size:.9em;margin-bottom:10px">
-      В Telegram MiniApp скачивание может быть недоступно — выдели текст ниже и скопируй его вручную.
+    <h2 id="transcript-copy-title">Текст</h2>
+    <p style="color:#888;font-size:.9em;margin-bottom:10px;line-height:1.5">
+      К сожалению, в Telegram MiniApp скачивание файлов <b>.txt</b> работает нестабильно — 
+      это ограничение самого WebView, а не вики.<br>
+      Нажми <b>«📋 Копировать всё»</b> или выдели нужный фрагмент вручную и скопируй через системное меню.
     </p>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="primary" onclick="copyModalContent()">📋 Копировать всё</button>
+      <button onclick="downloadFromModal()">📥 Попробовать скачать</button>
+    </div>
     <textarea id="transcript-copy-area" style="min-height:340px"></textarea>
     <div class="btns">
       <button onclick="document.getElementById('transcript-copy-modal').classList.remove('active')">Закрыть</button>
@@ -6132,6 +6145,7 @@ function renderTranscripts() {
       <div class="tt-buttons">
         ${isLong ? `<button onclick="toggleTranscript(${realIdx})" id="tt-btn-${realIdx}">Показать полностью</button>` : ''}
         <button class="dl" onclick="downloadTranscript(${realIdx})">📥 Скачать .txt</button>
+        <button class="copy" onclick="copyTranscript(${realIdx})">📋 Копировать</button>
       </div>
     </div>`;
   }).join('');
@@ -6162,14 +6176,84 @@ function fallbackCopyDialog(content, filename) {
   setTimeout(() => { area.focus(); area.select(); }, 100);
 }
 
-function saveTextFile(content, filename) {
-  // UTF-8 BOM — критично для читаемости в блокноте и др. редакторах
+function isTelegramMiniApp() {
+  return !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData !== undefined);
+}
+
+// Открыть текст в модалке для ручного копирования
+function openCopyModal(content, title) {
+  const modal = document.getElementById('transcript-copy-modal');
+  const area = document.getElementById('transcript-copy-area');
+  const titleEl = document.getElementById('transcript-copy-title');
+  if (!modal || !area) {
+    prompt('Скопируй текст вручную:', content.slice(0, 30000));
+    return;
+  }
+  titleEl.textContent = title || 'Текст';
+  area.value = content;
+  modal.classList.add('active');
+  setTimeout(() => { area.focus(); }, 100);
+}
+
+// Кнопка «Копировать всё» внутри модалки
+function copyModalContent() {
+  const area = document.getElementById('transcript-copy-area');
+  if (!area) return;
+  const text = area.value;
+  const done = () => showToast('📋 Скопировано в буфер обмена');
+  const fail = () => {
+    // Фолбэк: выделяем весь текст — пользователь скопирует системным меню
+    area.focus();
+    area.select();
+    showToast('✋ Текст выделен — нажми «Копировать» в меню');
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, fail);
+  } else {
+    fail();
+  }
+}
+
+// Попробовать скачать прямо из модалки
+function downloadFromModal() {
+  const area = document.getElementById('transcript-copy-area');
+  if (!area) return;
+  const filename = (document.getElementById('transcript-copy-title')?.textContent || 'transcript')
+    .replace(/[^\wа-яё\-]/gi, '_') + '.txt';
+  const blob = new Blob(['\uFEFF' + area.value], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+// Основная функция сохранения/скачивания
+// autodlParam — то, что подставится в URL при редиректе из MiniApp
+function saveTextFile(content, filename, autodlParam) {
+  // В Telegram MiniApp пробуем редирект в браузер — там скачивание работает
+  if (isTelegramMiniApp() && autodlParam) {
+    const tg = window.Telegram.WebApp;
+    try {
+      const url = new URL(window.location.origin + window.location.pathname);
+      url.searchParams.set('autodl', String(autodlParam));
+      if (tg.openLink) {
+        tg.openLink(url.toString());
+        showToast('🌐 Открываю в браузере — там начнётся скачивание');
+        return;
+      }
+    } catch (e) {
+      console.warn('openLink не сработал:', e);
+    }
+  }
+
+  // Обычное скачивание (браузер или если openLink недоступен)
   const blob = new Blob(['\uFEFF' + content], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-
-  const isTg = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData !== undefined);
-
-  // 1) Обычное скачивание
   try {
     const a = document.createElement('a');
     a.href = url;
@@ -6179,34 +6263,28 @@ function saveTextFile(content, filename) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    if (isTelegramMiniApp()) showToast('📥 Если файл не появился — нажми «Копировать»');
   } catch (e) {
     console.warn('Скачивание не удалось:', e);
+    if (isTelegramMiniApp()) openCopyModal(content, filename);
   }
-
-  // 2) В Telegram MiniApp — дублируем в буфер обмена
-  if (isTg) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(content).then(
-        () => showToast('📋 Текст скопирован (скачать в MiniApp не всегда возможно)'),
-        () => fallbackCopyDialog(content, filename)
-      );
-    } else {
-      fallbackCopyDialog(content, filename);
-    }
-  }
-
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
-function downloadTranscript(idx) {
+// Совместимость со старым именем
+function fallbackCopyDialog(content, filename) {
+  openCopyModal(content, filename);
+}
+
+function downloadTranscript(idx, skipRedirect) {
   const t = data.transcripts[idx];
   if (!t) return;
   const header = `Эпизод ${t.episode}${t.name ? ' — ' + t.name : ''}\n${'='.repeat(40)}\n\n`;
   const filename = `zazerkalye_ep_${String(t.episode).padStart(3, '0')}.txt`;
-  saveTextFile(header + (t.text || ''), filename);
+  saveTextFile(header + (t.text || ''), filename, skipRedirect ? null : t.episode);
 }
 
-function downloadAllTranscripts() {
+function downloadAllTranscripts(skipRedirect) {
   if (!data.transcripts || !data.transcripts.length) {
     alert('Нет транскрибаций для скачивания');
     return;
@@ -6217,7 +6295,30 @@ function downloadAllTranscripts() {
     return `${head}\n${'='.repeat(head.length)}\n${t.text || ''}`;
   });
   const full = `ТРАНСКРИБАЦИЯ ЗАЗЕРКАЛЬЯ\nВсего эпизодов: ${sorted.length}\n\n` + parts.join('\n\n\n');
-  saveTextFile(full, 'zazerkalye_transcripts_all.txt');
+  saveTextFile(full, 'zazerkalye_transcripts_all.txt', skipRedirect ? null : 'all');
+}
+
+// Копирование одной транскрибации в модалку
+function copyTranscript(idx) {
+  const t = data.transcripts[idx];
+  if (!t) return;
+  const header = `Эпизод ${t.episode}${t.name ? ' — ' + t.name : ''}\n${'='.repeat(40)}\n\n`;
+  openCopyModal(header + (t.text || ''), `Эпизод ${t.episode}`);
+}
+
+// Копирование всех транскрибаций в модалку
+function copyAllTranscripts() {
+  if (!data.transcripts || !data.transcripts.length) {
+    alert('Нет транскрибаций');
+    return;
+  }
+  const sorted = [...data.transcripts].sort((a, b) => (a.episode || 0) - (b.episode || 0));
+  const parts = sorted.map(t => {
+    const head = `Эпизод ${t.episode}${t.name ? ' — ' + t.name : ''}`;
+    return `${head}\n${'='.repeat(head.length)}\n${t.text || ''}`;
+  });
+  const full = `ТРАНСКРИБАЦИЯ ЗАЗЕРКАЛЬЯ\nВсего эпизодов: ${sorted.length}\n\n` + parts.join('\n\n\n');
+  openCopyModal(full, 'Все эпизоды');
 }
 
 // ============ ТЕСТ НА ЗНАНИЕ ЗАЗЕРКАЛЬЯ ============
@@ -8020,6 +8121,33 @@ renderFilters();renderSidebar();updateSelInfo();updateGraphStats();graphCenter()
 function toggleInfoPopup(){document.getElementById('info-popup').classList.toggle('show');}
 function toggleSidebarMobile(){document.getElementById('graph-sidebar').classList.toggle('open');}
 
+// Авто-скачивание при переходе по ссылке ?autodl=35 или ?autodl=all
+function checkAutoDownload() {
+  const params = new URLSearchParams(location.search);
+  const autodl = params.get('autodl');
+  if (!autodl) return;
+
+  // Убираем параметр из URL сразу — чтобы при F5 не скачивался снова
+  const url = new URL(window.location.href);
+  url.searchParams.delete('autodl');
+  history.replaceState({}, '', url.toString());
+
+  // Небольшая задержка, чтобы страница успела отрисоваться
+  setTimeout(() => {
+    if (autodl === 'all') {
+      downloadAllTranscripts(true); // true = не делать повторный редирект
+    } else {
+      const epNum = parseInt(autodl, 10);
+      const idx = (data.transcripts || []).findIndex(t => String(t.episode) === String(epNum));
+      if (idx >= 0) {
+        downloadTranscript(idx, true);
+      } else {
+        showToast('⚠️ Эпизод ' + autodl + ' не найден');
+      }
+    }
+  }, 400);
+}
+
 // === ЗАГРУЗКА ДАННЫХ ИЗ JSON ===
 async function loadInitialData() {
 try {
@@ -8045,6 +8173,9 @@ console.log("⚠️ Не удалось загрузить data.json, испол
 updateStats();
 buildGraph();
 renderCurrentTab();
+
+// Авто-скачивание при переходе из MiniApp (?autodl=35 или ?autodl=all)
+checkAutoDownload();
 
 // Авто-открытие карты, если в URL есть ?map=...
 if (new URLSearchParams(location.search).has('map')) {
@@ -8410,7 +8541,7 @@ document.addEventListener('touchend', e => {
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия gamma4 · Обновлено: 26.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия gamma5 · Обновлено: 26.09.2026.</div>
 </footer>
 
 </body></html>
