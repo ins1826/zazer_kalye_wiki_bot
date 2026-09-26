@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru"><head>
 <meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪞</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -584,8 +585,37 @@ background:rgba(18,18,28,.5);border:1px solid #2a2a3a;border-radius:8px;font-siz
   .map-toggle-sidebar:hover{background:#3a3a4a;border-color:#c9a0ff}
 }
 
-/* ===== ТЕСТ НА ЗНАНИЕ ЗАЗЕРКАЛЬЯ ===== */
+/* ===== ТЕСТ НА ЗНАНИЕ ЗАЗЕРКАЛЬЯ + ЛИЧНОСТЬ ===== */
 .quiz-wrap{max-width:820px;margin:0 auto;padding:0 4px}
+
+/* Оси личности — полосы результата */
+.axis-row{display:grid;grid-template-columns:80px 1fr 80px;align-items:center;gap:10px;margin-bottom:14px}
+.axis-label{font-size:.85em;color:#888;text-align:center}
+.axis-label.pos{color:#c9a0ff}
+.axis-track{
+  position:relative;height:8px;border-radius:4px;
+  background:linear-gradient(90deg,#3a2a5a 0%,#2a2a3a 50%,#3a3a2a 100%);
+}
+.axis-track::after{
+  content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:#555
+}
+.axis-marker{
+  position:absolute;top:50%;width:18px;height:18px;border-radius:50%;
+  background:#c9a0ff;border:2px solid #1a1a25;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 12px rgba(201,160,255,.6);
+  transition:left .5s ease
+}
+.axis-row-title{font-size:.75em;color:#666;text-align:center;margin-bottom:4px}
+.top-matches{margin-top:16px;text-align:left}
+.top-matches-title{color:#888;font-size:.85em;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.top-match{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:#0f0f17;border:1px solid #2a2a3a;border-radius:6px;margin-bottom:6px
+}
+.top-match img{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #5a3a8a}
+.top-match .tm-name{flex:1;color:#e8e8f0;font-size:.92em}
+.top-match .tm-percent{color:#c9a0ff;font-weight:600;font-size:.9em}
 
 .quiz-start{
   background:#1a1a25;border:1px solid #2a2a3a;border-left:4px solid #c9a0ff;
@@ -677,6 +707,9 @@ background:rgba(18,18,28,.5);border:1px solid #2a2a3a;border-radius:8px;font-siz
   pointer-events:none;z-index:9998;display:none
 }
 #confettiCanvas.active{display:block}
+
+/* Админ-панель превью "Кто ты" */
+body.admin-mode #personality-debug { display: block !important; }
 
 /* Plot timeline */
 .plot-card {
@@ -1029,6 +1062,7 @@ body.admin-mode .admin-only { display: inline-block !important; }
   <button class="tab-btn" data-tab="transcripts">Транскрибация</button>
   <button class="tab-btn" data-tab="map">Карта</button>
   <button class="tab-btn" data-tab="quiz">🎯 Тест</button>
+  <button class="tab-btn" data-tab="personality">🧬 Кто ты?</button>
 </nav>
 
 <div id="tab-characters" class="tab-content">
@@ -2885,7 +2919,34 @@ body.admin-mode .admin-only { display: inline-block !important; }
   </div>
 </div>
 
+<div id="tab-personality" class="tab-content hidden">
+  <div class="quiz-wrap" id="personality-wrap">
+    <!-- содержимое генерируется JS -->
+  </div>
+</div>
+
 <canvas id="confettiCanvas"></canvas>
+
+<!-- Админ-панель: превью результата "Кто ты из Зазеркалья" -->
+<div id="personality-debug" class="admin-only" style="
+  position:fixed;bottom:20px;right:20px;
+  background:rgba(26,26,37,.95);border:1px solid #c9a0ff;border-radius:10px;
+  padding:10px 14px;z-index:9997;font-size:.85em;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  display:none;max-width:280px
+">
+  <div style="color:#c9a0ff;font-weight:600;margin-bottom:6px">🎭 Превью результата (админ)</div>
+  <select id="personality-debug-select" onchange="personalityDebugPreview(this.value)" style="
+    width:100%;background:#0f0f17;color:#e8e8f0;border:1px solid #3a3a4a;
+    padding:6px 8px;border-radius:6px;font-size:.9em;font-family:inherit
+  ">
+    <option value="">— выбери персонажа —</option>
+  </select>
+  <div style="color:#666;font-size:.8em;margin-top:6px;line-height:1.4">
+    Открывает экран результата так, будто ты получила этого персонажа.
+  </div>
+</div>
 
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
@@ -4979,6 +5040,457 @@ const QUIZ_RANKS = [
 
 const QUIZ_QUESTIONS_TO_SHOW = 20;
 
+// ============ ТЕСТ ЛИЧНОСТИ «КТО ТЫ ИЗ ЗАЗЕРКАЛЬЯ» ============
+// 4 оси: order(порядок↔хаос), light(свет↔тьма), social(стая↔одиночка), nature(природа↔механика)
+// Значения на осях у пользователя могут выйти за [-3, +3], у персонажей — строго в этом диапазоне.
+const PERSONALITY_AXES = [
+  { id: 'order',  pos: '📏 Порядок',   neg: '🌀 Хаос'        },
+  { id: 'light',  pos: '☀️ Свет',      neg: '🌑 Тьма'        },
+  { id: 'social', pos: '👥 Стая',      neg: '🧍 Одиночка'    },
+  { id: 'nature', pos: '🌿 Природа',   neg: '⚙️ Механика'    },
+  { id: 'humor',  pos: '🎭 Игривость', neg: '🎩 Серьёзность' }
+];
+
+// 30 вопросов. Шкала весов: ±1 (слабо), ±3 (средне), ±5 (сильно).
+// Короткий тест берёт 12, полный — 25.
+const PERSONALITY_QUESTIONS = [
+  {
+    text: "Как ты относишься к порядку?",
+    answers: [
+      { text: "Люблю, когда всё по полочкам",           scores: { order:  5 } },
+      { text: "Порядок - скука смертная",                scores: { order: -5 } },
+      { text: "Порядок для тех, у кого нет фантазии",    scores: { order: -3 } },
+      { text: "Не задумываюсь об этом",                  scores: { order:  0, nature: 1 } }
+    ]
+  },
+  {
+    text: "Где ты предпочтёшь провести вечер?",
+    answers: [
+      { text: "В Сумеречной роще, среди светлячков",     scores: { nature: 3, social: -2, light: 1 } },
+      { text: "На викторине Вальтасара",                 scores: { social: 3, light: 1, order: -1 } },
+      { text: "В подпольном щекоточном клубе",           scores: { social: 3, light: -1, order: -1 } },
+      { text: "Дома, в дупле, с чашкой компота",         scores: { social: -5, nature: 1, light: 1 } }
+    ]
+  },
+  {
+    text: "Какой транспорт тебе ближе?",
+    answers: [
+      { text: "Быстрые ноги - надёжно",                 scores: { order: 3, social: 1 } },
+      { text: "Вихри - главное успеть",                   scores: { order: -5, nature: 1 } },
+      { text: "Бульдогзер мопсосвинов",                   scores: { nature: -5, social: 1 } },
+      { text: "Свои ноги и неспешность",                  scores: { nature: 5, social: -3 } }
+    ]
+  },
+  {
+    text: "Как ты относишься к шумным компаниям?",
+    answers: [
+      { text: "Обожаю, чем больше - тем веселее",         scores: { social: 5, order: -1 } },
+      { text: "Терплю, если по делу",                     scores: { order: 1, social: 1 } },
+      { text: "Предпочитаю тишину и покой",               scores: { social: -5, nature: 1 } },
+      { text: "Смотря с кем",                             scores: { social: 2, light: 1 } }
+    ]
+  },
+  {
+    text: "Как ты относишься к щекотке?",
+    answers: [
+      { text: "Она запрещена ОНАЙ, но я бы пощекотал",   scores: { social: 1, order: -3, light: -1 } },
+      { text: "Я прима щекоточного клуба (тс-с-с)",       scores: { social: 3, light: -3, order: 1 } },
+      { text: "Мне это неинтересно",                      scores: { social: -3, nature: 1 } },
+      { text: "Краснею от одной мысли",                   scores: { order: 3, social: -1 } }
+    ]
+  },
+  {
+    text: "Ты бы вышел ночью в Сумеречную рощу?",
+    answers: [
+      { text: "Да, я там как дома",                       scores: { nature: 5, light: -1, social: -1 } },
+      { text: "Только с хорошей кокалкой в руке",         scores: { order: -1, light: -3, social: 1 } },
+      { text: "Никогда - там опасно",                     scores: { light: 5, order: 1, nature: -1 } },
+      { text: "Ночью я обычно сплю",                      scores: { order: 3, light: 3 } }
+    ]
+  },
+  {
+    text: "Что для тебя важнее всего?",
+    answers: [
+      { text: "Свобода быть собой",                       scores: { nature: 3, social: -3 } },
+      { text: "Порядок и предсказуемость",                scores: { order: 5, light: 1 } },
+      { text: "Друзья и стая",                            scores: { social: 5, nature: 1 } },
+      { text: "Знания и тайны",                           scores: { order: 3, social: -3, light: 1 } }
+    ]
+  },
+  {
+    text: "Тебе предложили 2 кукича за 1 пакич. Что делаешь?",
+    answers: [
+      { text: "Беру не раздумывая!",                      scores: { order: -3, social: 1 } },
+      { text: "Ищу подвох - так не бывает",               scores: { order: 5, light: 1 } },
+      { text: "Сначала задобрю грибами-бытовиками",       scores: { nature: 5, social: 1 } },
+      { text: "Мне это неинтересно - я не торгуюсь",      scores: { social: -3, order: 1 } }
+    ]
+  },
+  {
+    text: "Опиши идеальный день:",
+    answers: [
+      { text: "Долгая прогулка по лесу и компот вечером", scores: { nature: 5, social: -3, light: 1 } },
+      { text: "Чак-Чак с друзьями и мясной хлеб",         scores: { social: 5, order: -1 } },
+      { text: "Разговоры об искусстве за ужином",         scores: { light: 3, order: 1, social: 1 } },
+      { text: "Работа в лаборатории над новым проектом",  scores: { nature: -5, social: -1, order: 3 } }
+    ]
+  },
+  {
+    text: "Твоя реакция на неожиданную проблему?",
+    answers: [
+      { text: "Иду напролом - была не была",              scores: { order: -5, social: 1 } },
+      { text: "Ищу обходные пути",                        scores: { order: 1, light: 1 } },
+      { text: "Ухожу в тень и думаю",                     scores: { light: -5, social: -1 } },
+      { text: "Обращаюсь к друзьям за помощью",           scores: { social: 5 } }
+    ]
+  },
+  {
+    text: "Кто тебе ближе по духу?",
+    answers: [
+      { text: "Бобыли - простые и уютные",                scores: { nature: 3, order: 1 } },
+      { text: "Грязуны - весёлые и грязные",              scores: { order: -3, social: 3, nature: 1 } },
+      { text: "Мигуны - светящиеся и эффективные",        scores: { nature: -3, light: 3, social: 1 } },
+      { text: "Синие ящеры - шалуны и затейники",         scores: { order: -5, social: 1 } }
+    ]
+  },
+  {
+    text: "Как ты относишься к риску?",
+    answers: [
+      { text: "Обижаете! Дайте два!",                     scores: { order: -5, social: 1 } },
+      { text: "Только с планом и подготовкой",            scores: { order: 5, nature: -1 } },
+      { text: "Лучше понаблюдать со стороны",             scores: { social: -3, light: -1 } },
+      { text: "С друзьями - куда угодно",                 scores: { social: 5 } }
+    ]
+  },
+  {
+    text: "Какое время суток тебе ближе?",
+    answers: [
+      { text: "Раннее утро, пока все спят",               scores: { light: 5, social: -1, nature: 1 } },
+      { text: "Полдень - время дел",                      scores: { light: 3, order: 3 } },
+      { text: "Закат - самое красивое",                   scores: { light: 1, nature: 1 } },
+      { text: "Глубокая ночь, темнота шепчет",            scores: { light: -5, social: -1 } }
+    ]
+  },
+  {
+    text: "Как ты обычно решаешь конфликты?",
+    answers: [
+      { text: "Бью первым - потом разберёмся",            scores: { order: -3, light: -1 } },
+      { text: "Убеждаю словами",                          scores: { social: 3, order: 1 } },
+      { text: "Молча ухожу",                              scores: { social: -5, light: -1 } },
+      { text: "Ищу компромисс, всех мирит",               scores: { order: 3, social: 3 } }
+    ]
+  },
+  {
+    text: "Что для тебя Зазеркалье?",
+    answers: [
+      { text: "Дом, уютное место",                        scores: { social: 1, order: 1, nature: 1 } },
+      { text: "Бесконечное приключение",                  scores: { order: -5, social: 1 } },
+      { text: "Загадка, которую хочу разгадать",          scores: { social: -3, light: -1, order: 1 } },
+      { text: "Возможность построить что-то новое",       scores: { nature: -3, order: 3, social: 1 } }
+    ]
+  },
+  {
+    text: "Что ты думаешь о грибах?",
+    answers: [
+      { text: "Бахромка - моя страсть!",                  scores: { nature: 5, order: -1 } },
+      { text: "Бытовики моют полы - вот это полезно",     scores: { order: 5, light: 1 } },
+      { text: "Пахомистый груздь? Никогда не слышал",     scores: { social: -1, nature: 1 } },
+      { text: "Грибы - отличная закуска к Гыче",          scores: { social: 3, nature: 1 } }
+    ]
+  },
+  {
+    text: "Как ты относишься к славе?",
+    answers: [
+      { text: "Обожаю внимание публики!",                 scores: { social: 5, order: -1 } },
+      { text: "Главное, чтобы работали, а не глазели",    scores: { order: 3, social: -1 } },
+      { text: "Зачем мне это?",                           scores: { social: -5, nature: 1 } },
+      { text: "Только если с пользой для дела",           scores: { order: 3, light: 1 } }
+    ]
+  },
+  {
+    text: "Что бы ты сделал с кукичем?",
+    answers: [
+      { text: "Потратил на что-нибудь яркое",             scores: { order: -3, light: 1 } },
+      { text: "Отложил - вдруг пригодится",               scores: { order: 5, nature: -1 } },
+      { text: "Отдал бы друзьям",                         scores: { social: 5, light: 3 } },
+      { text: "Вложил в строительство Хрящёвки",          scores: { order: 1, nature: -5 } }
+    ]
+  },
+  {
+    text: "Твоё отношение к сыру?",
+    answers: [
+      { text: "Люблю, особенно если он сам прибегает",    scores: { light: 1, order: -1 } },
+      { text: "Сыр везде и всюду!",                       scores: { social: 3, light: 1 } },
+      { text: "Ничто не может быть желтее меня",          scores: { light: 3, social: -1, order: 3 } },
+      { text: "Не понимаю этого ажиотажа",                scores: { social: -3, order: 1 } }
+    ]
+  },
+  {
+    text: "Как ты относишься к полипам?",
+    answers: [
+      { text: "Прогоняю их вон",                          scores: { social: -3, light: 1, order: 1 } },
+      { text: "Они милые, когда их не больше пяти",       scores: { social: 3, light: 3, nature: 1 } },
+      { text: "Страшные, если соберутся в кучу",          scores: { order: 3, social: -1, light: -1 } },
+      { text: "Полипы? Я их не встречал",                 scores: { nature: 1, social: -1 } }
+    ]
+  },
+  {
+    text: "Что тебя пугает больше всего?",
+    answers: [
+      { text: "Оказаться в Сладком хлеву",                scores: { order: 3, social: -1, light: 1 } },
+      { text: "Многоликий Филипп",                        scores: { social: -3, light: -1, order: 1 } },
+      { text: "Пахомий вылез из дупла - точно что-то будет", scores: { order: 1, light: -1 } },
+      { text: "Ничего, я сама угроза",                    scores: { light: -5, order: -1 } }
+    ]
+  },
+  {
+    text: "Как ты относишься к музыке?",
+    answers: [
+      { text: "Зукя - мой любимый певец",                 scores: { nature: 5, social: -1 } },
+      { text: "Канифоль болотного скрипача - завораживает", scores: { nature: 3, light: -1 } },
+      { text: "Люблю хоровое пение с друзьями",           scores: { social: 5, light: 1 } },
+      { text: "Музыка - это хаос, терпеть не могу",       scores: { order: 5, social: -1 } }
+    ]
+  },
+  {
+    text: "Ты бы согласился стать Теопиксом (Деопиксом)?",
+    answers: [
+      { text: "Скип - моя мечта, конечно да!",            scores: { social: 3, order: -3, light: -1 } },
+      { text: "Только если это поможет друзьям",          scores: { social: 5, light: 3 } },
+      { text: "Нет, я не синий ящер",                     scores: { order: 1, nature: 1 } },
+      { text: "Что такое скип? Не знаю такого",           scores: { social: -3, light: 1 } }
+    ]
+  },
+  {
+    text: "Что бы ты сделал в Сладком хлеву?",
+    answers: [
+      { text: "Искал выход - я тут по делу",              scores: { order: 3, social: -1 } },
+      { text: "Поиграл бы в догонялки с Кожником",        scores: { social: 3, order: -3 } },
+      { text: "Ходил бы на руках и поклонялся сыру",      scores: { order: -1, social: 1, light: 1 } },
+      { text: "Сидел бы тихо, никого не трогал",          scores: { social: -5, order: 1 } }
+    ]
+  },
+  {
+    text: "Как ты относишься к тишине?",
+    answers: [
+      { text: "Обожаю, тишина - лучшее лекарство",        scores: { social: -5, nature: 3 } },
+      { text: "Плохо, мне нужно слышать голоса",          scores: { social: 5, light: 1 } },
+      { text: "Только как пауза перед бурей",             scores: { order: -1, light: -1 } },
+      { text: "В тишине хорошо думать о делах",           scores: { order: 3, social: -1 } }
+    ]
+  },
+  {
+    text: "Ты нашёл мясной хлеб. Что дальше?",
+    answers: [
+      { text: "Съем! Мясной хлеб - это святое",           scores: { social: 1, nature: 1 } },
+      { text: "Подарю Баранче - он обрадуется",           scores: { social: 5, light: 3 } },
+      { text: "Использую как приманку для Михаила",       scores: { order: 3, nature: -1 } },
+      { text: "Не буду трогать, это чужое",               scores: { order: 5, light: 1, social: -1 } }
+    ]
+  },
+  {
+    text: "Как ты относишься к темноте?",
+    answers: [
+      { text: "Это моё время, я живу ночью",              scores: { light: -5, social: -1 } },
+      { text: "Боюсь - там Многоликий Филипп",            scores: { light: 5, order: 1 } },
+      { text: "Нейтрально, просто часть суток",           scores: { light: 0, order: 1 } },
+      { text: "В темноте веселее - можно пошалить",       scores: { light: -3, order: -3, social: 1 } }
+    ]
+  },
+  {
+    text: "Что для тебя важнее - долг или свобода?",
+    answers: [
+      { text: "Долг! Даже если трудно",                   scores: { order: 5, light: 1 } },
+      { text: "Свобода быть собой",                       scores: { nature: 5, social: -3 } },
+      { text: "Долг перед друзьями",                      scores: { social: 5, order: 1 } },
+      { text: "Свобода - только чтобы творить зло",       scores: { light: -5, order: -1 } }
+    ]
+  },
+  {
+    text: "Как ты относишься к правилам ОНО и ОНА?",
+    answers: [
+      { text: "Уважаю, они за порядок",                   scores: { order: 5, light: 3 } },
+      { text: "Соблюдаю, но иногда ворчу",                scores: { order: 1, light: 1 } },
+      { text: "Мне всё равно, я живу свою жизнь",         scores: { social: -1, order: -1, nature: 1 } },
+      { text: "Правила для того, чтобы их нарушать",      scores: { order: -5, light: -3 } }
+    ]
+  },
+  {
+    text: "Что бы ты подарил Бабе Жуле?",
+    answers: [
+      { text: "Черпачок Гычи",                            scores: { nature: 3, light: 1 } },
+      { text: "Помощь по хозяйству",                      scores: { order: 3, social: 3, light: 3 } },
+      { text: "Хорошую историю про Жвачников",            scores: { social: 3, order: -1 } },
+      { text: "Ничего - не люблю подарки",                scores: { social: -3, order: 1 } }
+    ]
+  },
+  {
+    text: "Опиши свою реакцию на проделки Синих Ящеров:",
+    answers: [
+      { text: "Смеюсь - обожаю шалости!",                 scores: { order: -5, light: 1, social: 3, humor: 3 } },
+      { text: "Злюсь, кто-то должен это прекратить",      scores: { order: 5, social: -1, humor: -3 } },
+      { text: "Присоединяюсь к очередной шалости",        scores: { order: -3, light: -1, social: 1, humor: 4 } },
+      { text: "Мне безразлично",                          scores: { social: -3, nature: 1, humor: -1 } }
+    ]
+  },
+  {
+    text: "Как ты относишься к шуткам?",
+    answers: [
+      { text: "Шучу постоянно, жизнь - это игра",         scores: { humor:  5, order: -2 } },
+      { text: "Люблю посмеяться с друзьями",              scores: { humor:  3, social: 2 } },
+      { text: "Шутки - дело хорошее, но в меру",          scores: { humor:  1 } },
+      { text: "Серьёзные дела - не до шуток",             scores: { humor: -5, order: 2 } }
+    ]
+  },
+  {
+    text: "Что ты думаешь о розыгрышах?",
+    answers: [
+      { text: "Обожаю! Чем коварнее, тем смешнее",        scores: { humor:  5, order: -3, light: -1 } },
+      { text: "Иногда можно, если безобидно",             scores: { humor:  2 } },
+      { text: "Не понимаю, зачем это нужно",              scores: { humor: -3, order: 2 } },
+      { text: "Розыгрыши - это зло",                      scores: { humor: -5, light: 2 } }
+    ]
+  },
+  {
+    text: "Какое у тебя отношение к правилам?",
+    answers: [
+      { text: "Правила существуют, чтобы их нарушать",    scores: { humor:  4, order: -5 } },
+      { text: "Иногда можно нарушить ради смеха",         scores: { humor:  3, order: -2 } },
+      { text: "Лучше их соблюдать",                       scores: { humor: -3, order: 3 } },
+      { text: "Правила - основа всего",                   scores: { humor: -5, order: 5, light: 1 } }
+    ]
+  },
+  {
+    text: "Что ты чувствуешь, когда кто-то падает?",
+    answers: [
+      { text: "Смеюсь в голос, не могу сдержаться",       scores: { humor:  5, light: -2 } },
+      { text: "Улыбаюсь, но спешу помочь",                scores: { humor:  2, social: 2 } },
+      { text: "Бегу помогать без раздумий",               scores: { humor: -2, social: 3, light: 3 } },
+      { text: "Как можно смеяться над чужим горем?",      scores: { humor: -5, light: 3, order: 2 } }
+    ]
+  },
+  {
+    text: "Щекотка — это забава или серьёзное испытание?",
+    answers: [
+      { text: "Забава! Обожаю щекотаться",                scores: { humor:  5, order: -2 } },
+      { text: "Весело, но в меру",                        scores: { humor:  3 } },
+      { text: "Забавно смотреть, но не на себе",          scores: { humor:  1, light: 1 } },
+      { text: "Это испытание, запрещённое ОНАЙ",          scores: { humor: -5, order: 3 } }
+    ]
+  }
+];
+
+// Профили персонажей. Шкала −5..+5. Чем ближе два персонажа — тем чаще путаются в результатах.
+// ⚙️ КАЛИБРОВКА: если персонаж выдаётся «не туда» — правь его числа.
+const PERSONALITY_PROFILES = {
+  // === Крупные персонажи ===
+  'Акакий Куролесов':    { order:  0, light:  3, social: -5, nature:  5, humor:  1, img: 'images/Akakiy_Kurolesov.png',   short: 'Созерцательный гриб' },
+  'Вальтасар':           { order: -3, light:  3, social:  5, nature:  0, humor:  4, img: 'images/Valtasar.png',            short: 'Эксцентричный шоумен' },
+  'Баба Жуля':           { order:  2, light:  3, social:  2, nature:  5, humor:  2, img: 'images/Baba_ZHulya.png',         short: 'Хлебосольная хозяйка' },
+  'Дед Ченя':            { order:  1, light:  2, social: -2, nature:  5, humor: -2, img: 'images/DedChenya.png',           short: 'Ленивый сожитель Бабы Жули' },
+  'Истуканус':           { order:  5, light:  0, social:  0, nature:  2, humor: -5, img: 'images/Istukanus.png',           short: 'Божество порядка' },
+  'ОНО':                 { order:  4, light:  5, social: -1, nature: -3, humor: -5, img: 'images/ONO.png',                 short: 'Орбитальный наблюдатель' },
+  'ОНА':                 { order:  3, light: -5, social: -1, nature:  0, humor: -5, img: 'images/ONA.png',                 short: 'Покровительница темноты' },
+  'Птозный Эдгар':       { order:  0, light:  3, social:  3, nature:  0, humor: -1, img: 'images/Ptoznyy_Edgar.png',       short: 'Предприимчивый логист' },
+  'Доктор Эпикантус':    { order:  2, light:  2, social: -3, nature: -3, humor: -2, img: 'images/Doktor_Epikantus.png',    short: 'Гений-коллекционер' },
+  'Профессор Игорь Диод':{ order:  3, light:  2, social: -2, nature: -5, humor: -4, img: 'images/IgorDiod.png',            short: 'Изобретатель-перфекционист' },
+  'Пахомий':             { order:  2, light:  1, social: -5, nature:  4, humor:  2, img: 'images/Pahomiy.png',             short: 'Затворник дупла' },
+  'Фукс':                { order:  0, light:  0, social: -4, nature:  5, humor: -1, img: 'images/Fuks.png',                short: 'Мудрый филин-молчун' },
+  'Зукя':                { order:  0, light:  2, social: -3, nature:  5, humor:  3, img: 'images/Zukya.png',               short: 'Свободный певец' },
+  'Орлундий':            { order:  0, light:  0, social: -5, nature:  3, humor:  0, img: 'images/Orlundiy.png',            short: 'Изгой, верный себе' },
+  'Грибной Архивариус':  { order:  5, light:  2, social: -3, nature:  2, humor: -3, img: 'images/Gribnoy_Arhivarius.png',  short: 'Педантичный книжник' },
+  'Многоликий Филипп':   { order: -3, light: -5, social: -2, nature:  0, humor: -1, img: 'images/Mnogolikiy_Filipp.png',   short: 'Хитрый оборотень' },
+  'Сортирный Сатир':     { order: -3, light:  0, social:  3, nature:  0, humor:  5, img: 'images/Sortirnyy_Satir.png',     short: 'Дерзкий остряк' },
+  'Дядюшка Фантасмагор': { order: -2, light:  3, social:  2, nature: -3, humor:  3, img: 'images/DyaDyaFantasmo.png',      short: 'Безумный строитель' },
+  'Баранча':             { order:  0, light:  2, social:  5, nature:  2, humor:  4, img: 'images/Barancha.png',            short: 'Душа компании' },
+  'Большой Дима':        { order:  2, light:  3, social:  5, nature:  3, humor:  3, img: 'images/Bolshoy_Dima.png',        short: 'Добрый защитник' },
+  'Коленыч':             { order: -5, light:  0, social: -3, nature:  2, humor: -2, img: 'images/Kolenych.png',            short: 'Дикий берсерк' },
+  'Лесной Курбак':       { order:  2, light:  0, social: -5, nature:  5, humor: -4, img: 'images/Lesnoy_Kurbak.png',       short: 'Упрямый нелюдим' },
+  'Смоломаз':            { order:  5, light: -2, social: -2, nature: -5, humor: -5, img: 'images/Smolomaz.png',            short: 'Надёжный телохранитель' },
+  'Казимир':             { order: -5, light: -2, social:  0, nature:  2, humor:  4, img: 'images/Kazimir.png',             short: 'Хитрый ловкач' },
+  'Господин Кривин':     { order:  3, light:  3, social: -2, nature: -2, humor:  1, img: 'images/Gospodin_Krivin.png',     short: 'Утончённый эстет' },
+  'Сатор Арепыч':        { order:  3, light:  2, social: -2, nature:  0, humor: -4, img: 'images/Sator_Arepych.png',       short: 'Целеустремлённый охотник' },
+  'Мопсосвины':          { order:  3, light:  0, social:  3, nature: -5, humor:  0, img: 'images/Mopsosviny.png',          short: 'Коллективные механики' },
+  'Мигуны':              { order:  2, light:  5, social:  3, nature: -5, humor: -2, img: 'images/Miguny.png',              short: 'Светящаяся команда' },
+  'Грязуны':             { order: -2, light:  0, social:  5, nature:  3, humor:  4, img: 'images/Gryazuny.png',            short: 'Весёлые грязнули' },
+  'Тётя Варя':           { order:  2, light: -2, social:  3, nature:  0, humor: -1, img: 'images/Tyotya_Varya.png',        short: 'Властная наставница' },
+  'Дон Окунь':           { order:  3, light:  4, social:  4, nature: -2, humor:  1, img: 'images/Don_Okun.png',            short: 'Респектабельный эстет' },
+  'Подмыхан':            { order:  3, light:  2, social: -2, nature:  3, humor: -3, img: 'images/Podmihan.png',            short: 'Хранитель пустыни' },
+  'Доктор Лист':         { order:  3, light:  5, social:  2, nature:  2, humor:  2, img: 'images/DoktorList.png',          short: 'Добрый лекарь' },
+  'Сырный Джо':          { order: -2, light:  2, social:  3, nature: -2, humor:  3, img: 'images/Syrnyy_Dzho.png',         short: 'Сырный артист' },
+  'Желейный князь':      { order:  1, light:  0, social: -3, nature:  3, humor: -1, img: 'images/ZHeleynyy_Knyaz.png',     short: 'Загадочный проводник' },
+  'Магога':              { order:  5, light:  0, social: -3, nature: -2, humor: -3, img: 'images/Magoga.png',              short: 'Страж подземелья' },
+  'Рудло':               { order:  1, light:  2, social: -4, nature:  2, humor: -2, img: 'images/Rudlo.png',               short: 'Робкий крот' },
+  'Мальчик-Педаль':      { order:  5, light:  5, social:  5, nature:  2, humor:  4, img: 'images/Malchik-Pedal.png',       short: 'Всеобщий помощник' },
+  'Пальчик-Медаль':      { order: -5, light: -3, social:  0, nature:  0, humor:  5, img: 'images/Palchik-Medal.png',       short: 'Мелкий пакостник' },
+  'Гриб-Бытовик':        { order:  1, light:  4, social:  1, nature:  5, humor: -1, img: 'images/GribBitovik.png',         short: 'Трудолюбивый гриб' },
+
+  // === Бобыли ===
+  'Реутень':             { order:  5, light:  2, social: -5, nature:  3, humor: -3, img: 'images/Reuten.png',              short: 'Спортивный силач' },
+  'Чёрный Эклер':        { order:  0, light:  2, social:  3, nature:  2, humor:  3, img: 'images/ChorniEkler.png',         short: 'Болтливый рассказчик' },
+  'Ёксель-Моксель':      { order:  3, light: -2, social: -4, nature:  3, humor: -3, img: 'images/YokselMoksel.png',        short: 'Подозрительный страж' },
+  'Вандух':              { order:  2, light:  0, social:  2, nature: -1, humor: -1, img: 'images/Vanduh.png',              short: 'Горожанин Медного града' },
+  'Шнеки-Шмяк':          { order:  2, light:  0, social: -2, nature:  2, humor: -2, img: 'images/shnekiShmyak.png',        short: 'Осторожный привратник' },
+  'Цупль-Звак':          { order:  0, light:  0, social:  0, nature:  2, humor: -1, img: 'images/CuplCwak.png',            short: 'Скромный бобыль' },
+  'Гузлик':              { order: -3, light:  3, social:  5, nature:  2, humor:  4, img: 'images/Guzlik.png',              short: 'Верный артист' },
+  'Лесной бобыль':       { order:  0, light:  0, social: -2, nature:  5, humor: -1, img: 'images/Lesnoy_bobyl.png',        short: 'Дикий лесной житель' },
+  'Пустынный бобыль':    { order: -2, light: -2, social: -2, nature:  3, humor: -3, img: 'images/PustinniyBobil.png',      short: 'Агрессивный кочевник' },
+  'Царь Бобылей':        { order: -4, light:  1, social:  4, nature:  1, humor:  5, img: 'images/Bulizhnik.png',           short: 'Авантюрист-булыжник' },
+
+  // === Расы и существа ===
+  'Полипы':              { order:  0, light:  3, social:  3, nature:  3, humor:  2, img: 'images/Polipy.png',              short: 'Милые комочки' },
+  'Камнюки':             { order:  0, light:  0, social: -3, nature:  2, humor: -3, img: 'images/Kamnuki.png',             short: 'Суровые големы' },
+  'Хрычи':               { order:  0, light:  2, social:  0, nature:  5, humor:  1, img: 'images/Hrych.png',               short: 'Тыква с характером' },
+  'Бахромка':            { order:  0, light:  4, social: -1, nature:  4, humor:  0, img: 'images/Bahromka.png',            short: 'Обычный гриб' },
+  'Пчелисей':            { order:  5, light:  5, social:  5, nature:  5, humor:  1, img: 'images/Pchelisey.png',           short: 'Надёжный почтальон' },
+  'Светлячки':           { order: -2, light:  5, social:  3, nature:  3, humor:  3, img: 'images/Svetlyachki.png',         short: 'Назойливые огоньки' },
+  'Совяне':              { order:  2, light:  0, social: -3, nature:  3, humor: -2, img: 'images/Sovyane.png',             short: 'Скрытные обитатели' },
+  'Кукушки':             { order: -2, light:  2, social:  5, nature:  2, humor:  2, img: 'images/Kukushki.png',            short: 'Любопытные птицы' },
+  'Калач':               { order:  0, light:  2, social:  2, nature:  2, humor:  0, img: 'images/Kalach.png',              short: 'Аппетитный мотылёк' },
+  'Осы':                 { order: -2, light: -3, social:  3, nature:  2, humor:  2, img: 'images/Osy.png',                 short: 'Вредители-маскировщики' },
+  'Жаба':                { order: -1, light: -1, social: -5, nature:  5, humor: -3, img: 'images/ZHaba.png',               short: 'Квакушка Сумеречной рощи' },
+  'Улитолий':            { order: -2, light:  3, social:  0, nature:  3, humor:  1, img: 'images/Litoliy.png',             short: 'Забывчивый слизень' },
+  'Грочилы':             { order:  0, light: -2, social:  5, nature:  3, humor:  0, img: 'images/Grochil.png',             short: 'Охотники на ноготков' },
+  'Ламантины':           { order:  0, light:  2, social:  4, nature:  1, humor:  1, img: 'images/Lamantiny.png',           short: 'Простудливые добряки' },
+  'Голуби':              { order: -1, light:  2, social:  3, nature:  2, humor:  0, img: 'images/Golub.png',               short: 'Похожи на пескарей' },
+
+  // === Мелкие роли ===
+  'Духа':                { order:  0, light:  1, social:  2, nature:  2, humor:  1, img: 'images/Duha.png',                short: 'Не переходят дорогу' },
+  'Жадность на лайке':   { order: -1, light: -5, social: -3, nature: -2, humor: -5, img: 'images/ZHadnost_na_layke.png',   short: 'Тёмная сущность' },
+  'Бесхозные Камни':     { order:  0, light:  2, social:  3, nature:  4, humor: -2, img: 'images/Kamni.png',               short: 'Камни под покровительством ОНА' },
+  'Епень':               { order: -5, light: -2, social:  2, nature:  2, humor:  3, img: 'images/Epen.png',                short: 'Хитрый небыличник' },
+  'Кожник':              { order: -4, light:  0, social:  4, nature:  2, humor:  5, img: 'images/Kozhnik.png',             short: 'Игривый трюкач' },
+  'Пыльный Глеб':        { order:  3, light: -2, social: -5, nature: -3, humor: -3, img: 'images/PilniyGleb.png',          short: 'Хранитель пыли' },
+  'Кловунец':            { order: -3, light:  2, social:  5, nature: -2, humor:  4, img: 'images/Klovunec.png',            short: 'Амбициозный самозванец' },
+  'Мухачи':              { order:  2, light:  0, social:  5, nature:  2, humor: -1, img: 'images/Muhach.png',              short: 'Обиженные ящеры' },
+  'Пакет':               { order:  4, light:  3, social:  2, nature:  0, humor:  0, img: 'images/Paket.png',               short: 'Благородный хранитель' },
+  'Толстомясочка':       { order:  2, light:  3, social:  3, nature:  5, humor:  2, img: 'images/Tolstomyasochka.png',     short: 'Любимица Бабы Жули' },
+  'Волнистый попугай Николай': { order: -3, light: 2, social: 4, nature: 0, humor: 1, img: 'images/VolnistiyPopugayNikolay.png', short: 'Всем нужный' },
+  'Дядя Егоня':          { order: -2, light: -2, social: -1, nature: -1, humor:  3, img: 'images/DyadyzEhonya.png',        short: 'Беспринципный глаз' },
+  'Тонкий Феодал':       { order: -4, light: -1, social:  2, nature:  0, humor:  1, img: 'images/TonkiyFeodal.png',        short: 'Слух, который везде' },
+  'Чертилий':            { order: -2, light:  2, social: -2, nature:  2, humor:  1, img: 'images/Chertiliy.png',           short: 'Странная кокша' },
+  'Маня Понич':          { order:  2, light:  3, social:  0, nature:  3, humor:  2, img: 'images/ManyaPonich.png',         short: 'Славная малая' },
+  'Валькирия':           { order:  3, light:  3, social:  4, nature:  2, humor:  0, img: 'images/Valkiriya.png',           short: 'Кандидат в ведьмы' },
+  'Евдокия':             { order: -2, light:  0, social:  3, nature:  3, humor: -1, img: 'images/Evdokiya.png',            short: 'Мечтает стать ведьмой' },
+  'Брат Евдокии':        { order:  4, light:  2, social:  4, nature: -2, humor: -3, img: 'images/Brat_Evdokii.png',        short: 'Карьерист на Псарне' },
+  'Бульдогзер':          { order:  3, light:  0, social:  2, nature: -5, humor:  0, img: 'images/Buldogzer.png',           short: 'Машина-участник гонок' },
+  'Петухи':              { order: -2, light:  2, social:  2, nature:  3, humor:  2, img: 'images/Petuhi.png',              short: 'Разбежались по мху' },
+  'Ягодники':            { order: -2, light: -2, social:  2, nature:  3, humor:  0, img: 'images/Yagodniki.png',           short: 'Облизыватели' },
+  'Синие ящеры':         { order: -3, light: -2, social:  4, nature:  0, humor:  5, img: 'images/Sinie_YAschery.png',      short: 'Озорные любители шалостей' }
+};
+
+const PERSONALITY_CLONES = {
+  'Синие ящеры': [
+    { name: 'Бубоня',  img: 'images/Bubonya.png' },
+    { name: 'Фубоня',  img: 'images/Fubonya.png' },
+    { name: 'Цубоня',  img: 'images/Cubonya.png' },
+    { name: 'Ибоня',   img: 'images/Fubonya.png' },
+    { name: 'Субоня',  img: 'images/Bubonya.png' }
+  ]
+};
+const PERSONALITY_QUESTIONS_TO_SHOW_SHORT = 12;
+const PERSONALITY_QUESTIONS_TO_SHOW_LONG = 25;
+
 // ============ СОСТОЯНИЕ ============
 let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
 // === РЕЖИМ АДМИНИСТРАТОРА ===
@@ -5283,6 +5795,9 @@ mapFit();
 if (tab === 'quiz') {
 quizState = null;
 }
+if (tab === 'personality') {
+personalityState = null;
+}
 });
 });
 
@@ -5297,6 +5812,7 @@ function renderCurrentTab() {
   else if (currentTab === 'transcripts') renderTranscripts();
   else if (currentTab === 'map') initMap();
   else if (currentTab === 'quiz') renderQuiz();
+  else if (currentTab === 'personality') renderPersonality();
   else if (currentTab === 'graph') renderGraph();
 }
 
@@ -5545,6 +6061,346 @@ function quizReviewToggle() {
   const el = document.getElementById('quiz-review');
   if (!el) return;
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// ============ ЛОГИКА ТЕСТА ЛИЧНОСТИ ============
+let personalityState = null;
+
+function renderPersonality() {
+  const wrap = document.getElementById('personality-wrap');
+  if (!wrap) return;
+
+  if (!personalityState) {
+    let savedShort = null, savedLong = null, savedFull = null;
+    try {
+      savedShort = localStorage.getItem('zz_personality_result_short');
+      savedLong  = localStorage.getItem('zz_personality_result_long');
+      savedFull  = localStorage.getItem('zz_personality_result_full');
+    } catch(e){}
+    const totalCharacters = Object.keys(PERSONALITY_PROFILES).length;
+    wrap.innerHTML = `
+      <div class="quiz-start">
+        <h2>🧬 Кто ты из Зазеркалья?</h2>
+        <p>Мы сравним твои ответы с ${totalCharacters} жителями Зазеркалья.<br>
+        Отвечай честно, а не «как надо». Здесь неправильных ответов нет.</p>
+        <div style="font-size:.85em;color:#888;background:rgba(201,160,255,.08);border-left:2px solid #5a3a8a;padding:8px 14px;border-radius:6px;margin-bottom:16px;text-align:left;line-height:1.5">
+          🧪 <b>Тест в разработке.</b> Он уже работает и даёт правдоподобные результаты, но профили персонажей продолжают калиброваться — со временем совпадения станут ещё точнее, спасибо за понимание ^^
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+          <button onclick="personalityStart('short')" style="min-width:200px">
+            ⚡ Короткий тест<br>
+            <span style="font-size:.8em;opacity:.8;font-weight:400">${PERSONALITY_QUESTIONS_TO_SHOW_SHORT} вопросов · быстро</span>
+          </button>
+          <button onclick="personalityStart('long')" style="min-width:200px;background:#3a3a4a">
+            🎯 Полный тест<br>
+            <span style="font-size:.8em;opacity:.8;font-weight:400">${PERSONALITY_QUESTIONS_TO_SHOW_LONG} вопросов · точнее</span>
+          </button>
+          <button onclick="personalityStart('full')" style="min-width:200px;background:#5a3a8a">
+            🏆 Марафон<br>
+            <span style="font-size:.8em;opacity:.8;font-weight:400">${PERSONALITY_QUESTIONS.length} вопросов · максимально точно</span>
+          </button>
+        </div>
+        ${(savedShort || savedLong || savedFull) ? `<div class="quiz-meta" style="margin-top:20px">
+          ${savedShort ? `⚡ Прошлый короткий: <b style="color:#c9a0ff">${escapeHtml(savedShort)}</b>` : ''}
+          ${savedShort && (savedLong || savedFull) ? '<br>' : ''}
+          ${savedLong ? `🎯 Прошлый полный: <b style="color:#c9a0ff">${escapeHtml(savedLong)}</b>` : ''}
+          ${savedLong && savedFull ? '<br>' : ''}
+          ${savedFull ? `🏆 Прошлый марафон: <b style="color:#c9a0ff">${escapeHtml(savedFull)}</b>` : ''}
+        </div>` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  if (personalityState.phase === 'question') {
+    const total = personalityState.questions.length;
+    const idx = personalityState.current;
+    const q = personalityState.questions[idx];
+    const progress = (idx / total) * 100;
+
+    const LETTERS = ['A','B','C','D'];
+    wrap.innerHTML = `
+      <div class="quiz-question-card">
+        <div class="quiz-progress"><div class="quiz-progress-bar" style="width:${progress}%"></div></div>
+        <div class="quiz-counter">Вопрос ${idx + 1} из ${total}</div>
+        <div class="quiz-q-text">${escapeHtml(q.text)}</div>
+        <div class="quiz-answers">
+          ${q.answers.map((ans, i) => `
+            <button class="quiz-answer" onclick="personalityAnswer(${i})">
+              <span class="letter">${LETTERS[i]}</span>
+              <span>${escapeHtml(ans.text)}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if (personalityState.phase === 'result') {
+    const result = personalityState.result;
+    const top3 = personalityState.top3;
+
+    // Оси: для каждой пары pos/neg считаем положение маркера 0..100
+    const axesHtml = PERSONALITY_AXES.map(axis => {
+      const val = result.userVector[axis.id] || 0;
+      // Пользовательский вектор обычно в диапазоне [-15, 15]. Нормализуем к [-1, 1]
+      const norm = Math.max(-1, Math.min(1, val / 12));
+      const posPercent = 50 + norm * 50;
+      return `<div class="axis-row">
+        <div class="axis-label">${axis.neg}</div>
+        <div class="axis-track"><div class="axis-marker" style="left:${posPercent}%"></div></div>
+        <div class="axis-label pos">${axis.pos}</div>
+      </div>`;
+    }).join('');
+
+    const topHtml = top3.map((m, i) => `
+      <div class="top-match">
+        <img src="${escapeHtml(m.img)}" onerror="this.style.display='none'">
+        <span class="tm-name">${i === 0 ? '🏆 ' : ''}${escapeHtml(m.name)}</span>
+        <span class="tm-percent">${m.percent}%</span>
+      </div>
+    `).join('');
+
+    wrap.innerHTML = `
+      <div class="quiz-result">
+        <img class="quiz-result-img" src="${escapeHtml(result.img)}" alt="${escapeHtml(result.name)}" onerror="this.style.display='none'">
+        <div class="quiz-result-rank" style="font-size:1.6em">${escapeHtml(result.name)}</div>
+        <div class="quiz-result-score" style="font-size:1em;color:#888;font-style:italic">${escapeHtml(result.short)}</div>
+        <div class="quiz-result-desc" style="margin-top:14px">
+          Ты ближе всего к этому персонажу Зазеркалья.<br>
+          Совпадение: <b style="color:#c9a0ff">${result.percent}%</b>
+        </div>
+        <div style="text-align:left;margin-top:24px">
+          <div class="axis-row-title">Твой профиль по осям</div>
+          ${axesHtml}
+        </div>
+        <div class="top-matches">
+          <div class="top-matches-title">Тоже похоже на:</div>
+          ${topHtml}
+        </div>
+        <div class="quiz-result-actions" style="margin-top:24px">
+          <button class="primary" onclick="personalityStart('${personalityState.mode || 'short'}')">🔄 Пройти снова</button>
+          <button onclick="personalityShare('${escapeHtml(result.name).replace(/'/g,"\\'")}', ${result.percent})">📤 Поделиться</button>
+          <button onclick="personalityState=null; renderPersonality()">🏠 К выбору теста</button>
+        </div>
+      </div>
+    `;
+
+    // Если сходство очень высокое — фейерверк
+    if (result.percent >= 90) setTimeout(() => fireConfetti(), 200);
+    return;
+  }
+}
+
+function personalityStart(mode = 'short') {
+  let count;
+  if (mode === 'full') count = PERSONALITY_QUESTIONS.length;
+  else if (mode === 'long') count = PERSONALITY_QUESTIONS_TO_SHOW_LONG;
+  else count = PERSONALITY_QUESTIONS_TO_SHOW_SHORT;
+  const pool = shuffleArr(PERSONALITY_QUESTIONS).slice(0, Math.min(count, PERSONALITY_QUESTIONS.length));
+  personalityState = {
+    mode: mode,
+    phase: 'question',
+    questions: pool,
+    current: 0
+  };
+  renderPersonality();
+}
+
+function personalityAnswer(i) {
+  if (!personalityState || personalityState.phase !== 'question') return;
+  const q = personalityState.questions[personalityState.current];
+  const chosen = q.answers[i];
+  if (!chosen) return;
+
+  // Сохраняем ответ
+  if (!personalityState.scores) personalityState.scores = {};
+  if (!personalityState.userAnswers) personalityState.userAnswers = [];
+  personalityState.userAnswers.push({ qText: q.text, aText: chosen.text });
+
+  // Прибавляем очки
+  Object.entries(chosen.scores || {}).forEach(([axis, val]) => {
+    personalityState.scores[axis] = (personalityState.scores[axis] || 0) + val;
+  });
+
+  // Автопереход
+  personalityState.current++;
+  if (personalityState.current >= personalityState.questions.length) {
+    personalityState.phase = 'result';
+    personalityState.result = computePersonalityResult(personalityState.scores);
+    // Берём топ-4, чтобы после фильтрации группы осталось хотя бы 3
+    personalityState.top3 = computeTopMatches(personalityState.scores, 4)
+      .filter(m => m.name !== personalityState.result.groupName)
+      .slice(0, 3);
+    const key = personalityState.mode === 'full'
+      ? 'zz_personality_result_full'
+      : (personalityState.mode === 'long' ? 'zz_personality_result_long' : 'zz_personality_result_short');
+    try { localStorage.setItem(key, personalityState.result.name); } catch(e){}
+  }
+  renderPersonality();
+}
+
+function computePersonalityResult(userScores) {
+  // Пользователь нормируется по своему maxAbs
+  const userNorm = normalizeAxisVector(userScores, true);
+
+  let best = null;
+  let bestDist = Infinity;
+
+  Object.entries(PERSONALITY_PROFILES).forEach(([name, prof]) => {
+    // Профили нормируются делением на 5 (сохраняем интенсивность)
+    const pNorm = normalizeAxisVector(prof, false);
+    const dist = axisDistance(userNorm, pNorm);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = { name, prof };
+    }
+  });
+
+  // Процент совпадения. Реалистичный максимум расстояния — около 3.
+  const maxDist = 3.0;
+  const percent = Math.max(20, Math.round((1 - Math.min(1, bestDist / maxDist)) * 100));
+
+  // Если совпали с группой-клоном (например, «Синие ящеры») —
+  // раскрываем в случайного участника.
+  let displayName = best.name;
+  let displayImg  = best.prof.img;
+  if (typeof PERSONALITY_CLONES !== 'undefined' && PERSONALITY_CLONES[best.name]) {
+    const pool = PERSONALITY_CLONES[best.name];
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    displayName = pick.name;
+    displayImg  = pick.img;
+  }
+
+  return {
+    name: displayName,
+    groupName: best.name,   // для отладки и фильтрации топ-3
+    short: best.prof.short,
+    img: displayImg,
+    percent,
+    userVector: userScores
+  };
+}
+
+function computeTopMatches(userScores, k = 3) {
+  const userNorm = normalizeAxisVector(userScores, true);
+  const list = Object.entries(PERSONALITY_PROFILES).map(([name, prof]) => {
+    const pNorm = normalizeAxisVector(prof, false);
+    const dist = axisDistance(userNorm, pNorm);
+    // Реалистичный max: 5 осей × 2 (крайности) = sqrt(20) ≈ 4.47, но на практике ~3
+    const maxDist = 3.0;
+    const percent = Math.max(20, Math.round((1 - Math.min(1, dist / maxDist)) * 100));
+    return { name, img: prof.img, short: prof.short, percent, dist };
+  });
+  list.sort((a, b) => a.dist - b.dist);
+  return list.slice(0, k);
+}
+
+// Нормализуем вектор осей.
+// Для персонажа — делим на 5 (фикс. максимум шкалы), чтобы сохранить силу каждой оси.
+// Для пользователя — делим на его maxAbs, чтобы масштаб не зависел от «громкости» ответов.
+function normalizeAxisVector(vec, isUser = false) {
+  const ids = PERSONALITY_AXES.map(a => a.id);
+  const out = {};
+
+  if (isUser) {
+    let maxAbs = 0;
+    ids.forEach(id => {
+      const v = Math.abs(vec[id] || 0);
+      if (v > maxAbs) maxAbs = v;
+    });
+    if (maxAbs === 0) maxAbs = 1;
+    ids.forEach(id => out[id] = (vec[id] || 0) / maxAbs);
+    return out;
+  }
+
+  // Профиль персонажа — делим на 5, интенсивность сохраняется
+  ids.forEach(id => out[id] = (vec[id] || 0) / 5);
+  return out;
+}
+
+function axisDistance(a, b) {
+  const ids = PERSONALITY_AXES.map(x => x.id);
+  let sum = 0;
+  ids.forEach(id => {
+    const d = (a[id] || 0) - (b[id] || 0);
+    sum += d * d;
+  });
+  return Math.sqrt(sum);
+}
+
+// ============ АДМИН: ПРЕВЬЮ РЕЗУЛЬТАТА ============
+function fillPersonalityDebugSelect() {
+  const sel = document.getElementById('personality-debug-select');
+  if (!sel || sel.dataset.filled === '1') return;
+  const names = Object.keys(PERSONALITY_PROFILES).sort((a, b) => a.localeCompare(b, 'ru'));
+  const options = names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+  sel.innerHTML = '<option value="">— выбери персонажа —</option>' + options;
+  sel.dataset.filled = '1';
+}
+
+function personalityDebugPreview(name) {
+  if (!name) return;
+  const prof = PERSONALITY_PROFILES[name];
+  if (!prof) return;
+
+  // Показываем вкладку "Кто ты" и сразу результат
+  const tabBtn = document.querySelector('.tab-btn[data-tab="personality"]');
+  if (tabBtn && !tabBtn.classList.contains('active')) tabBtn.click();
+
+  // Та же логика раскрытия клонов, что и в реальном результате
+  let displayName = name;
+  let displayImg  = prof.img;
+  if (typeof PERSONALITY_CLONES !== 'undefined' && PERSONALITY_CLONES[name]) {
+    const pool = PERSONALITY_CLONES[name];
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    displayName = pick.name;
+    displayImg  = pick.img;
+  }
+
+  const userVec = {
+    order:  prof.order  || 0,
+    light:  prof.light  || 0,
+    social: prof.social || 0,
+    nature: prof.nature || 0,
+    humor:  prof.humor  || 0
+  };
+
+  personalityState = {
+    mode: 'debug',
+    phase: 'result',
+    questions: [],
+    current: 0,
+    scores: userVec,
+    userAnswers: [],
+    result: {
+      name: displayName,
+      groupName: name,
+      short: prof.short,
+      img: displayImg,
+      percent: 100,
+      userVector: userVec
+    },
+    top3: computeTopMatches(userVec, 4)
+      .filter(m => m.name !== name)
+      .slice(0, 3)
+  };
+  renderPersonality();
+}
+
+function personalityShare(name, percent) {
+  const text = `🧬 Я прошёл тест «Кто ты из Зазеркалья?»\nМой результат: ${name} — совпадение ${percent}% ✨\n\nПроверь себя: https://t.me/zazer_kalye_wiki_bot`;
+  if (navigator.share) {
+    navigator.share({ title: 'Кто ты из Зазеркалья?', text }).catch(()=>{});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(
+      () => showToast('📋 Результат скопирован!'),
+      () => prompt('Скопируй текст:', text)
+    );
+  } else {
+    prompt('Скопируй текст:', text);
+  }
 }
 
 function quizShare(percent, title) {
@@ -7143,6 +7999,40 @@ attachCardClicks();
 const observer = new MutationObserver(() => attachCardClicks());
 observer.observe(document.body, { childList: true, subtree: true });
 
+// Заполняем админ-панель превью, если мы в режиме админа
+if (typeof IS_ADMIN !== 'undefined' && IS_ADMIN) {
+  fillPersonalityDebugSelect();
+}
+
+// ============ КАЛИБРОВОЧНЫЙ ДАМП ============
+// Открой консоль (F12 → Console), напиши dumpPersonalityCalibration() и нажми Enter.
+// Скопируй всё, что появится, и пришли мне — я подстрою профили.
+function dumpPersonalityCalibration() {
+  const lines = [];
+  lines.push('=== КАЛИБРОВКА: топ-5 ближайших для каждого персонажа ===');
+  Object.entries(PERSONALITY_PROFILES).forEach(([name, prof]) => {
+    const vec = {
+      order:  prof.order  || 0,
+      light:  prof.light  || 0,
+      social: prof.social || 0,
+      nature: prof.nature || 0,
+      humor:  prof.humor  || 0
+    };
+    const top = computeTopMatches(vec, 6)
+      .filter(m => m.name !== name)
+      .slice(0, 5);
+    lines.push(`\n${name}:`);
+    top.forEach((m, i) => {
+      lines.push(`  ${i+1}. ${m.name} (${m.percent}%)`);
+    });
+  });
+  const text = lines.join('\n');
+  console.log(text);
+  console.log('\n=== Скопируй всё и пришли в чат ===');
+  return text;
+}
+window.dumpPersonalityCalibration = dumpPersonalityCalibration;
+
 // ============ ЗАКРЫТИЕ САЙДБАРОВ ПО КЛИКУ ВНЕ ============
 function closeSidebarsIfOutside(e) {
   // Граф связей
@@ -7187,8 +8077,6 @@ document.addEventListener('touchend', e => {
 }, { passive: true });
 </script>
 
-
-</script>
 <div class="toast" id="toast">✅ Сохранено!</div>
 
 <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #2a2a3a; color: #888; font-size: 0.85em;">
@@ -7197,7 +8085,7 @@ document.addEventListener('touchend', e => {
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия beta21 · Обновлено: 24.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия gamma2 · Обновлено: 26.09.2026.</div>
 </footer>
 
 </body></html>
