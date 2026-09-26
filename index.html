@@ -857,6 +857,112 @@ body.admin-mode #personality-debug { display: block !important; }
   text-decoration: none;
 }
 
+/* ===== КАРУСЕЛЬ ИЗОБРАЖЕНИЙ ===== */
+.modal-image-wrap {
+  position: relative;
+  margin-bottom: 18px;
+  background: #0f0f13;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.modal-image-wrap .modal-image { margin-bottom: 0; }
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(26,26,37,.75);
+  border: 1px solid #3a3a45;
+  color: #c9a0ff;
+  font-size: 1.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: all .2s;
+  user-select: none;
+  font-family: inherit;
+}
+.carousel-arrow:hover { background: rgba(42,42,58,.95); border-color: #c9a0ff; }
+.carousel-arrow.prev { left: 10px; }
+.carousel-arrow.next { right: 10px; }
+.carousel-dots {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+.carousel-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,.35);
+  transition: all .2s;
+}
+.carousel-dot.active { background: #c9a0ff; transform: scale(1.2); }
+
+/* Индикатор на мини-превью карточки */
+.card .thumb-multi {
+  position: absolute;
+  bottom: 4px; right: 8px;
+  font-size: .7em;
+  background: rgba(15,15,23,.85);
+  color: #c9a0ff;
+  padding: 1px 6px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* ===== МОДАЛКА ЭПИЗОДА ===== */
+.episode-watch-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: #5a3a8a;
+  color: #fff;
+  border: 1px solid #7a5aaa;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .2s;
+  margin-bottom: 16px;
+}
+.episode-watch-btn:hover { background: #7a5aaa; border-color: #c9a0ff; }
+.episode-transcript-label {
+  color: #888;
+  font-size: .85em;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 8px;
+}
+.episode-transcript {
+  background: #0f0f17;
+  border: 1px solid #2a2a3a;
+  border-left: 3px solid #5a3a8a;
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: #ccc;
+  font-size: .95em;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.episode-transcript-empty {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
 /* ===== ТРАНСКРИБАЦИЯ ===== */
 .transcript-card {
   background: #1a1a25;
@@ -894,6 +1000,8 @@ body.admin-mode #personality-debug { display: block !important; }
   position: relative;
   white-space: pre-wrap;
   word-break: break-word;
+  cursor: pointer;
+  transition: max-height .25s ease;
 }
 .transcript-card .transcript-text.expanded { max-height: none; }
 .transcript-card .transcript-text:not(.expanded)::after {
@@ -2968,11 +3076,27 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <button class="modal-close" id="wikiModalClose" aria-label="Закрыть">✕</button>
 <div class="modal-type" id="modalType"></div>
 <h2 class="modal-title" id="modalTitle"></h2>
-<img class="modal-image" id="modalImage" style="display:none" alt="">
+<div class="modal-image-wrap" id="modalImageWrap" style="display:none">
+  <img class="modal-image" id="modalImage" alt="">
+  <button class="carousel-arrow prev" id="carouselPrev" aria-label="Назад">‹</button>
+  <button class="carousel-arrow next" id="carouselNext" aria-label="Вперёд">›</button>
+  <div class="carousel-dots" id="carouselDots"></div>
+</div>
 <div class="modal-short" id="modalShort"></div>
 <div class="modal-full" id="modalFull"></div>
 <div class="modal-episodes" id="modalEpisodes"></div>
 </div>
+</div>
+
+<!-- Модалка эпизода (видео + транскрипция) -->
+<div class="modal-bg" id="episode-modal">
+  <div class="modal" style="max-width:720px">
+    <h2 id="episode-modal-title">Эпизод</h2>
+    <div id="episode-modal-body"></div>
+    <div class="btns">
+      <button onclick="closeEpisodeModal()">Закрыть</button>
+    </div>
+  </div>
 </div>
 
 <!-- Мини-модалка для постановки точки на карте -->
@@ -5547,45 +5671,163 @@ function escapeHtml(s) {
   return (s || '').replace(/[&<>"'\n\r]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','\n':'&#10;','\r':''}[c]));
 }
 
+// Разбираем строку изображений: "a.png, b.png" → ["a.png", "b.png"]
+function parseImages(str) {
+  if (!str) return [];
+  return String(str).split(',').map(s => s.trim()).filter(Boolean);
+}
+
+// Рассчитываем URL видео по номеру эпизода (та же логика, что была раньше)
+function getEpisodeUrl(num) {
+  num = parseInt(num, 10);
+  if (isNaN(num)) return null;
+  let messageId = num;
+  if (num >= 1 && num <= 124)      messageId = num + 2;
+  else if (num >= 125 && num <= 245) messageId = num + 3;
+  else if (num >= 246)             messageId = num + 5;
+  return `https://t.me/zazer_kalye_bot_database/${messageId}`;
+}
+
+// Отдаём либо прямую ссылку (для wiki-формата [[url|текст]]), либо данные для попапа
+function resolveEpisode(e) {
+  e = String(e).trim();
+
+  // [[url|text]] — прямая ссылка
+  const wikiMatch = e.match(/^\[\[(.+?)\|(.+?)\]\]$/);
+  if (wikiMatch) {
+    return { url: wikiMatch[1].trim(), label: wikiMatch[2].trim(), num: null };
+  }
+
+  // Прямая http-ссылка
+  if (e.startsWith('http')) {
+    return { url: e, label: 'Эпизод', num: null };
+  }
+
+  // Число
+  const num = parseInt(e, 10);
+  if (!isNaN(num)) {
+    return { url: getEpisodeUrl(num), label: String(num), num };
+  }
+
+  // Не число и не ссылка — просто метка
+  return { url: null, label: e, num: null };
+}
+
 function parseEpisodeLinks(episodes) {
   if (!episodes || !episodes.length) return '';
   return episodes.map(e => {
-    e = e.trim();
-    
-    // 1. Приоритет №1: Ручная вики-ссылка [[https://...|1]]
-    const wikiMatch = e.match(/^\[\[(.+?)\|(.+?)\]\]$/);
-    if (wikiMatch) {
-      const url = wikiMatch[1].trim();
-      const text = wikiMatch[2].trim();
-      return `<a href="${escapeHtml(url)}" target="_blank" class="episode-link">ep.${escapeHtml(text)}</a>`;
+    const r = resolveEpisode(e);
+    if (r.num != null && r.url) {
+      // Число: кликабельный бейдж, открывает попап
+      return `<a href="javascript:void(0)" onclick="openEpisodeModal(${r.num}); return false;" class="episode-link">ep.${escapeHtml(r.label)}</a>`;
     }
-    
-    // 2. Приоритет №2: Прямая полная ссылка
-    if (e.startsWith('http')) {
-      return `<a href="${escapeHtml(e)}" target="_blank" class="episode-link">🎬 Эпизод</a>`;
+    if (r.url) {
+      // Прямая ссылка — как было
+      return `<a href="${escapeHtml(r.url)}" target="_blank" class="episode-link">${escapeHtml(r.label === 'Эпизод' ? '🎬 Эпизод' : 'ep.' + r.label)}</a>`;
     }
-    
-    // 3. Приоритет №3: Автоматический расчёт смещения для обычных чисел
-    const num = parseInt(e, 10);
-    if (!isNaN(num)) {
-      let messageId = num;
-      
-      // Логика смещения, которую ты запросила:
-      if (num >= 1 && num <= 124) {
-        messageId = num + 2;
-      } else if (num >= 125 && num <= 245) {
-        messageId = num + 3;
-      } else if (num >= 246) {
-        messageId = num + 5;
-      }
-      
-      return `<a href="https://t.me/zazer_kalye_bot_database/${messageId}" target="_blank" class="episode-link">ep.${escapeHtml(e)}</a>`;
-    }
-    
-    // 4. Если введено что-то нечисловое (на всякий случай)
-    return `<span>ep.${escapeHtml(e)}</span>`;
+    return `<span>ep.${escapeHtml(r.label)}</span>`;
   }).join('');
 }
+
+// ============ ПОПАП ЭПИЗОДА ============
+function openEpisodeModal(epNum) {
+  const modal = document.getElementById('episode-modal');
+  const title = document.getElementById('episode-modal-title');
+  const body  = document.getElementById('episode-modal-body');
+  if (!modal || !title || !body) return;
+
+  title.textContent = `🎬 Эпизод ${epNum}`;
+
+  const url = getEpisodeUrl(epNum);
+  const t = (data.transcripts || []).find(x => String(x.episode) === String(epNum));
+
+  let html = '';
+  if (url) {
+    html += `<a class="episode-watch-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener">▶ Посмотреть эпизод</a>`;
+  }
+
+  if (t && t.text) {
+    html += `<div class="episode-transcript-label">Транскрибация</div>`;
+    html += `<div class="episode-transcript">${escapeHtml(t.text)}</div>`;
+  } else {
+    html += `<div class="episode-transcript-empty">Транскрибации для этого эпизода пока нет</div>`;
+  }
+
+  body.innerHTML = html;
+  modal.classList.add('active');
+}
+
+function closeEpisodeModal() {
+  document.getElementById('episode-modal')?.classList.remove('active');
+}
+
+// ============ КАРУСЕЛЬ ИЗОБРАЖЕНИЙ В МОДАЛКЕ ============
+let carouselImages = [];
+let carouselIndex = 0;
+
+function renderCarousel() {
+  const img = document.getElementById('modalImage');
+  const wrap = document.getElementById('modalImageWrap');
+  const dots = document.getElementById('carouselDots');
+  const prev = document.getElementById('carouselPrev');
+  const next = document.getElementById('carouselNext');
+  if (!img || !wrap) return;
+
+  if (!carouselImages.length) {
+    wrap.style.display = 'none';
+    return;
+  }
+
+  wrap.style.display = 'block';
+  img.src = carouselImages[carouselIndex];
+  img.style.display = 'block';
+
+  const multi = carouselImages.length > 1;
+  prev.style.display = multi ? 'flex' : 'none';
+  next.style.display = multi ? 'flex' : 'none';
+
+  if (multi) {
+    dots.innerHTML = carouselImages.map((_, i) =>
+      `<span class="carousel-dot${i === carouselIndex ? ' active' : ''}"></span>`
+    ).join('');
+    dots.style.display = 'flex';
+  } else {
+    dots.innerHTML = '';
+    dots.style.display = 'none';
+  }
+}
+
+function carouselGo(delta) {
+  if (carouselImages.length < 2) return;
+  carouselIndex = (carouselIndex + delta + carouselImages.length) % carouselImages.length;
+  renderCarousel();
+}
+
+// Свайп по картинке
+(function initCarouselSwipe() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const wrap = document.getElementById('modalImageWrap');
+    if (!wrap) return;
+    let startX = 0, startY = 0, active = false;
+
+    wrap.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      active = true;
+    }, { passive: true });
+
+    wrap.addEventListener('touchend', e => {
+      if (!active) return;
+      active = false;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+      carouselGo(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  });
+})();
 
 // ============ РЕНДЕР КАРТОЧЕК ============
 function renderCharacters() {
@@ -5610,8 +5852,11 @@ function renderCharacters() {
     // Правильная обработка эпизодов (без дублирования!)
       const eps = parseEpisodeLinks(c.episodes);
     
-    const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
-    const hasThumb = c.image ? 'has-thumb' : '';
+    const imgs = parseImages(c.image);
+    const thumbSrc = imgs[0] || '';
+    const multiBadge = imgs.length > 1 ? `<span class="thumb-multi">📷 ${imgs.length}</span>` : '';
+    const thumb = thumbSrc ? `<img class="thumb" src="${escapeHtml(thumbSrc)}" alt="">${multiBadge}` : '';
+    const hasThumb = thumbSrc ? 'has-thumb' : '';
     
     return `<div class="card race-${rc} ${hasThumb}" data-idx="${realIdx}" data-name="${escapeHtml(c.name)}" data-full="${escapeHtml(c.full)}" data-img="${escapeHtml(c.image || '')}">
 ${IS_ADMIN ? `<div class="actions">
@@ -5694,8 +5939,11 @@ function renderGeneric(type, fields) {
     // Правильная обработка эпизодов
       const eps = parseEpisodeLinks(c.episodes);
     
-    const thumb = c.image ? `<img class="thumb" src="${escapeHtml(c.image)}" alt="">` : '';
-    const hasThumb = c.image ? 'has-thumb' : '';
+    const imgs = parseImages(c.image);
+    const thumbSrc = imgs[0] || '';
+    const multiBadge = imgs.length > 1 ? `<span class="thumb-multi">📷 ${imgs.length}</span>` : '';
+    const thumb = thumbSrc ? `<img class="thumb" src="${escapeHtml(thumbSrc)}" alt="">${multiBadge}` : '';
+    const hasThumb = thumbSrc ? 'has-thumb' : '';
     
     return `<div class="card ${rc ? 'race-'+rc : ''} ${hasThumb}" data-idx="${realIdx}" data-name="${escapeHtml(c.name)}" data-full="${escapeHtml(c.full||'')}" data-img="${escapeHtml(c.image||'')}">
 ${IS_ADMIN ? `<div class="actions">
@@ -5859,7 +6107,7 @@ function renderTranscripts() {
       </div>` : ''}
       <span class="ep-badge">📺 Эпизод ${t.episode || '?'}</span>
       ${titleHtml}
-      <div class="transcript-text" id="tt-${realIdx}">${preview}</div>
+      <div class="transcript-text" id="tt-${realIdx}" onclick="toggleTranscript(${realIdx})">${preview}</div>
       <div class="tt-buttons">
         ${isLong ? `<button onclick="toggleTranscript(${realIdx})" id="tt-btn-${realIdx}">Показать полностью</button>` : ''}
         <button class="dl" onclick="downloadTranscript(${realIdx})">📥 Скачать .txt</button>
@@ -5881,11 +6129,18 @@ function downloadTranscript(idx) {
   if (!t) return;
   const header = `Эпизод ${t.episode}${t.name ? ' — ' + t.name : ''}\n${'='.repeat(40)}\n\n`;
   const blob = new Blob([header + (t.text || '')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
   a.download = `zazerkalye_ep_${String(t.episode).padStart(3, '0')}.txt`;
+  a.rel = 'noopener';
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 300);
 }
 
 function downloadAllTranscripts() {
@@ -5900,11 +6155,18 @@ function downloadAllTranscripts() {
   });
   const full = `ТРАНСКРИБАЦИЯ ЗАЗЕРКАЛЬЯ\nВсего эпизодов: ${sorted.length}\n\n` + parts.join('\n\n\n');
   const blob = new Blob([full], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
   a.download = 'zazerkalye_transcripts_all.txt';
+  a.rel = 'noopener';
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 300);
 }
 
 // ============ ТЕСТ НА ЗНАНИЕ ЗАЗЕРКАЛЬЯ ============
@@ -7927,12 +8189,9 @@ function openWikiModal(item) {
   modalShort.textContent    = item.short || '';
   modalFull.innerHTML       = parseWikiLinks(item.full || '');
   
-  if (item.image) {
-    modalImage.src = item.image;
-    modalImage.style.display = 'block';
-  } else {
-    modalImage.style.display = 'none';
-  }
+  carouselImages = parseImages(item.image);
+  carouselIndex = 0;
+  renderCarousel();
   
   if (item.episodes && item.episodes.length) {
   modalEpisodes.innerHTML = parseEpisodeLinks(item.episodes);
@@ -7949,6 +8208,19 @@ function closeWikiModal() {
   wikiModal.classList.remove('active');
   document.body.style.overflow = '';
 }
+
+// Стрелки карусели
+document.getElementById('carouselPrev')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  carouselGo(-1);
+});
+document.getElementById('carouselNext')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  carouselGo(1);
+});
+
+// Закрытие
+wikiModalClose.addEventListener('click', closeWikiModal);
 
 // Закрытие
 wikiModalClose.addEventListener('click', closeWikiModal);
@@ -8085,7 +8357,7 @@ document.addEventListener('touchend', e => {
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия gamma2 · Обновлено: 26.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия gamma3 · Обновлено: 26.09.2026.</div>
 </footer>
 
 </body></html>
