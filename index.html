@@ -918,6 +918,7 @@ body.admin-mode #personality-debug { display: block !important; }
 }
 
 /* ===== МОДАЛКА ЭПИЗОДА ===== */
+#episode-modal { z-index: 10000; }
 .episode-watch-btn {
   display: block;
   width: 100%;
@@ -3086,6 +3087,20 @@ body.admin-mode .admin-only { display: inline-block !important; }
 <div class="modal-full" id="modalFull"></div>
 <div class="modal-episodes" id="modalEpisodes"></div>
 </div>
+</div>
+
+<!-- Модалка для ручного копирования текста (MiniApp fallback) -->
+<div class="modal-bg" id="transcript-copy-modal">
+  <div class="modal" style="max-width:720px">
+    <h2 id="transcript-copy-title">Файл</h2>
+    <p style="color:#888;font-size:.9em;margin-bottom:10px">
+      В Telegram MiniApp скачивание может быть недоступно — выдели текст ниже и скопируй его вручную.
+    </p>
+    <textarea id="transcript-copy-area" style="min-height:340px"></textarea>
+    <div class="btns">
+      <button onclick="document.getElementById('transcript-copy-modal').classList.remove('active')">Закрыть</button>
+    </div>
+  </div>
 </div>
 
 <!-- Модалка эпизода (видео + транскрипция) -->
@@ -5719,7 +5734,7 @@ function parseEpisodeLinks(episodes) {
     const r = resolveEpisode(e);
     if (r.num != null && r.url) {
       // Число: кликабельный бейдж, открывает попап
-      return `<a href="javascript:void(0)" onclick="openEpisodeModal(${r.num}); return false;" class="episode-link">ep.${escapeHtml(r.label)}</a>`;
+      return `<a href="javascript:void(0)" onclick="event.stopPropagation(); openEpisodeModal(${r.num}); return false;" class="episode-link">ep.${escapeHtml(r.label)}</a>`;
     }
     if (r.url) {
       // Прямая ссылка — как было
@@ -5759,7 +5774,13 @@ function openEpisodeModal(epNum) {
 
 function closeEpisodeModal() {
   document.getElementById('episode-modal')?.classList.remove('active');
+  document.getElementById('transcript-copy-modal')?.classList.remove('active');
 }
+
+// Закрытие copy-модалки по клику вне
+document.getElementById('transcript-copy-modal')?.addEventListener('click', e => {
+  if (e.target.id === 'transcript-copy-modal') e.target.classList.remove('active');
+});
 
 // ============ КАРУСЕЛЬ ИЗОБРАЖЕНИЙ В МОДАЛКЕ ============
 let carouselImages = [];
@@ -6124,23 +6145,65 @@ function toggleTranscript(idx) {
   if (btn) btn.textContent = el.classList.contains('expanded') ? 'Свернуть' : 'Показать полностью';
 }
 
+// Универсальный помощник: сохранить/скачать текст + подстраховать в MiniApp
+function fallbackCopyDialog(content, filename) {
+  // Последний шанс: показываем текст в modal-подобном окне для ручного копирования
+  const modal = document.getElementById('transcript-copy-modal');
+  const area = document.getElementById('transcript-copy-area');
+  const title = document.getElementById('transcript-copy-title');
+  if (!modal || !area) {
+    // Нет модалки — обычный prompt
+    prompt('Скопируйте текст вручную (Ctrl/Cmd+C):', content.slice(0, 30000));
+    return;
+  }
+  title.textContent = filename;
+  area.value = content;
+  modal.classList.add('active');
+  setTimeout(() => { area.focus(); area.select(); }, 100);
+}
+
+function saveTextFile(content, filename) {
+  // UTF-8 BOM — критично для читаемости в блокноте и др. редакторах
+  const blob = new Blob(['\uFEFF' + content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  const isTg = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData !== undefined);
+
+  // 1) Обычное скачивание
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.rel = 'noopener';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (e) {
+    console.warn('Скачивание не удалось:', e);
+  }
+
+  // 2) В Telegram MiniApp — дублируем в буфер обмена
+  if (isTg) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(content).then(
+        () => showToast('📋 Текст скопирован (скачать в MiniApp не всегда возможно)'),
+        () => fallbackCopyDialog(content, filename)
+      );
+    } else {
+      fallbackCopyDialog(content, filename);
+    }
+  }
+
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
 function downloadTranscript(idx) {
   const t = data.transcripts[idx];
   if (!t) return;
   const header = `Эпизод ${t.episode}${t.name ? ' — ' + t.name : ''}\n${'='.repeat(40)}\n\n`;
-  const blob = new Blob([header + (t.text || '')], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `zazerkalye_ep_${String(t.episode).padStart(3, '0')}.txt`;
-  a.rel = 'noopener';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 300);
+  const filename = `zazerkalye_ep_${String(t.episode).padStart(3, '0')}.txt`;
+  saveTextFile(header + (t.text || ''), filename);
 }
 
 function downloadAllTranscripts() {
@@ -6154,19 +6217,7 @@ function downloadAllTranscripts() {
     return `${head}\n${'='.repeat(head.length)}\n${t.text || ''}`;
   });
   const full = `ТРАНСКРИБАЦИЯ ЗАЗЕРКАЛЬЯ\nВсего эпизодов: ${sorted.length}\n\n` + parts.join('\n\n\n');
-  const blob = new Blob([full], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'zazerkalye_transcripts_all.txt';
-  a.rel = 'noopener';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 300);
+  saveTextFile(full, 'zazerkalye_transcripts_all.txt');
 }
 
 // ============ ТЕСТ НА ЗНАНИЕ ЗАЗЕРКАЛЬЯ ============
@@ -8257,6 +8308,8 @@ function attachCardClicks() {
     card.addEventListener('click', (e) => {
       // Не срабатывает, если кликнули по кнопкам внутри карточки (удалить/редактировать)
       if (e.target.closest('button, .card-btn, .card-action')) return;
+      // Не срабатывает, если кликнули по ссылке эпизода (у неё свой попап)
+      if (e.target.closest('.episode-link, .episodes a')) return;
       
       // Ищем данные — подстрой под свою структуру
       const name = card.dataset.name || card.querySelector('.card-title, .name')?.textContent;
@@ -8357,7 +8410,7 @@ document.addEventListener('touchend', e => {
 <span>Автор вики: <a href="https://t.me/DarkIceZero" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>@DarkIceZero</strong></a></span> ·
 <span>Источник: <a href="https://t.me/zazer_kalye" target="_blank" style="color: #c9a0ff; text-decoration: none; transition: color 0.2s;"><strong>t.me/zazer_kalye</strong></a></span>
 </div>
-  <div style="margin-top: 8px; color: #666;">Версия gamma3 · Обновлено: 26.09.2026.</div>
+  <div style="margin-top: 8px; color: #666;">Версия gamma4 · Обновлено: 26.09.2026.</div>
 </footer>
 
 </body></html>

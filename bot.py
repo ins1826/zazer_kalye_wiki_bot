@@ -319,10 +319,17 @@ def send_item_card(chat_id, item, label, send_photo=True):
 
     if send_photo and item.get('image'):
         try:
-            image_url = IMAGES_BASE_URL + item['image']
-            response = requests.get(image_url, timeout=10)
-            if response.status_code == 200:
-                bot.send_photo(chat_id, BytesIO(response.content))
+            # Поддержка нескольких картинок через запятую: "a.png, b.png, c.png"
+            raw = str(item['image']).strip()
+            candidates = [s.strip() for s in raw.split(',') if s.strip()]
+            if candidates:
+                img_path = random.choice(candidates)  # рандомно как со стикерами
+                image_url = IMAGES_BASE_URL + img_path
+                response = requests.get(image_url, timeout=10)
+                if response.status_code == 200:
+                    bot.send_photo(chat_id, BytesIO(response.content))
+                else:
+                    log(f"⚠️ Картинка не загружена ({response.status_code}): {image_url}")
         except Exception as e:
             log(f"❌ Картинка: {e}")
 
