@@ -3107,7 +3107,8 @@ body.admin-mode .admin-only { display: inline-block !important; }
     </p>
     <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
       <button class="primary" onclick="copyModalContent()">📋 Копировать всё</button>
-      <button onclick="downloadFromModal()">📥 Попробовать скачать</button>
+      <button id="copy-modal-browser-btn" onclick="" style="display:none">🌐 Открыть в браузере</button>
+      <button onclick="downloadFromModal()">📥 Скачать файлом</button>
     </div>
     <textarea id="transcript-copy-area" style="min-height:340px"></textarea>
     <div class="btns">
@@ -6177,11 +6178,13 @@ function fallbackCopyDialog(content, filename) {
 }
 
 function isTelegramMiniApp() {
-  return !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData !== undefined);
+  return !!(window.Telegram && window.Telegram.WebApp);
 }
 
-// Открыть текст в модалке для ручного копирования
-function openCopyModal(content, title) {
+// Открыть текст в модалке для копирования/скачивания
+// opts.autodlParam — если задан, покажем кнопку «Открыть в браузере»
+function openCopyModal(content, title, opts) {
+  opts = opts || {};
   const modal = document.getElementById('transcript-copy-modal');
   const area = document.getElementById('transcript-copy-area');
   const titleEl = document.getElementById('transcript-copy-title');
@@ -6191,8 +6194,54 @@ function openCopyModal(content, title) {
   }
   titleEl.textContent = title || 'Текст';
   area.value = content;
+
+  // Кнопка «Открыть в браузере» — только если есть autodlParam и мы в MiniApp
+  const browserBtn = document.getElementById('copy-modal-browser-btn');
+  if (browserBtn) {
+    if (opts.autodlParam != null && isTelegramMiniApp()) {
+      browserBtn.style.display = '';
+      browserBtn.onclick = () => openInBrowser(opts.autodlParam);
+    } else {
+      browserBtn.style.display = 'none';
+      browserBtn.onclick = null;
+    }
+  }
+
   modal.classList.add('active');
-  setTimeout(() => { area.focus(); }, 100);
+  setTimeout(() => { try { area.focus(); } catch(e){} }, 100);
+}
+
+// Редирект в браузер с параметром ?autodl=N — там страница сама скачает файл
+function openInBrowser(autodlParam) {
+  const url = new URL(window.location.origin + window.location.pathname);
+  url.searchParams.set('autodl', String(autodlParam));
+  const finalUrl = url.toString();
+  const tg = window.Telegram && window.Telegram.WebApp;
+
+  // 1. tg.openLink — официальный API Telegram MiniApp
+  if (tg && typeof tg.openLink === 'function') {
+    try {
+      tg.openLink(finalUrl, { try_instant_view: false });
+      showToast('🌐 Открываю в браузере — там начнётся скачивание');
+      return;
+    } catch (e) {
+      console.warn('tg.openLink failed:', e);
+    }
+  }
+
+  // 2. window.open — сработает в некоторых WebView
+  try {
+    const w = window.open(finalUrl, '_blank');
+    if (w) {
+      showToast('🌐 Открываю в браузере…');
+      return;
+    }
+  } catch (e) {
+    console.warn('window.open failed:', e);
+  }
+
+  // 3. Если ничего не помогло — сообщаем и подсказываем про копирование
+  showToast('😔 Не удалось открыть браузер — используй «📋 Копировать всё»');
 }
 
 // Кнопка «Копировать всё» внутри модалки
@@ -6202,7 +6251,6 @@ function copyModalContent() {
   const text = area.value;
   const done = () => showToast('📋 Скопировано в буфер обмена');
   const fail = () => {
-    // Фолбэк: выделяем весь текст — пользователь скопирует системным меню
     area.focus();
     area.select();
     showToast('✋ Текст выделен — нажми «Копировать» в меню');
@@ -6214,7 +6262,7 @@ function copyModalContent() {
   }
 }
 
-// Попробовать скачать прямо из модалки
+// Прямая попытка скачать файл из модалки (blob-ссылка)
 function downloadFromModal() {
   const area = document.getElementById('transcript-copy-area');
   if (!area) return;
@@ -6229,29 +6277,23 @@ function downloadFromModal() {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+  if (isTelegramMiniApp()) {
+    showToast('📥 Если файл не появился — жми «🌐 Открыть в браузере»');
+  }
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
 // Основная функция сохранения/скачивания
 // autodlParam — то, что подставится в URL при редиректе из MiniApp
 function saveTextFile(content, filename, autodlParam) {
-  // В Telegram MiniApp пробуем редирект в браузер — там скачивание работает
+  // В Telegram MiniApp прямое скачивание блокируется WebView —
+  // открываем модалку с кнопкой «Открыть в браузере»
   if (isTelegramMiniApp() && autodlParam) {
-    const tg = window.Telegram.WebApp;
-    try {
-      const url = new URL(window.location.origin + window.location.pathname);
-      url.searchParams.set('autodl', String(autodlParam));
-      if (tg.openLink) {
-        tg.openLink(url.toString());
-        showToast('🌐 Открываю в браузере — там начнётся скачивание');
-        return;
-      }
-    } catch (e) {
-      console.warn('openLink не сработал:', e);
-    }
+    openCopyModal(content, filename, { autodlParam });
+    return;
   }
 
-  // Обычное скачивание (браузер или если openLink недоступен)
+  // Обычное скачивание (браузер)
   const blob = new Blob(['\uFEFF' + content], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   try {
@@ -6263,10 +6305,9 @@ function saveTextFile(content, filename, autodlParam) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    if (isTelegramMiniApp()) showToast('📥 Если файл не появился — нажми «Копировать»');
   } catch (e) {
     console.warn('Скачивание не удалось:', e);
-    if (isTelegramMiniApp()) openCopyModal(content, filename);
+    openCopyModal(content, filename);
   }
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
@@ -6303,7 +6344,7 @@ function copyTranscript(idx) {
   const t = data.transcripts[idx];
   if (!t) return;
   const header = `Эпизод ${t.episode}${t.name ? ' — ' + t.name : ''}\n${'='.repeat(40)}\n\n`;
-  openCopyModal(header + (t.text || ''), `Эпизод ${t.episode}`);
+  openCopyModal(header + (t.text || ''), `Эпизод ${t.episode}`, { autodlParam: t.episode });
 }
 
 // Копирование всех транскрибаций в модалку
@@ -6318,7 +6359,7 @@ function copyAllTranscripts() {
     return `${head}\n${'='.repeat(head.length)}\n${t.text || ''}`;
   });
   const full = `ТРАНСКРИБАЦИЯ ЗАЗЕРКАЛЬЯ\nВсего эпизодов: ${sorted.length}\n\n` + parts.join('\n\n\n');
-  openCopyModal(full, 'Все эпизоды');
+  openCopyModal(full, 'Все эпизоды', { autodlParam: 'all' });
 }
 
 // ============ ТЕСТ НА ЗНАНИЕ ЗАЗЕРКАЛЬЯ ============
